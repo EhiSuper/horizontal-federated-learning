@@ -1,7 +1,9 @@
 package it.unipi.dsmt.horizontalFederatedLearning.entities;
 
 
-public class Algorithm {
+import com.ericsson.otp.erlang.OtpErlangTuple;
+
+public abstract class Algorithm {
     private String name;
 
     public Algorithm(String name){
@@ -15,5 +17,9 @@ public class Algorithm {
     public void setName(String name) {
         this.name = name;
     }
+
+    public abstract AlgorithmRound getIterationInfo(OtpErlangTuple algorithmContent);
+
+    public abstract OtpErlangTuple prepareSpecificParameters();
 }
 

@@ -1,6 +1,9 @@
 package it.unipi.dsmt.horizontalFederatedLearning.entities;
 
+import com.ericsson.otp.erlang.*;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Experiment {
@@ -21,7 +24,7 @@ public class Experiment {
     private List<String> clientsHostnames;
     private boolean randomClients;
     private double randomClientsSeed;
-    private double timeout;
+    private int timeout;
     private int maxAttemptsClientCrash;
     private int maxAttemptsServerCrash;
     private int maxAttemptsOverallCrash;
@@ -30,7 +33,7 @@ public class Experiment {
 
     public Experiment(String name, Algorithm algorithm, String dataset, int numFeatures, int mode, User user, LocalDate creationDate,
                       LocalDate lastUpdateDate, int numRounds, int maxNumRounds, int numCrashes, int numClients, int numMinClients,
-                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, double timeout, int maxAttemptsClientCrash,
+                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, int timeout, int maxAttemptsClientCrash,
                       int maxAttemptsServerCrash, int maxAttemptsOverallCrash) {
         this.id = id;
         this.name = name;
@@ -167,11 +170,11 @@ public class Experiment {
         randomClientsSeed = randomClientsSeed;
     }
 
-    public double getTimeout() {
+    public int getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(double timeout) {
+    public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
@@ -221,5 +224,32 @@ public class Experiment {
 
     public void setClientsHostnames(List<String> clientsHostnames) {
         this.clientsHostnames = clientsHostnames;
+    }
+
+    //spostare in communication
+    public OtpErlangTuple prepareTuple(){
+        ArrayList<OtpErlangObject> objects = new ArrayList<>();
+        //start( {NumClusters, Distance, Mode, Epsilon, SeedCenters, NormFn}, MaxAttemptsServerCrash).
+        objects.add((new OtpErlangInt(numClients)));
+        objects.add((new OtpErlangInt(numMinClients)));
+        objects.add((new OtpErlangString(dataset)));
+        objects.add((new OtpErlangInt(numFeatures)));
+        OtpErlangObject[] clients = new OtpErlangObject[clientsHostnames.size()];
+        for(int i=0; i < clientsHostnames.size(); i++){
+            clients[i] = new OtpErlangString(clientsHostnames.get(i));
+        }
+        objects.add((new OtpErlangList(clients)));
+        objects.add((new OtpErlangBoolean(randomClients)));
+        objects.add((new OtpErlangDouble(randomClientsSeed)));
+        objects.add((new OtpErlangInt(maxNumRounds)));
+        objects.add((new OtpErlangDouble(randomClientsSeed)));
+        objects.add((new OtpErlangBoolean(randomClients)));
+        objects.add((new OtpErlangInt(timeout)));
+        objects.add((new OtpErlangInt(maxAttemptsClientCrash)));
+        objects.add((new OtpErlangInt(maxAttemptsOverallCrash)));
+        OtpErlangObject[] array2 = new OtpErlangObject[objects.size()];
+        OtpErlangObject[] array = objects.toArray(array2);
+        OtpErlangTuple tuple = new OtpErlangTuple(array);
+        return tuple;
     }
 }

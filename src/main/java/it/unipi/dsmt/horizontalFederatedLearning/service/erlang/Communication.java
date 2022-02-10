@@ -21,8 +21,13 @@ public class Communication {
         OtpErlangTuple tuple = null;
         try {
             tuple = (OtpErlangTuple) node.getOtpMbox().receive();
-            if(destination == null)
-                destination = (OtpErlangPid)tuple.elementAt(0);
+            OtpErlangPid sender = (OtpErlangPid)tuple.elementAt(0);
+            if(sender.node().equals("erl@localhost"))
+                System.out.println("La destination è: " + sender.node());
+            if(destination == null) {
+                destination = sender;
+                node.getOtpMbox().link(destination);
+            }
         } catch (OtpErlangExit e) {
             e.printStackTrace();
         } catch (OtpErlangDecodeException e) {
@@ -33,6 +38,9 @@ public class Communication {
 
     public ExperimentRound receiveRound(Node node) throws ErlangErrorException {
         OtpErlangTuple result = receive(node);
+        if(result == null){
+            return null;
+        }
         OtpErlangAtom msgType = (OtpErlangAtom)result.elementAt(1);
         System.out.println("msgtype: " + msgType.toString());
         if(msgType.toString().equals("error")) {
@@ -47,6 +55,7 @@ public class Communication {
             OtpErlangTuple algorithmContent = (OtpErlangTuple) content.elementAt(0);
             //System.out.println("Algorithm Content: " + content);
             // deve diventare chiamata generica
+            //AlgorithmRound algRound = experiment.getAlgorithm.getIterationInfo(algorithmContent);
             AlgorithmRound algRound = getKMeansIterationInfo(algorithmContent);
             List<Client> clients = new ArrayList<>();
             OtpErlangList clientsContent = (OtpErlangList)content.elementAt(2);
@@ -76,7 +85,7 @@ public class Communication {
                 center.add(Double.parseDouble(coordinate.toString()));
             centers.add(center);
         }
-       return new KMeansAlgorithmRound(centers, Double.parseDouble(algorithmContent.elementAt(1).toString()));
+        return new KMeansAlgorithmRound(centers, Double.parseDouble(algorithmContent.elementAt(1).toString()));
     }
 
     private void send(Node node, String content){
