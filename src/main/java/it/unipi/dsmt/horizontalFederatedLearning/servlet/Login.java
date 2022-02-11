@@ -30,7 +30,6 @@ public class Login extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         request.setAttribute("error", " ");
-
         try {
             myUserService.login(username, password);
             HttpSession session = request.getSession();
