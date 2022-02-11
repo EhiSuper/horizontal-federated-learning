@@ -5,11 +5,11 @@ import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
 
-@WebServlet(name = "MainPage", value = "/MainPage")
-public class MainPage extends HttpServlet {
+@WebServlet(name = "Home", value = "/Home")
+public class Home extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String targetJSP = "/pages/jsp/main-page.jsp";
+        String targetJSP = "/pages/jsp/home.jsp";
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
     }

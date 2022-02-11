@@ -31,10 +31,12 @@ public class Login extends HttpServlet {
         String password = request.getParameter("password");
         request.setAttribute("error", " ");
 
-        try{
+        try {
             myUserService.login(username, password);
-            response.sendRedirect(request.getContextPath() + "/MainPage");
-        }catch(LoginException e){
+            HttpSession session = request.getSession();
+            session.setAttribute("login", username);
+            response.sendRedirect(request.getContextPath() + "/Home");
+        } catch (LoginException e) {
             request.setAttribute("error", e.getMessage());
             String targetJSP = "/pages/jsp/login.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
