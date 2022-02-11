@@ -85,8 +85,7 @@ public class Test {
          */
         Node node = new Node("server@localhost", "COOKIE", "javaServer");
         try {
-            final Process p = Runtime.getRuntime().exec("erl -sname erl@localhost -setcookie COOKIE");
-
+            final Process p = Runtime.getRuntime().exec("erl -sname erl@localhost -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
                 public void run() {
                     BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -104,7 +103,8 @@ public class Test {
             OtpSelf caller = new OtpSelf("caller", "COOKIE");
             OtpPeer supervisor = new OtpPeer("erl@localhost");
             OtpConnection conn = caller.connect(supervisor);
-            conn.sendRPC("supervisorNode","start",arguments );
+            conn.sendRPC("supervisorNode","currentDirectory", new OtpErlangList() );
+            conn.sendRPC("supervisorNode","start", arguments );
         } catch (Exception e) {
             e.printStackTrace();
         }
