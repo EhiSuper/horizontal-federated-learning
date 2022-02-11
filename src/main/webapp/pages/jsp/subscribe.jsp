@@ -10,20 +10,9 @@
 <html>
 <head>
     <title>Subscribe</title>
+    <script src="../js/script.js" type="text/javascript"></script>
 </head>
 <body>
-
-<script>
-    function validate(){
-        console.log("sono nella validate");
-        if (document.getElementById("password").value != document.getElementById("confirmPassword").value) {
-            window.alert("The confirm password is not equal to the previous password")
-            return false;
-        }
-        else return true;
-    }
-</script>
-
 <h1>Subscribe</h1>
 <form action="<%=request.getContextPath()%>/Subscribe" method="post" onsubmit="return validate()">
     <label for="username">Username: </label> <input type="text" name="username" id="username" placeholder="username" required>

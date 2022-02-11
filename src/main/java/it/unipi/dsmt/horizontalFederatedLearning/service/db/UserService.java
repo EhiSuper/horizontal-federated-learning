@@ -7,11 +7,9 @@ import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.Registration
 import java.util.HashMap;
 import java.util.List;
 
-// per ora tutto statico, poi boh
-
 public class UserService {
-    private static LevelDB db;
-    private static int counterID;
+    private LevelDB db;
+    private int counterID;
 
     public UserService(LevelDB db) {
         if(!db.isDBOpen())
@@ -20,7 +18,7 @@ public class UserService {
         setCounterID();
     }
 
-    private static void setCounterID(){
+    private void setCounterID(){
         List<String> keys = db.findKeysByPrefix("User:");
         if(keys != null)
             for(String key: keys){
@@ -30,7 +28,7 @@ public class UserService {
             }
     }
 
-    public static void register(User user) throws RegistrationException {
+    public void register(User user) throws RegistrationException {
         HashMap<String, String> map = new HashMap<>();
         if(findUserByUsername(user.getUsername()) != null)
             throw new RegistrationException("Username already taken");
@@ -42,7 +40,7 @@ public class UserService {
         db.putBatchValues(map);
     }
 
-    public static User login(String username, String password) throws LoginException {
+    public User login(String username, String password) throws LoginException {
         List<String> keys = db.findKeysByPrefix("User:");
         for(String key: keys){
             if(key.endsWith("username") && db.getValue(key).equals(username)){
@@ -56,7 +54,7 @@ public class UserService {
         throw new LoginException("Username not present in the database");
     }
 
-    public static User findUserByUsername(String username){
+    public User findUserByUsername(String username){
         List<String> keys = db.findKeysByPrefix("User:");
         for(String key: keys){
             if(key.endsWith("username") && db.getValue(key).equals(username)){
@@ -70,7 +68,7 @@ public class UserService {
         return null;
     }
 
-    public static User findUserById(int id){
+    public User findUserById(int id){
         List<String> keys = db.findKeysByPrefix("User:");
         for(String key: keys){
             if(key.endsWith("id") && db.getValue(key).equals(id)){

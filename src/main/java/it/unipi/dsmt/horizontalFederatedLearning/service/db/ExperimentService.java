@@ -11,10 +11,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 
 public class ExperimentService {
-    private static int counterID;
-    private static LevelDB db;
+    private int counterID;
+    private LevelDB db;
 
     public ExperimentService(LevelDB db) {
         if (!db.isDBOpen())
@@ -23,7 +24,7 @@ public class ExperimentService {
         setCounterID();
     }
 
-    private static void setCounterID() {
+    private void setCounterID() {
         List<String> keys = db.findKeysByPrefix("Experiment:");
         for (String key : keys) {
             int id = Integer.parseInt(key.split(":")[1]);
@@ -32,7 +33,7 @@ public class ExperimentService {
         }
     }
 
-    public static void insert(Experiment experiment) throws RegistrationException{
+    public void insert(Experiment experiment) throws RegistrationException{
         HashMap<String, String> map = new HashMap<>();
         if(findExperimentByName(experiment.getName()) != null)
             throw new RegistrationException("Experiment name already taken!");
@@ -59,7 +60,7 @@ public class ExperimentService {
         db.putBatchValues(map);
     }
 
-    public static void insertAlgorithm(Experiment experiment, HashMap<String, String> map) {
+    public void insertAlgorithm(Experiment experiment, HashMap<String, String> map) {
         String prefixKey = "Experiment:" + experiment.getId() + ":" + experiment.getUser().getId() + ":Algorithm:";
         map.put(prefixKey + "name", experiment.getAlgorithm().getName());
         // logica dipendente
@@ -73,7 +74,7 @@ public class ExperimentService {
         }
     }
 
-    public static List<Experiment> readAllExperiments() {
+    public List<Experiment> readAllExperiments() {
         List<Experiment> experiments = new ArrayList<>();
         for(int i = 0; i < counterID; ++i){
             experiments.add(findExperimentById(i));
@@ -81,20 +82,20 @@ public class ExperimentService {
         return experiments;
     }
 
-    public static void deleteExperimentById(int id) {
+    public void deleteExperimentById(int id) {
         List<String> keys = db.findValuesByPrefix("Experiment:"+id);
         for(String key: keys)
             db.deleteValue(key);
     }
 
-    public static void editExperiment(Experiment newExperiment){
+    public void editExperiment(Experiment newExperiment){
         deleteExperimentById(newExperiment.getId());
         insert(newExperiment);
         newExperiment.setId(counterID);
     }
 
     // altri parametri, una volta definiti
-    public static Experiment findExperimentById(int id){
+    public Experiment findExperimentById(int id){
         Experiment experiment = new Experiment();
         HashMap<String, String> map = db.findByPrefix("Experiment:"+id);
         for(String key: map.keySet()){
@@ -151,13 +152,15 @@ public class ExperimentService {
                     break;
             }
         }
+        LevelDB myLevelDB = LevelDB.getInstance();
+        UserService myUserService = new UserService(myLevelDB);
         List<String> key = db.findKeysByPrefix("Experiment:"+id);
-        experiment.setUser(UserService.findUserById(Integer.parseInt(key.get(0).split(":")[2])));
+        experiment.setUser(myUserService.findUserById(Integer.parseInt(key.get(0).split(":")[2])));
         experiment.setAlgorithm(readAlgorithm(id,Integer.parseInt(key.get(0).split(":")[2])));
         return experiment;
     }
 
-    public static Experiment findExperimentByName(String name){
+    public Experiment findExperimentByName(String name){
         List<String> keys = db.findKeysByPrefix("Experiment:");
         for(String key: keys){
             if(key.endsWith("name") && db.getValue(key).equals(name)){
@@ -168,7 +171,7 @@ public class ExperimentService {
         return null;
     }
 
-    public static Algorithm readAlgorithm(int id, int userId){
+    public Algorithm readAlgorithm(int id, int userId){
         HashMap<String, String> map = db.findByPrefix("Experiment:"+id+":"+userId+"Algorithm");
         String name = db.findValuesByPrefix("Experiment:"+id+":"+userId+":Algorithm:name").get(0);
         Algorithm wrapAlgorithm = null;
@@ -202,7 +205,7 @@ public class ExperimentService {
         return wrapAlgorithm;
     }
 
-    public static Experiment readExperimentsByUser(User user){
+    public Experiment readExperimentsByUser(User user){
         List<String> keys = db.findKeysByPrefix("Experiment:");
         for(String key: keys){
             if(key.split(":")[2].equals(Integer.toString(user.getId()))){

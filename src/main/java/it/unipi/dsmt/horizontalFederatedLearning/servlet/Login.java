@@ -6,8 +6,6 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.*;
 
 @WebServlet(name = "Login", value = "/Login")
@@ -25,9 +23,9 @@ public class Login extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        LevelDB myLevelDb = new LevelDB();
-        new UserService(myLevelDb);
-        User myUser = UserService.findUserByUsername(username);
+        LevelDB myLevelDb = LevelDB.getInstance();
+        UserService myUserService = new UserService(myLevelDb);
+        User myUser = myUserService.findUserByUsername(username);
         if(password.equals(myUser.getPassword())) {
             HttpSession session = request.getSession(true);
             session.setAttribute("username", username);

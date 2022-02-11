@@ -26,10 +26,10 @@ public class Subscribe extends HttpServlet {
         String lastName = request.getParameter("lastName");
         String password = request.getParameter("password");
 
-        LevelDB myLevelDB = new LevelDB();
-        new UserService(myLevelDB);
+        LevelDB myLevelDB = LevelDB.getInstance();
+        UserService myUserService = new UserService(myLevelDB);
         try {
-            UserService.register(new User(10, firstName, lastName, username, password));
+            myUserService.register(new User(firstName, lastName, username, password));
             response.sendRedirect(request.getContextPath() + "/Login");
         }
         catch(RegistrationException e){
