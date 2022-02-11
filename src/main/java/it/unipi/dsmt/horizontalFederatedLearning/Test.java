@@ -84,14 +84,16 @@ public class Test {
         for(String elem: list)
             System.out.println(elem);
          */
+
         Node node = new Node("server@localhost", "COOKIE", "javaServer");
         try {
-            final Process p = Runtime.getRuntime().exec("erl -sname erl@localhost -setcookie COOKIE -pa \"./erlangFiles\"");
-            new Thread(new Runnable() {
+            String[] cmd = {"bash","-c", "erl -sname erl@localhost -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
+            final Process p = Runtime.getRuntime().exec(cmd);
+            //final Process p = new ProcessBuilder().command("erl -sname erl@localhost -setcookie COOKIE").start();
+            new Thread(new Runnable(){
                 public void run() {
                     BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
                     String line = null;
-
                     try {
                         while ((line = input.readLine()) != null)
                             System.out.println(line);
@@ -104,7 +106,6 @@ public class Test {
             OtpSelf caller = new OtpSelf("caller", "COOKIE");
             OtpPeer supervisor = new OtpPeer("erl@localhost");
             OtpConnection conn = caller.connect(supervisor);
-            conn.sendRPC("supervisorNode","currentDirectory", new OtpErlangList() );
             conn.sendRPC("supervisorNode","start", arguments );
         } catch (Exception e) {
             e.printStackTrace();
