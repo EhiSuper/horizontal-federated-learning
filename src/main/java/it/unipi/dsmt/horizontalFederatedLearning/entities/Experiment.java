@@ -24,7 +24,7 @@ public class Experiment {
     private List<String> clientsHostnames;
     private boolean randomClients;
     private double randomClientsSeed;
-    private int timeout;
+    private double timeout;
     private int maxAttemptsClientCrash;
     private int maxAttemptsServerCrash;
     private int maxAttemptsOverallCrash;
@@ -33,7 +33,7 @@ public class Experiment {
 
     public Experiment(String name, Algorithm algorithm, String dataset, int numFeatures, int mode, User user, LocalDate creationDate,
                       LocalDate lastUpdateDate, int numRounds, int maxNumRounds, int numCrashes, int numClients, int numMinClients,
-                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, int timeout, int maxAttemptsClientCrash,
+                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, double timeout, int maxAttemptsClientCrash,
                       int maxAttemptsServerCrash, int maxAttemptsOverallCrash) {
         this.id = id;
         this.name = name;
@@ -170,11 +170,11 @@ public class Experiment {
         randomClientsSeed = randomClientsSeed;
     }
 
-    public int getTimeout() {
+    public double getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(int timeout) {
+    public void setTimeout(double timeout) {
         this.timeout = timeout;
     }
 
@@ -226,6 +226,12 @@ public class Experiment {
         this.clientsHostnames = clientsHostnames;
     }
 
+    public String toString(){
+        return "{name = " + name + ", dataset=" + dataset + ", numFeatures=" + numFeatures + ", mode=" + mode
+                + ", creationDate = " + creationDate.toString() + ", lastUpdateDate=" + lastUpdateDate.toString() +
+                "user =" + user.getUsername() + ", algorithm=" + algorithm.getName();
+    }
+
     public OtpErlangTuple prepareTuple(){
         ArrayList<OtpErlangObject> objects = new ArrayList<>();
         //start( {NumClusters, Distance, Mode, Epsilon, SeedCenters, NormFn}, MaxAttemptsServerCrash).
@@ -243,7 +249,7 @@ public class Experiment {
         objects.add((new OtpErlangInt(maxNumRounds)));
         objects.add((new OtpErlangDouble(randomClientsSeed)));
         objects.add((new OtpErlangBoolean(randomClients)));
-        objects.add((new OtpErlangInt(timeout)));
+        objects.add((new OtpErlangDouble(timeout)));
         objects.add((new OtpErlangInt(maxAttemptsClientCrash)));
         objects.add((new OtpErlangInt(maxAttemptsOverallCrash)));
         OtpErlangObject[] array2 = new OtpErlangObject[objects.size()];

@@ -12,8 +12,6 @@ public class UserService {
     private int counterID;
 
     public UserService(LevelDB db) {
-        if(!db.isDBOpen())
-            db.openDB();
         this.db = db;
         setCounterID();
     }
@@ -69,16 +67,13 @@ public class UserService {
     }
 
     public User findUserById(int id){
-        List<String> keys = db.findKeysByPrefix("User:");
-        for(String key: keys){
-            if(key.endsWith("id") && db.getValue(key).equals(id)){
-                String username = db.getValue("User:" + id + ":username");
-                String password = db.getValue("User:" + id + ":password");
-                String firstName = db.getValue("User:" + id + ":firstName");
-                String lastName = db.getValue("User:" + id + ":lastName");
-                return new User(id, firstName, lastName, username, password);
-            }
-        }
-        return null;
+        List<String> keys = db.findKeysByPrefix("User:"+id);
+        if(keys.size() == 0)
+            return null;
+        String username = db.getValue("User:" + id + ":username");
+        String password = db.getValue("User:" + id + ":password");
+        String firstName = db.getValue("User:" + id + ":firstName");
+        String lastName = db.getValue("User:" + id + ":lastName");
+        return new User(id, firstName, lastName, username, password);
     }
 }

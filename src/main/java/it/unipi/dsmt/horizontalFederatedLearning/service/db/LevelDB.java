@@ -1,8 +1,12 @@
 package it.unipi.dsmt.horizontalFederatedLearning.service.db;
 
 import com.google.common.collect.Lists;
+import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
+import it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm;
+import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
 import org.iq80.leveldb.*;
 import java.io.*;
+import java.time.LocalDate;
 import java.util.*;
 import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
@@ -38,6 +42,10 @@ public class LevelDB {
         } catch(IOException ioe){
             closeDB();
         }
+        List<String> list = iterateDB();
+        System.out.println("Iterating though db...");
+        for(String elem: list)
+            System.out.println(elem);
     }
 
     public void closeDB(){
@@ -109,7 +117,7 @@ public class LevelDB {
                 String key = asString(iterator.peekNext().getKey());
                 if(!key.startsWith(prefix))
                     break;
-                values.add(key);
+                values.add(getValue(key));
             }
             return values;
         } catch(IOException ioe){

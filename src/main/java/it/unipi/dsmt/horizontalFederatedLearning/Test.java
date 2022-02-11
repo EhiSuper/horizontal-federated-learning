@@ -29,9 +29,9 @@ public class Test {
         List<String> list = db.iterateDB();
         for(String elem: list)
                 System.out.println(elem);
-        /*User user = new User(1, "Franco", "Terranova", "franchinino", "terranova");
-        UserService.register(user);
-        UserService.login("franchino", "terranova");*/
+        /*User user = new User(1, "Franco", "Terranova", "franchino", "terranova");
+        myUserService.register(user);
+        myUserService.login("franchino", "terranova");*/
         User user = myUserService.findUserByUsername("franchino");
         Experiment experiment = new Experiment();
         experiment.setName("Experiment3");
@@ -84,7 +84,14 @@ public class Test {
         for(String elem: list)
             System.out.println(elem);
          */
-
+        ExperimentService myExperimentService = new ExperimentService(db);
+        //myExperimentService.insert(experiment);
+        list = db.iterateDB();
+        for(String elem: list)
+            System.out.println(elem);
+        List<Experiment> listE = myExperimentService.readAllExperiments();
+        for(Experiment elem: listE)
+            System.out.println(elem);
         Node node = new Node("server@localhost", "COOKIE", "javaServer");
         try {
             String[] cmd = {"bash","-c", "erl -sname erl@localhost -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command

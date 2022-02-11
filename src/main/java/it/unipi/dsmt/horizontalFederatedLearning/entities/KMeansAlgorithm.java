@@ -78,6 +78,10 @@ public class KMeansAlgorithm extends Algorithm{
         return new KMeansAlgorithmRound(centers, Double.parseDouble(algorithmContent.elementAt(1).toString()));
     }
 
+    public String toString(){
+        return "{name = " + getName() + ",numClusters = " + numClusters + ",epsilon = " + epsilon + "}";
+    }
+
     @Override
     public OtpErlangTuple prepareSpecificParameters() {
         ArrayList<OtpErlangObject> objects = new ArrayList<>();

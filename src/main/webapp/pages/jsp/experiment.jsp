@@ -1,6 +1,6 @@
 <%--
   Created by IntelliJ IDEA.
-  User: franco
+  User: antonio
   Date: 07/02/22
   Time: 21:18
   To change this template use File | Settings | File Templates.
@@ -9,7 +9,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Search Page</title>
+    <title>Experiment Page</title>
 </head>
 <body>
 <div id="menu">

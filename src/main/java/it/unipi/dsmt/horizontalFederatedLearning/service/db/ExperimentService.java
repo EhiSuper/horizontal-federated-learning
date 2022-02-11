@@ -18,8 +18,6 @@ public class ExperimentService {
     private LevelDB db;
 
     public ExperimentService(LevelDB db) {
-        if (!db.isDBOpen())
-            db.openDB();
         this.db = db;
         setCounterID();
     }
@@ -76,7 +74,7 @@ public class ExperimentService {
 
     public List<Experiment> readAllExperiments() {
         List<Experiment> experiments = new ArrayList<>();
-        for(int i = 0; i < counterID; ++i){
+        for(int i = 1; i < counterID+1; ++i){
             experiments.add(findExperimentById(i));
         }
         return experiments;
@@ -137,7 +135,7 @@ public class ExperimentService {
                     experiment.setRandomClientsSeed(Double.parseDouble(map.get(key)));
                     break;
                 case "timeout":
-                    experiment.setTimeout(Integer.parseInt(map.get(key)));
+                    experiment.setTimeout(Double.parseDouble(map.get(key)));
                     break;
                 case "maxAttemptsClientCrash":
                     experiment.setNumClients(Integer.parseInt(map.get(key)));
@@ -156,7 +154,8 @@ public class ExperimentService {
         UserService myUserService = new UserService(myLevelDB);
         List<String> key = db.findKeysByPrefix("Experiment:"+id);
         experiment.setUser(myUserService.findUserById(Integer.parseInt(key.get(0).split(":")[2])));
-        experiment.setAlgorithm(readAlgorithm(id,Integer.parseInt(key.get(0).split(":")[2])));
+        Algorithm algorithm = readAlgorithm(id,Integer.parseInt(key.get(0).split(":")[2]));
+        experiment.setAlgorithm(algorithm);
         return experiment;
     }
 
@@ -171,10 +170,32 @@ public class ExperimentService {
         return null;
     }
 
-    public Algorithm readAlgorithm(int id, int userId){
-        HashMap<String, String> map = db.findByPrefix("Experiment:"+id+":"+userId+"Algorithm");
+    public List<Experiment> findExperimentsByFilter(String user, String filter, String value){
+        List<String> keys = db.findKeysByPrefix("Experiment:");
+        List<Experiment> list = new ArrayList<>();
+        for(String key: keys){
+            if(key.endsWith(filter) && db.getValue(key).startsWith(value)){
+                System.out.println(key);
+                String identifier = key.split(":")[1];
+                int id = Integer.parseInt(identifier);
+                if(!user.equals("all")) {
+                    if(user.equals(id)) {
+                        System.out.println(id);
+                        list.add(findExperimentById(id));
+                    }
+                } else {
+                    System.out.println(id);
+                    list.add(findExperimentById(id));
+                }
+            }
+        }
+        return list;
+    }
+
+    //aggiustare poi
+    public KMeansAlgorithm readAlgorithm(int id, int userId){
+        HashMap<String, String> map = db.findByPrefix("Experiment:"+id+":"+userId+":Algorithm");
         String name = db.findValuesByPrefix("Experiment:"+id+":"+userId+":Algorithm:name").get(0);
-        Algorithm wrapAlgorithm = null;
         // codice dipendente
         if(name.equals("KMeans")) {
             KMeansAlgorithm algorithm = new KMeansAlgorithm();
@@ -200,9 +221,9 @@ public class ExperimentService {
                         break;
                 }
             }
-            wrapAlgorithm = algorithm;
+            return algorithm;
         }
-        return wrapAlgorithm;
+        return null;
     }
 
     public Experiment readExperimentsByUser(User user){
