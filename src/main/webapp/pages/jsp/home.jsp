@@ -19,14 +19,15 @@
     <button><a href="<%=request.getContextPath()%>/Logout">Logout</a></button>
 </div>
 <div id="options">
-    <form action="<%=request.getContextPath()%>/Home">
-        <label for="dataset">Dataset: </label><input id="dataset" type="file"><br>
-        <label for="numFeatures">Features: </label><input id="numFeatures" type="number"><br>
-        <label for="maxNumberRounds">Maximum number of rounds: </label><input id="maxNumberRounds" type="number"><br>
-        <label for="numClusters">Clusters: </label><input id="numClusters" type="number"><br>
-        <label for="distance">Distance: </label><input id="distance" type="number"><br>
-        <label for="epsilon">Epsilon: </label><input id="epsilon" type="number"><br>
-        <label for="normFn">Norm Fn: </label><input id="normFn" type="number"><br><br>
+    <form action="<%=request.getContextPath()%>/Home" method="post">
+        <label for="dataset">Dataset: </label><input id="dataset" type="text" name="dataset"><br>
+        <label for="numFeatures">Features: </label><input id="numFeatures" type="number" name="features"><br>
+        <label for="maxNumberRounds">Maximum number of rounds: </label><input id="maxNumberRounds" type="number"
+                                                                              name="maxRounds"><br>
+        <label for="numClusters">Clusters: </label><input id="numClusters" type="number" name="numClusters"><br>
+        <label for="distance">Distance: </label><input id="distance" type="number" name="distance"><br>
+        <label for="epsilon">Epsilon: </label><input id="epsilon" type="number" name="epsilon"><br>
+        <label for="normFn">Norm Fn: </label><input id="normFn" type="number" name="normFn"><br><br>
         <button type="submit">Submit</button>
         <br>
     </form>
