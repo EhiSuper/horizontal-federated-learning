@@ -1,1 +1,8 @@
+
+# Compiled class file
 *.class
+
+target
+.idea
+KeyValueRepository
+
