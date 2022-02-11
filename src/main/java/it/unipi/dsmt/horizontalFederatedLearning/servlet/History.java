@@ -46,7 +46,6 @@ public class History extends HttpServlet {
         if(!user.equals("all"))
             user = ""+myUser.getId();
         List<Experiment> listExperiments = myExperimentService.findExperimentsByFilter(user,filter, value);
-        System.out.println(listExperiments.size());
         request.setAttribute("listExperiment", listExperiments);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);

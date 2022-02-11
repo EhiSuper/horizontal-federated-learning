@@ -175,16 +175,13 @@ public class ExperimentService {
         List<Experiment> list = new ArrayList<>();
         for(String key: keys){
             if(key.endsWith(filter) && db.getValue(key).startsWith(value)){
-                System.out.println(key);
                 String identifier = key.split(":")[1];
                 int id = Integer.parseInt(identifier);
                 if(!user.equals("all")) {
                     if(user.equals(id)) {
-                        System.out.println(id);
                         list.add(findExperimentById(id));
                     }
                 } else {
-                    System.out.println(id);
                     list.add(findExperimentById(id));
                 }
             }

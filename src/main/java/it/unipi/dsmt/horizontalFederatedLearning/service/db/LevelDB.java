@@ -42,10 +42,6 @@ public class LevelDB {
         } catch(IOException ioe){
             closeDB();
         }
-        List<String> list = iterateDB();
-        System.out.println("Iterating though db...");
-        for(String elem: list)
-            System.out.println(elem);
     }
 
     public void closeDB(){
