@@ -226,7 +226,6 @@ public class Experiment {
         this.clientsHostnames = clientsHostnames;
     }
 
-    //spostare in communication
     public OtpErlangTuple prepareTuple(){
         ArrayList<OtpErlangObject> objects = new ArrayList<>();
         //start( {NumClusters, Distance, Mode, Epsilon, SeedCenters, NormFn}, MaxAttemptsServerCrash).

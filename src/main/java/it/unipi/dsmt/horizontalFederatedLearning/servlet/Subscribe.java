@@ -12,6 +12,10 @@ import java.io.IOException;
 
 @WebServlet(name = "Subscribe", value = "/Subscribe")
 public class Subscribe extends HttpServlet {
+
+    private final LevelDB myLevelDb = LevelDB.getInstance();
+    private final UserService myUserService = new UserService(myLevelDb);
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/subscribe.jsp";
@@ -25,15 +29,24 @@ public class Subscribe extends HttpServlet {
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
         String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirmPassword");
 
-        LevelDB myLevelDB = LevelDB.getInstance();
-        UserService myUserService = new UserService(myLevelDB);
+        if(!password.equals(confirmPassword)){
+            request.setAttribute("error", "The two passwords are not equal");
+            String targetJSP = "/pages/jsp/subscribe.jsp";
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
+            requestDispatcher.forward(request, response);
+        }
+
         try {
             myUserService.register(new User(firstName, lastName, username, password));
             response.sendRedirect(request.getContextPath() + "/Login");
         }
         catch(RegistrationException e){
-            e.printStackTrace();
+            request.setAttribute("error", e.getMessage());
+            String targetJSP = "/pages/jsp/subscribe.jsp";
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
+            requestDispatcher.forward(request, response);
         }
     }
 }

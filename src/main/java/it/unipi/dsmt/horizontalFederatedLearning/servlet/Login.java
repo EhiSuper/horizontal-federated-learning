@@ -6,10 +6,17 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.*;
+import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.LoginException;
 
 @WebServlet(name = "Login", value = "/Login")
 public class Login extends HttpServlet {
+
+    private final LevelDB myLevelDb = LevelDB.getInstance();
+    private final UserService myUserService = new UserService(myLevelDb);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -22,14 +29,16 @@ public class Login extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+        request.setAttribute("error", " ");
 
-        LevelDB myLevelDb = LevelDB.getInstance();
-        UserService myUserService = new UserService(myLevelDb);
-        User myUser = myUserService.findUserByUsername(username);
-        if(password.equals(myUser.getPassword())) {
-            HttpSession session = request.getSession(true);
-            session.setAttribute("username", username);
+        try{
+            myUserService.login(username, password);
             response.sendRedirect(request.getContextPath() + "/MainPage");
+        }catch(LoginException e){
+            request.setAttribute("error", e.getMessage());
+            String targetJSP = "/pages/jsp/login.jsp";
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
+            requestDispatcher.forward(request, response);
         }
     }
 }
