@@ -7,14 +7,34 @@ import java.util.*;
 import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
 public class LevelDB {
+    private static volatile LevelDB instance;
     private DB db = null;
+    private String pathDatabase;
+
+    //Private Constructor
+    private LevelDB(String pathDatabase){
+        this.pathDatabase = pathDatabase;
+        openDB();
+    }
+
+    //Singleton Pattern
+    public static LevelDB getInstance(){
+        if(instance == null){
+            synchronized (LevelDB.class){
+                if(instance == null){
+                    instance = new LevelDB("KeyValueRepository");
+                }
+            }
+        }
+        return instance;
+    }
 
     public void openDB(){
         Options options = new Options();
         // check if we have problems with lexicographic order or we need to define a comparator
         options.createIfMissing(true);
         try {
-            db = factory.open(new File("KeyValueRepository"), options);
+            db = factory.open(new File(pathDatabase), options);
         } catch(IOException ioe){
             closeDB();
         }

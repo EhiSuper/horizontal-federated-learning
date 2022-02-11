@@ -22,8 +22,8 @@ import java.util.List;
 public class Test {
 
     public static void main(String[] args){
-        LevelDB db = new LevelDB();
-        new UserService(db);
+        LevelDB db = LevelDB.getInstance();
+        UserService myUserService = new UserService(db);
         new ExperimentService(db);
         List<String> list = db.iterateDB();
         for(String elem: list)
@@ -31,7 +31,7 @@ public class Test {
         /*User user = new User(1, "Franco", "Terranova", "franchinino", "terranova");
         UserService.register(user);
         UserService.login("franchino", "terranova");*/
-        User user = UserService.findUserByUsername("franchino");
+        User user = myUserService.findUserByUsername("franchino");
         Experiment experiment = new Experiment();
         experiment.setName("Experiment3");
         experiment.setDataset("https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff");
