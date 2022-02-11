@@ -1,13 +1,9 @@
 package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
-import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
-
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.LoginException;

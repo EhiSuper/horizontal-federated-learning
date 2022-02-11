@@ -1,6 +1,5 @@
 package it.unipi.dsmt.horizontalFederatedLearning.servlet;
-
-import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
+import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
 

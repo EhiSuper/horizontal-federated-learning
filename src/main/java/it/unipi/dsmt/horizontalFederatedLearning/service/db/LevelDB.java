@@ -1,12 +1,8 @@
 package it.unipi.dsmt.horizontalFederatedLearning.service.db;
 
 import com.google.common.collect.Lists;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
 import org.iq80.leveldb.*;
 import java.io.*;
-import java.time.LocalDate;
 import java.util.*;
 import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 

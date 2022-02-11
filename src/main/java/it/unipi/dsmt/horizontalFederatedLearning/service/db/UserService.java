@@ -1,8 +1,7 @@
 package it.unipi.dsmt.horizontalFederatedLearning.service.db;
 
-import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.LoginException;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.RegistrationException;
+import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
+import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.*;
 
 import java.util.HashMap;
 import java.util.List;

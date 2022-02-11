@@ -1,8 +1,5 @@
 package it.unipi.dsmt.horizontalFederatedLearning.entities;
 
-import com.ericsson.otp.erlang.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class KMeansAlgorithmRound implements AlgorithmRound{
