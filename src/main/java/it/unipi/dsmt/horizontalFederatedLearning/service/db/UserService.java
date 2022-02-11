@@ -12,41 +12,41 @@ public class UserService {
     private int counterID;
 
     public UserService(LevelDB db) {
-        if(!db.isDBOpen())
+        if (!db.isDBOpen())
             db.openDB();
         this.db = db;
         setCounterID();
     }
 
-    private void setCounterID(){
+    private void setCounterID() {
         List<String> keys = db.findKeysByPrefix("User:");
-        if(keys != null)
-            for(String key: keys){
+        if (keys != null)
+            for (String key : keys) {
                 int id = Integer.parseInt(key.split(":")[1]);
-                if(id > counterID)
+                if (id > counterID)
                     counterID = id;
             }
     }
 
     public void register(User user) throws RegistrationException {
         HashMap<String, String> map = new HashMap<>();
-        if(findUserByUsername(user.getUsername()) != null)
+        if (findUserByUsername(user.getUsername()) != null)
             throw new RegistrationException("Username already taken");
         String prefixKey = "User:" + ++counterID + ":";
-        map.put(prefixKey+"username", user.getUsername());
-        map.put(prefixKey+"firstName", user.getFirstName());
-        map.put(prefixKey+"lastName", user.getLastName());
-        map.put(prefixKey+"password", user.getPassword());
+        map.put(prefixKey + "username", user.getUsername());
+        map.put(prefixKey + "firstName", user.getFirstName());
+        map.put(prefixKey + "lastName", user.getLastName());
+        map.put(prefixKey + "password", user.getPassword());
         db.putBatchValues(map);
     }
 
     public User login(String username, String password) throws LoginException {
         List<String> keys = db.findKeysByPrefix("User:");
-        for(String key: keys){
-            if(key.endsWith("username") && db.getValue(key).equals(username)){
+        for (String key : keys) {
+            if (key.endsWith("username") && db.getValue(key).equals(username)) {
                 String id = key.split(":")[1];
                 String correctPassword = db.getValue("User:" + id + ":password");
-                if(password.equals(correctPassword))
+                if (password.equals(correctPassword))
                     return findUserByUsername(username);
                 else throw new LoginException("The password is not correct");
             }
@@ -54,10 +54,10 @@ public class UserService {
         throw new LoginException("Username not present in the database");
     }
 
-    public User findUserByUsername(String username){
+    public User findUserByUsername(String username) {
         List<String> keys = db.findKeysByPrefix("User:");
-        for(String key: keys){
-            if(key.endsWith("username") && db.getValue(key).equals(username)){
+        for (String key : keys) {
+            if (key.endsWith("username") && db.getValue(key).equals(username)) {
                 int id = Integer.parseInt(key.split(":")[1]);
                 String password = db.getValue("User:" + id + ":password");
                 String firstName = db.getValue("User:" + id + ":firstName");
@@ -68,10 +68,10 @@ public class UserService {
         return null;
     }
 
-    public User findUserById(int id){
+    public User findUserById(int id) {
         List<String> keys = db.findKeysByPrefix("User:");
-        for(String key: keys){
-            if(key.endsWith("id") && db.getValue(key).equals(id)){
+        for (String key : keys) {
+            if (key.endsWith("id") && db.getValue(key).equals(id)) {
                 String username = db.getValue("User:" + id + ":username");
                 String password = db.getValue("User:" + id + ":password");
                 String firstName = db.getValue("User:" + id + ":firstName");
@@ -80,5 +80,16 @@ public class UserService {
             }
         }
         return null;
+    }
+
+    public void updateUser(User user) {
+        db.deleteValue("User:" + user.getId() + ":username");
+        db.putValue("User:" + user.getId() + ":username", user.getUsername());
+        db.deleteValue("User:" + user.getId() + ":password");
+        db.putValue("User:" + user.getId() + ":password", user.getPassword());
+        db.deleteValue("User:" + user.getId() + ":firstName");
+        db.putValue("User:" + user.getId() + ":firstName", user.getFirstName());
+        db.deleteValue("User:" + user.getId() + ":lastName");
+        db.putValue("User:" + user.getId() + ":lastName", user.getLastName());
     }
 }
