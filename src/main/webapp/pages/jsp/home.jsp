@@ -25,9 +25,9 @@
         <label for="maxNumberRounds">Maximum number of rounds: </label><input id="maxNumberRounds" type="number"
                                                                               name="maxRounds"><br>
         <label for="numClusters">Clusters: </label><input id="numClusters" type="number" name="numClusters"><br>
-        <label for="distance">Distance: </label><input id="distance" type="number" name="distance"><br>
-        <label for="epsilon">Epsilon: </label><input id="epsilon" type="number" name="epsilon"><br>
-        <label for="normFn">Norm Fn: </label><input id="normFn" type="number" name="normFn"><br><br>
+        <label for="distance">Distance: </label><input id="distance" type="text" name="distance"><br>
+        <label for="epsilon">Epsilon: </label><input id="epsilon" type="number" step="any" name="epsilon"><br>
+        <label for="normFn">Norm Fn: </label><input id="normFn" type="text" name="normFn"><br><br>
         <button type="submit">Submit</button>
         <br>
     </form>
