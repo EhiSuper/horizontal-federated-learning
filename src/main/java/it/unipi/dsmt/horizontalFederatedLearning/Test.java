@@ -29,10 +29,10 @@ public class Test {
         List<String> list = db.iterateDB();
         for(String elem: list)
                 System.out.println(elem);
-        /*User user = new User(1, "Franco", "Terranova", "franchino", "terranova");
+        User user = new User(1, "Franco", "Terranova", "franchino", "terranova");
         myUserService.register(user);
-        myUserService.login("franchino", "terranova");*/
-        User user = myUserService.findUserByUsername("franchino");
+        myUserService.login("franchino", "terranova");
+        user = myUserService.findUserByUsername("franchino");
         Experiment experiment = new Experiment();
         experiment.setName("Experiment3");
         experiment.setDataset("https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff");
@@ -85,7 +85,7 @@ public class Test {
             System.out.println(elem);
          */
         ExperimentService myExperimentService = new ExperimentService(db);
-        //myExperimentService.insert(experiment);
+        myExperimentService.insert(experiment);
         list = db.iterateDB();
         for(String elem: list)
             System.out.println(elem);

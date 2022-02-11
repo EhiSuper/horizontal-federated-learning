@@ -33,7 +33,7 @@
                 <option value="dataset">Dataset</option>
                 <option value="Algorithm:name">Algorithm</option>
             </select>
-            <input type="text" name="value" id="value" required>
+            <input type="text" name="value" id="value">
         </div>
         <button type="submit">Search</button>
         <br>
@@ -63,7 +63,7 @@
                 <td><%= experiment.getCreationDate().toString()%></td>
                 <td><%= experiment.getLastUpdateDate().toString()%></td>
                 <td><%= experiment.getUser().getUsername()%></td>
-                <td><a href="<%= request.getContextPath()%>/Experiment?id=<%=experiment.getId()%>"><button>Show Experiment</button></a></td>
+                <td><a href="<%= request.getContextPath()%>/ExperimentInfo?id=<%=experiment.getId()%>"><button>Show Experiment</button></a></td>
             </tr>
         <% } %>
     </table>

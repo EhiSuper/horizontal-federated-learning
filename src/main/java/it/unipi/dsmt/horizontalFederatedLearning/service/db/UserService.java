@@ -8,7 +8,7 @@ import java.util.List;
 
 public class UserService {
     private LevelDB db;
-    private int counterID;
+    private static int counterID;
 
     public UserService(LevelDB db) {
         this.db = db;

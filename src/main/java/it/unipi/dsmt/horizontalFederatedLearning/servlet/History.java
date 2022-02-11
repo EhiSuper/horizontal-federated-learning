@@ -26,6 +26,8 @@ public class History extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/history.jsp";
+        //myLevelDb.addExperiment();
+        myLevelDb.printContent();
         List<Experiment> listExperiment = myExperimentService.readAllExperiments();
         request.setAttribute("listExperiment", listExperiment);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);

@@ -31,6 +31,33 @@ public class Experiment {
 
     public Experiment(){}
 
+    public Experiment(int id, String name, Algorithm algorithm, String dataset, int numFeatures, int mode, User user, LocalDate creationDate,
+                      LocalDate lastUpdateDate, int numRounds, int maxNumRounds, int numCrashes, int numClients, int numMinClients,
+                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, double timeout, int maxAttemptsClientCrash,
+                      int maxAttemptsServerCrash, int maxAttemptsOverallCrash) {
+        this.id = id;
+        this.name = name;
+        this.algorithm = algorithm;
+        this.dataset = dataset;
+        this.numFeatures = numFeatures;
+        this.mode = mode;
+        this.user = user;
+        this.creationDate = creationDate;
+        this.lastUpdateDate = lastUpdateDate;
+        this.numRounds = numRounds;
+        this.maxNumRounds = maxNumRounds;
+        this.numCrashes = numCrashes;
+        this.numClients = numClients;
+        this.numMinClients = numMinClients;
+        this.clientsHostnames = clientsHostnames;
+        this.randomClients = randomClients;
+        this.randomClientsSeed = randomClientsSeed;
+        this.timeout = timeout;
+        this.maxAttemptsClientCrash = maxAttemptsClientCrash;
+        this.maxAttemptsOverallCrash = maxAttemptsOverallCrash;
+        this.maxAttemptsServerCrash = maxAttemptsServerCrash;
+    }
+
     public Experiment(String name, Algorithm algorithm, String dataset, int numFeatures, int mode, User user, LocalDate creationDate,
                       LocalDate lastUpdateDate, int numRounds, int maxNumRounds, int numCrashes, int numClients, int numMinClients,
                       List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, double timeout, int maxAttemptsClientCrash,

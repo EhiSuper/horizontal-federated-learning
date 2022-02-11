@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ExperimentService {
-    private int counterID;
+    private static int counterID;
     private LevelDB db;
 
     public ExperimentService(LevelDB db) {
@@ -34,6 +34,7 @@ public class ExperimentService {
         HashMap<String, String> map = new HashMap<>();
         if(findExperimentByName(experiment.getName()) != null)
             throw new RegistrationException("Experiment name already taken!");
+        System.out.println(experiment);
         experiment.setId(++counterID);
         String prefixKey = "Experiment:" + experiment.getId() + ":" + experiment.getUser().getId() + ":";
         map.put(prefixKey + "name", experiment.getName());
@@ -73,14 +74,18 @@ public class ExperimentService {
 
     public List<Experiment> readAllExperiments() {
         List<Experiment> experiments = new ArrayList<>();
+        Experiment experiment;
+        System.out.println(counterID);
         for(int i = 1; i < counterID+1; ++i){
-            experiments.add(findExperimentById(i));
+            experiment = findExperimentById(i);
+            if(experiment != null)
+                experiments.add(experiment);
         }
         return experiments;
     }
 
     public void deleteExperimentById(int id) {
-        List<String> keys = db.findValuesByPrefix("Experiment:"+id);
+        List<String> keys = db.findKeysByPrefix("Experiment:"+id);
         for(String key: keys)
             db.deleteValue(key);
     }
@@ -91,10 +96,12 @@ public class ExperimentService {
         newExperiment.setId(counterID);
     }
 
-    // altri parametri, una volta definiti
     public Experiment findExperimentById(int id){
         Experiment experiment = new Experiment();
+        if(db.findKeysByPrefix("Experiment:" + id).size()==0)
+            return null;
         HashMap<String, String> map = db.findByPrefix("Experiment:"+id);
+        experiment.setId(id);
         for(String key: map.keySet()){
             switch(key.split(":")[3]){
                 case "name":
