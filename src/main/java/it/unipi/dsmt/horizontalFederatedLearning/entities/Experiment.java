@@ -33,7 +33,7 @@ public class Experiment {
 
     public Experiment(int id, String name, Algorithm algorithm, String dataset, int numFeatures, int mode, User user, LocalDate creationDate,
                       LocalDate lastUpdateDate, int numRounds, int maxNumRounds, int numCrashes, int numClients, int numMinClients,
-                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, double timeout, int maxAttemptsClientCrash,
+                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, int timeout, int maxAttemptsClientCrash,
                       int maxAttemptsServerCrash, int maxAttemptsOverallCrash) {
         this.id = id;
         this.name = name;

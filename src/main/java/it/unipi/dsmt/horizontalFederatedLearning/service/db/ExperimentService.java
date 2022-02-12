@@ -141,7 +141,7 @@ public class ExperimentService {
                     experiment.setRandomClientsSeed(Double.parseDouble(map.get(key)));
                     break;
                 case "timeout":
-                    experiment.setTimeout(Integer.parseInt(map.get(key)));
+                    experiment.setTimeout((int)Double.parseDouble(map.get(key)));
                     break;
                 case "maxAttemptsClientCrash":
                     experiment.setNumClients(Integer.parseInt(map.get(key)));
@@ -181,14 +181,14 @@ public class ExperimentService {
         List<Experiment> list = new ArrayList<>();
         for(String key: keys){
             if(key.endsWith(filter) && db.getValue(key).startsWith(value)){
-                String identifier = key.split(":")[1];
-                int id = Integer.parseInt(identifier);
+                String userIdentifier = key.split(":")[2];
+                int experimentIdentifier = Integer.parseInt(key.split(":")[1]);
                 if(!user.equals("all")) {
-                    if(user.equals(id)) {
-                        list.add(findExperimentById(id));
+                    if(user.equals(userIdentifier)) {
+                        list.add(findExperimentById(experimentIdentifier));
                     }
                 } else {
-                    list.add(findExperimentById(id));
+                    list.add(findExperimentById(experimentIdentifier));
                 }
             }
         }

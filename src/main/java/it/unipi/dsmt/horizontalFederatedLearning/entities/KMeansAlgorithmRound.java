@@ -28,14 +28,20 @@ public class KMeansAlgorithmRound implements AlgorithmRound{
     }
 
     public String toString(){
-        String result = "{ fNorm: " + fNorm + ", centers: ";
-        for(List<Double> center: centers){
+        String result = "{ fNorm: " + fNorm + ", centers: {";
+        for(int i = 0; i < centers.size(); ++i){
             result += "[";
-            for(Double value: center)
-                result += value + ",";
-            result +="]";
+            List<Double> list = centers.get(i);
+            for(int j = 0; j < list.size(); ++j) {
+                result += list.get(j);
+                if(j != list.size()-1)
+                    result += ",";
+            }
+            result += "]";
+            if(i != centers.size()-1)
+                result += ",";
         }
-        result += "}";
+        result += "}}";
         return result;
     }
 }

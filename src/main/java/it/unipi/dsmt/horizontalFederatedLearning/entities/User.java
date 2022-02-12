@@ -9,6 +9,7 @@ public class User {
     //Altro?
     private String username;
     private String password;
+    private boolean admin;
 
     public User(){}
 
@@ -26,6 +27,25 @@ public class User {
         this.username = username;
         this.password = password;
     }
+
+    public User(String firstName, String lastName, String username, String password, boolean admin) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.password = password;
+        this.admin = admin;
+    }
+
+    public User(int id, String firstName, String lastName, String username, String password, boolean admin) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.password = password;
+        this.admin = admin;
+    }
+
+
 
     public int getId() {
         return id;
@@ -65,6 +85,10 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public boolean getAdmin() {
+        return admin;
     }
 
     public String toString(){

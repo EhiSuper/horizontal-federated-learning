@@ -15,6 +15,7 @@ public class UserService {
         setCounterID();
     }
 
+
     private void setCounterID() {
         List<String> keys = db.findKeysByPrefix("User:");
         if (keys != null)
@@ -34,6 +35,7 @@ public class UserService {
         map.put(prefixKey + "firstName", user.getFirstName());
         map.put(prefixKey + "lastName", user.getLastName());
         map.put(prefixKey + "password", user.getPassword());
+        map.put(prefixKey + "admin", String.valueOf(user.getAdmin()));
         db.putBatchValues(map);
     }
 
@@ -59,7 +61,10 @@ public class UserService {
                 String password = db.getValue("User:" + id + ":password");
                 String firstName = db.getValue("User:" + id + ":firstName");
                 String lastName = db.getValue("User:" + id + ":lastName");
-                return new User(id, firstName, lastName, username, password);
+                String admin = db.getValue("User:" + id + ":admin");
+                if(admin == null)
+                    return new User(id, firstName, lastName, username, password);
+                else return new User(id, firstName, lastName, username, password, Boolean.parseBoolean(admin));
             }
         }
         return null;
@@ -73,7 +78,10 @@ public class UserService {
         String password = db.getValue("User:" + id + ":password");
         String firstName = db.getValue("User:" + id + ":firstName");
         String lastName = db.getValue("User:" + id + ":lastName");
-        return new User(id, firstName, lastName, username, password);
+        String admin = db.getValue("User:" + id + ":admin");
+        if(admin == null)
+            return new User(id, firstName, lastName, username, password);
+        else return new User(id, firstName, lastName, username, password, Boolean.parseBoolean(admin));
     }
 
     public void updateUser(User user) {

@@ -52,8 +52,11 @@ public class Communication {
             OtpPeer supervisor = new OtpPeer("erl@localhost");
             OtpConnection conn = caller.connect(supervisor);
             conn.sendRPC("supervisorNode", "start", arguments);
-        } catch (Exception e) {
+        } catch (IOException e) {
+            startExperiment(experiment);
             e.printStackTrace();
+        } catch (Exception ee){
+            ee.printStackTrace();
         }
     }
 
@@ -85,6 +88,7 @@ public class Communication {
             } else if (msgType.toString().equals("completed")) {
                 return new ExperimentRound(true, result.elementAt(2).toString());
             } else { //round
+                //System.out.println(result.elementAt(2).toString());
                 ExperimentRound round = composeRound(result);
                 return round;
             }
@@ -108,13 +112,37 @@ public class Communication {
         OtpErlangList clientsContent = (OtpErlangList) content.elementAt(2);
         for (OtpErlangObject element : clientsContent) {
             OtpErlangTuple tupleElement = (OtpErlangTuple) element;
-            clients.add(new Client(tupleElement.elementAt(0).toString(), tupleElement.elementAt(1).toString(), Integer.parseInt(tupleElement.elementAt(3).toString())));
+            //System.out.println(tupleElement.toString());
+            OtpErlangList chunkList = (OtpErlangList) tupleElement.elementAt(2);
+            List<List<Double>> points = new ArrayList<>();
+            List<Double> point;
+            for(OtpErlangObject elemChunk: chunkList) {
+                OtpErlangList pointChunk = (OtpErlangList) elemChunk;
+                point = new ArrayList<>();
+                for(OtpErlangObject coordinate: pointChunk) {
+                    point.add(Double.parseDouble(coordinate.toString()));
+                }
+                points.add(point);
+            }
+            Client client = new Client(tupleElement.elementAt(0).toString(), tupleElement.elementAt(1).toString(), points, Integer.parseInt(tupleElement.elementAt(3).toString()));
+            clients.add(client);
         }
         List<Client> stateClients = new ArrayList<>();
         OtpErlangList stateClientsContent = (OtpErlangList) content.elementAt(3);
         for (OtpErlangObject element : stateClientsContent) {
             OtpErlangTuple tupleElement = (OtpErlangTuple) element;
-            stateClients.add(new Client(tupleElement.elementAt(0).toString(), tupleElement.elementAt(1).toString(), Integer.parseInt(tupleElement.elementAt(3).toString())));
+            OtpErlangList chunkList = (OtpErlangList) tupleElement.elementAt(2);
+            List<List<Double>> points = new ArrayList<>();
+            List<Double> point;
+            for(OtpErlangObject elemChunk: chunkList) {
+                OtpErlangList pointChunk = (OtpErlangList) elemChunk;
+                point = new ArrayList<>();
+                for(OtpErlangObject coordinate: pointChunk) {
+                    point.add(Double.parseDouble(coordinate.toString()));
+                }
+                points.add(point);
+            }
+            stateClients.add(new Client(tupleElement.elementAt(0).toString(), tupleElement.elementAt(1).toString(), points, Integer.parseInt(tupleElement.elementAt(3).toString())));
         }
         return new ExperimentRound(Integer.parseInt(content.elementAt(4).toString()), Integer.parseInt(content.elementAt(1).toString()), algRound, clients, stateClients);
     }

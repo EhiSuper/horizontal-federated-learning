@@ -5,6 +5,7 @@ import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
 
+import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.LoginException;
 
@@ -28,9 +29,14 @@ public class Login extends HttpServlet {
         request.setAttribute("error", " ");
         try {
             myUserService.login(username, password);
-            HttpSession session = request.getSession();
-            session.setAttribute("login", username);
-            response.sendRedirect(request.getContextPath() + "/Home");
+            User myUser = myUserService.findUserByUsername(username);
+            if(myUser.getAdmin() == true) {
+                //reindirizzare
+            } else {
+                HttpSession session = request.getSession();
+                session.setAttribute("login", username);
+                response.sendRedirect(request.getContextPath() + "/Home");
+            }
         } catch (LoginException e) {
             request.setAttribute("error", e.getMessage());
             String targetJSP = "/pages/jsp/login.jsp";

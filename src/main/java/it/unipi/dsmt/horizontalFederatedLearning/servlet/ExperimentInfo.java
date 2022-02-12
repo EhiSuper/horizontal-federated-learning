@@ -82,7 +82,7 @@ public class ExperimentInfo extends HttpServlet {
             }
             algorithm.setName(algorithmName);
             Experiment experiment = new Experiment(experimentId, name, algorithm, dataset, numFeatures, mode, user, creationDate, lastUpdateDate,numRounds,maxNumRounds,numCrashes,numClients, numMinClients,
-            clientsHostnames,  randomClients, randomClientsSeed,  timeout,maxAttemptsClientCrash, maxAttemptsServerCrash, maxAttemptsOverallCrash);
+            clientsHostnames,  randomClients, randomClientsSeed, (int) timeout,maxAttemptsClientCrash, maxAttemptsServerCrash, maxAttemptsOverallCrash);
             myExperimentService.editExperiment(experiment);
             // non ho controllato se campi diversi
             // reindirizza su pagina opportuna per rieseguire algoritmo

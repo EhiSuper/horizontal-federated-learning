@@ -43,6 +43,7 @@ public class LevelDB {
             closeDB();
         }
         //addExperiment();
+        //addAdmin();
     }
 
     public void closeDB(){
@@ -132,6 +133,12 @@ public class LevelDB {
         List<String> list = this.iterateDB();
         for(String elem: list)
             System.out.println(elem);
+    }
+
+    public void addAdmin(){
+        User user = new User("Capo", "Capo", "admin", "admin", true);
+        UserService myUserService = new UserService(this);
+        myUserService.register(user);
     }
 
     public void printContent(){

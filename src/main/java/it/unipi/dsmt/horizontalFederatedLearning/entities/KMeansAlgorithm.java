@@ -66,13 +66,14 @@ public class KMeansAlgorithm extends Algorithm{
     @Override
     public AlgorithmRound getIterationInfo(OtpErlangTuple algorithmContent) {
         OtpErlangList centersContent = (OtpErlangList)algorithmContent.elementAt(0);
-        //System.out.println("centersContent: " + centersContent);
         List<List<Double>> centers = new ArrayList<>();
-        List<Double> center = new ArrayList<>();
+        List<Double> center;
         for(OtpErlangObject element: centersContent) {
             OtpErlangList centerList = (OtpErlangList) element;
-            for(OtpErlangObject coordinate: centerList)
+            center = new ArrayList<>();
+            for(OtpErlangObject coordinate: centerList) {
                 center.add(Double.parseDouble(coordinate.toString()));
+            }
             centers.add(center);
         }
         return new KMeansAlgorithmRound(centers, Double.parseDouble(algorithmContent.elementAt(1).toString()));
