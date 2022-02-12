@@ -134,7 +134,7 @@ public class ExperimentService {
                     experiment.setRandomClientsSeed(Double.parseDouble(map.get(key)));
                     break;
                 case "timeout":
-                    experiment.setTimeout(Double.parseDouble(map.get(key)));
+                    experiment.setTimeout(Integer.parseInt(map.get(key)));
                     break;
                 case "maxAttemptsClientCrash":
                     experiment.setNumClients(Integer.parseInt(map.get(key)));

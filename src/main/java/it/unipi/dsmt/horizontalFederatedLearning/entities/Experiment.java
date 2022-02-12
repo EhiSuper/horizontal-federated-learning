@@ -7,33 +7,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Experiment {
-    private int id;
-    private String name;
-    private Algorithm algorithm;
-    private String dataset;
-    private int numFeatures;
-    private int mode;
-    private LocalDate creationDate;
-    private LocalDate lastUpdateDate;
-    private User user;
-    private int numRounds;
-    private int maxNumRounds;
-    private int numCrashes;
-    private int numClients;
-    private int numMinClients;
-    private List<String> clientsHostnames;
-    private boolean randomClients;
-    private double randomClientsSeed;
-    private double timeout;
-    private int maxAttemptsClientCrash;
-    private int maxAttemptsServerCrash;
-    private int maxAttemptsOverallCrash;
+    private int id; //auto
+    private String name; //user
+    private Algorithm algorithm; //user
+    private String dataset; //user
+    private int numFeatures; //user
+    private int mode; //admin
+    private LocalDate creationDate; //auto
+    private LocalDate lastUpdateDate; //auto
+    private User user; //auto
+    private int numRounds; //auto
+    private int maxNumRounds; //admin
+    private int numCrashes; //auto
+    private int numClients; //admin
+    private int numMinClients; //user
+    private List<String> clientsHostnames; //admin
+    private boolean randomClients; //user
+    private double randomClientsSeed; //admin
+    private int timeout; //auto
+    private int maxAttemptsClientCrash; //admin
+    private int maxAttemptsServerCrash; //admin
+    private int maxAttemptsOverallCrash; //admin
 
     public Experiment(){}
 
     public Experiment(String name, Algorithm algorithm, String dataset, int numFeatures, int mode, User user, LocalDate creationDate,
                       LocalDate lastUpdateDate, int numRounds, int maxNumRounds, int numCrashes, int numClients, int numMinClients,
-                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, double timeout, int maxAttemptsClientCrash,
+                      List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, int timeout, int maxAttemptsClientCrash,
                       int maxAttemptsServerCrash, int maxAttemptsOverallCrash) {
         this.id = id;
         this.name = name;
@@ -170,11 +170,11 @@ public class Experiment {
         randomClientsSeed = randomClientsSeed;
     }
 
-    public double getTimeout() {
+    public int getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(double timeout) {
+    public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
@@ -249,7 +249,7 @@ public class Experiment {
         objects.add((new OtpErlangInt(maxNumRounds)));
         objects.add((new OtpErlangDouble(randomClientsSeed)));
         objects.add((new OtpErlangBoolean(randomClients)));
-        objects.add((new OtpErlangDouble(timeout)));
+        objects.add((new OtpErlangInt(timeout)));
         objects.add((new OtpErlangInt(maxAttemptsClientCrash)));
         objects.add((new OtpErlangInt(maxAttemptsOverallCrash)));
         OtpErlangObject[] array2 = new OtpErlangObject[objects.size()];
