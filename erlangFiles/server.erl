@@ -16,12 +16,12 @@
 
 -export([start/3]).
 
-start({NClients,NMinClients, Dataset, NumFeatures, ClientsHostnames, RandomClients, RandomClientsSeed, MaxNumberRounds, RandomClientsSeed, RandomClients, Timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash}, AlgParams, Supervisor) ->
+start({NClients, NMinClients, Dataset, NumFeatures, ClientsHostnames, RandomClients, RandomClientsSeed, MaxNumberRounds, RandomClientsSeed, RandomClients, Timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash}, AlgParams, Supervisor) ->
   io:format("Server - Launching python server...~n"),
-  spawn(fun() -> os:cmd("python \"erlangFiles/server.py\"") end),
+  spawn(fun() -> os:cmd("python3 \"erlangFiles/server.py\"") end),
   timer:sleep(5000),
   io:format("Server - Generating chunks...~n"),
-  DatasetChunks = rpc:call('py@localhost', 'server', 'generate_chunks',  [NClients,Dataset]),
+  DatasetChunks = rpc:call('py@localhost', 'server', 'generate_chunks', [NClients, Dataset]),
   IterationParameters = startAlgorithm(AlgParams, NumFeatures),
   io:format("Server - Spawning clients~n"),
   CompleteListClients = spawnClients(NClients, DatasetChunks, ClientsHostnames, [], Timeout),
@@ -31,7 +31,7 @@ start({NClients,NMinClients, Dataset, NumFeatures, ClientsHostnames, RandomClien
 
 printList([]) -> ok;
 printList([H | T]) ->
-  {_, Pid, _, _ } = H,
+  {_, Pid, _, _} = H,
   io:format("Element: ~p~n", [Pid]),
   printList(T).
 
@@ -42,11 +42,11 @@ spawnClients(NClients, [ChunkHead | ChunkTail], [HostnameHead | HostnameTail], L
   io:format("Server - Spawned ~p~n", [Client]),
   ClientInfo = {HostnameHead, Client, ChunkHead, 0},
   List = ListClients ++ [ClientInfo],
-  spawnClients(NClients-1, ChunkTail, HostnameTail, List, Timeout).
+  spawnClients(NClients - 1, ChunkTail, HostnameTail, List, Timeout).
 
 loop(NClients, NMinClients, ListClients, DatasetChunks, NumFeatures, RandomClientsSeed, RandomClients,
     ClientsHostnames, MaxNumberRounds, RandomClientsSeed, Timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash,
-    NumCrashes, IterationElements, Executed_rounds, AlgParams, Supervisor)->
+    NumCrashes, IterationElements, Executed_rounds, AlgParams, Supervisor) ->
   case MaxNumberRounds =< Executed_rounds of %% max rounds reached ?
     true ->
       Supervisor ! {self(), reached_max_rounds},
@@ -55,7 +55,7 @@ loop(NClients, NMinClients, ListClients, DatasetChunks, NumFeatures, RandomClien
       io:format("Server - Shutting down all nodes~n"),
       shutdownClients(ListClients);
     false ->
-      io:format("Server - Getting into the ~p-th iteration of the loop~n",[Executed_rounds + 1]),
+      io:format("Server - Getting into the ~p-th iteration of the loop~n", [Executed_rounds + 1]),
       io:format("Server - Selecting nodes to be involved~n"),
       InvolvedClients = getInvolvedClients(NClients, NMinClients, ListClients, RandomClientsSeed, RandomClients),
       io:format("Server - Selected clients:~n"),
@@ -67,7 +67,7 @@ loop(NClients, NMinClients, ListClients, DatasetChunks, NumFeatures, RandomClien
       io:format("Server - Received all results~n"),
       io:format("Server - Joining all results~n"),
       {NewIterationElements, Finished} = getIterationResults(AlgParams, MaxNumberRounds, NumFeatures, Client_responses, Executed_rounds, IterationElements),
-      Supervisor ! {self(), round, {getOutputIterationResults(NewIterationElements), NewNumCrashes, InvolvedClients, UpdatedClients, Executed_rounds+1}},
+      Supervisor ! {self(), round, {getOutputIterationResults(NewIterationElements), NewNumCrashes, InvolvedClients, UpdatedClients, Executed_rounds + 1}},
       case Finished == 0 of %%norm under epsilon
         true ->
           Supervisor ! {self(), norm_under_epsilon},
@@ -76,7 +76,7 @@ loop(NClients, NMinClients, ListClients, DatasetChunks, NumFeatures, RandomClien
         false ->
           loop(NClients, NMinClients, UpdatedClients, DatasetChunks, NumFeatures, RandomClientsSeed, RandomClients,
             AvailableHostnames, MaxNumberRounds, RandomClientsSeed, Timeout, MaxAttemptsClientCrash,
-            MaxAttemptsOverallCrash, NewNumCrashes, NewIterationElements, Executed_rounds+1, AlgParams, Supervisor)
+            MaxAttemptsOverallCrash, NewNumCrashes, NewIterationElements, Executed_rounds + 1, AlgParams, Supervisor)
       end
   end.
 
@@ -87,7 +87,7 @@ loop(NClients, NMinClients, ListClients, DatasetChunks, NumFeatures, RandomClien
 getInvolvedClients(NClients, NMinClients, ListClients, RandomClientSeed, RandomClients) ->
   case NClients == NMinClients of
     false when RandomClients == true ->
-      InvolvedClientsIndexes = rpc:call('py@localhost', 'server', 'erlang_request_get_involved_clients',  [{NClients, NMinClients, RandomClientSeed}]),
+      InvolvedClientsIndexes = rpc:call('py@localhost', 'server', 'erlang_request_get_involved_clients', [{NClients, NMinClients, RandomClientSeed}]),
       selectClients(ListClients, InvolvedClientsIndexes);
     false when RandomClients == false ->
       lists:sublist(ListClients, NMinClients);
@@ -100,19 +100,20 @@ selectClients(ListClients, [FirstClientIndex | OtherClientIndexes]) ->
   [lists:nth(FirstClientIndex + 1, ListClients) | selectClients(ListClients, OtherClientIndexes)].
 
 shutdownClients([]) -> io:format("Server - Sent shutdown command to all nodes~n");
-shutdownClients([H|T]) ->
+shutdownClients([H | T]) ->
   {_, Pid, _, _} = H,
   Pid ! {self(), shutdown},
   shutdownClients(T).
 
 performRound([], _) -> ok;
-performRound([H|T], RoundParameters) ->
+performRound([H | T], RoundParameters) ->
   {_, Pid, _, _} = H,
   io:format("Performing round ~w~n", [Pid]),
   Pid ! {self(), compute_round, RoundParameters},
   performRound(T, RoundParameters).
 
-waitResponses(_, _, _, _, NumCrashes, ClientsHostnames, UpdatedClients, [],ResultsList) -> {ResultsList, UpdatedClients, ClientsHostnames, NumCrashes};
+waitResponses(_, _, _, _, NumCrashes, ClientsHostnames, UpdatedClients, [], ResultsList) ->
+  {ResultsList, UpdatedClients, ClientsHostnames, NumCrashes};
 waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NumCrashes, ClientsHostnames, ListClients, PidList, ResultsList) ->
   receive
     {From, results, Results} ->
@@ -120,7 +121,7 @@ waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOvera
         true ->
           NewPidList = lists:keydelete(From, 2, PidList),
           NewResultsList = lists:append([Results], ResultsList),
-          waitResponses(Timeout, RoundParameters,MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NumCrashes, ClientsHostnames, ListClients, NewPidList, NewResultsList);
+          waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NumCrashes, ClientsHostnames, ListClients, NewPidList, NewResultsList);
         false ->
           waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NumCrashes, ClientsHostnames, ListClients, PidList, ResultsList)
       end;
@@ -153,9 +154,9 @@ waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOvera
 checkOverallCrashes(NumCrashes, MaxAttemptsOverallCrash) ->
   NewNumCrashes = NumCrashes + 1,
   case NewNumCrashes > MaxAttemptsOverallCrash of
-    true->
+    true ->
       exit(failed_MAX_CRASHES_REACHED);
-    false->
+    false ->
       io:format("Server - Number of crashes: ~w ~n", [NewNumCrashes]),
       NewNumCrashes
   end.
@@ -170,9 +171,9 @@ initializeAtHostname(Hostname, Chunk, Timeout, Attempts, RoundParameters) ->
 selectNextLocation(_, []) -> exit(failed_NO_LOC_AVAILABLE);
 selectNextLocation(ListClients, [HostnamesHead | HostnamesTail]) ->
   case lists:keymember(HostnamesHead, 1, ListClients) of
-    true->
+    true ->
       selectNextLocation(ListClients, HostnamesTail);
-    false->
+    false ->
       HostnamesHead
   end.
 

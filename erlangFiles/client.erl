@@ -17,7 +17,7 @@ start(Chunk, Server, Timeout) ->
   io:format("Client ~w - Launching python client...~n", [self()]),
   % register(erlangNode, self()),
   % invio al nodo dove deve inviarmi il pid così che io possa settare il link
-  spawn(fun() -> os:cmd("python client.py py " ++ atom_to_list(node()) ++ " " ++ atom_to_list(erlNode)) end),
+  spawn(fun() -> os:cmd("python3 client.py py " ++ atom_to_list(node()) ++ " " ++ atom_to_list(erlNode)) end),
   net_kernel:connect_node('py@localhost'),
   timer:sleep(1000),
   %% Prova 1 linko uso registered name
@@ -35,17 +35,17 @@ start(Chunk, Server, Timeout) ->
 loop(Chunk, Server, Timeout) ->
   receive
     {Server, compute_round, Params} ->
-      io:format("Client ~w - Executing round~n",[self()]),
+      io:format("Client ~w - Executing round~n", [self()]),
       Response = computeRound(Chunk, Params),
       Server ! {self(), results, Response},
       loop(Chunk, Server, Timeout);
     {Server, shutdown} ->
-      io:format("Client ~w - Server requested me to shut down~n",[self()]);
+      io:format("Client ~w - Server requested me to shut down~n", [self()]);
     _otherMsg ->
-      io:format("Client ~w - Invalid message received~n",[self()]),
+      io:format("Client ~w - Invalid message received~n", [self()]),
       loop(Chunk, Server, Timeout)
   after Timeout ->
-    io:format("Client ~w - Timeout elapsed! Shutting down!~n",[self()]),
+    io:format("Client ~w - Timeout elapsed! Shutting down!~n", [self()]),
     true
   end.
 
