@@ -11,6 +11,7 @@ import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Communication;
 import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Node;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorException;
+import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class Test {
         UserService.login("franchino", "terranova");*/
         User user = myUserService.findUserByUsername("antonio");
         Experiment experiment = new Experiment();
+        experiment.setId(2);
         experiment.setName("Experiment3");
         experiment.setDataset("https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff");
         experiment.setLastUpdateDate(LocalDate.now());
@@ -84,6 +86,7 @@ public class Test {
             if(rounds.get(i) != null)
                 System.out.println(rounds.get(i));
         }
+        Log.exportLogExperiment(experiment);
         //creato oggetto esperimento e richiesta esecuzione va aggiornato oggetto esperimento
         // vedere come chiedere esecuzione esperimento
     }

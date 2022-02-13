@@ -15,11 +15,6 @@ public class Communication {
     private static OtpErlangPid destination;
     private static Node node;
     private static Experiment currentExperiment;
-    private static Log log;
-
-    static {
-        log = new Log("experimentsLog.txt");
-    }
 
     private static OtpErlangList prepareArguments(Experiment experiment) {
         OtpErlangTuple params = experiment.prepareTuple();
@@ -52,7 +47,7 @@ public class Communication {
                                 editedLine = line.split("1> ")[1];
                             else editedLine = line;
                             System.out.println(editedLine);
-                            log.logExperimentLine(editedLine);
+                            Log.logExperimentLine(editedLine);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -65,7 +60,7 @@ public class Communication {
             OtpSelf caller = new OtpSelf("caller", "COOKIE");
             OtpPeer supervisor = new OtpPeer("erl@127.0.0.1");
             OtpConnection conn = caller.connect(supervisor);
-            log.startLogExperiment(experiment);
+            Log.startLogExperiment(experiment);
             conn.sendRPC("supervisorNode", "start", arguments);
         } catch (IOException e) {
             startExperiment(experiment);
