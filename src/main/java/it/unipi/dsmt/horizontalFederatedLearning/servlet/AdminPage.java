@@ -2,7 +2,6 @@ package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ConfigurationService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
-import jdk.management.jfr.ConfigurationInfo;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -17,28 +16,27 @@ public class AdminPage extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if(request.getSession().getAttribute("isAdmin") == null){
-            response.sendError(401);
+        if (request.getSession().getAttribute("isAdmin") == null) {
+            response.sendRedirect(request.getContextPath() + "/");
             return;
-        };
+        }
+        ;
         Map<String, String> messages = new HashMap<>();
         request.setAttribute("messages", messages);
         Map<String, String> valuesGeneral = myConfigurationService.retrieveGeneral();
-        if(valuesGeneral != null && !valuesGeneral.isEmpty()){
+        if (valuesGeneral != null && !valuesGeneral.isEmpty()) {
             String[] clients = valuesGeneral.remove("ClientsHostnames").split(",");
             List<String> clientsHostnames = Arrays.asList(clients);
             request.setAttribute("valuesGeneral", valuesGeneral);
             request.setAttribute("hostnames", clientsHostnames);
-        }
-        else{
+        } else {
             request.setAttribute("valuesGeneral", new HashMap<>());
             request.setAttribute("hostnames", new ArrayList<>());
         }
         Map<String, String> valuesKMeans = myConfigurationService.retrieveSpecific("kmeans");
-        if(valuesKMeans != null && !valuesKMeans.isEmpty()){
+        if (valuesKMeans != null && !valuesKMeans.isEmpty()) {
             request.setAttribute("valuesKMeans", valuesKMeans);
-        }
-        else{
+        } else {
             request.setAttribute("valuesKMeans", new HashMap<>());
         }
 
@@ -49,10 +47,11 @@ public class AdminPage extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if(request.getSession().getAttribute("isAdmin") == null){
+        if (request.getSession().getAttribute("isAdmin") == null) {
             response.sendError(401);
             return;
-        };
+        }
+        ;
         HashMap<String, String> messages = new HashMap<>();
         request.setAttribute("messages", messages);
         HashMap<String, String> valuesGeneral = new HashMap<>();
@@ -67,35 +66,33 @@ public class AdminPage extends HttpServlet {
             messages.put("NumberOfClients", "Please enter NumberOfClients");
         } else if (!numberOfClients.matches("\\d+")) {
             messages.put("NumberOfClients", "Please enter digits only");
-        } else{
+        } else {
             valuesGeneral.put("NumberOfClients", numberOfClients);
         }
 
-        if(request.getParameterValues("ClientsHostnames")!=null){
+        if (request.getParameterValues("ClientsHostnames") != null) {
             List<String> clientsHostnames = Arrays.asList(request.getParameterValues("ClientsHostnames"));
             List<String> actualClientsHostnames = new ArrayList<>();
             String hostnameValue = "";
-            for(String hostname: clientsHostnames){
-                if(!hostname.isEmpty()){
+            for (String hostname : clientsHostnames) {
+                if (!hostname.isEmpty()) {
                     hostnameValue = hostnameValue.equals("") ? hostname : hostnameValue + "," + hostname;
                     actualClientsHostnames.add(hostname);
-                    if(!hostname.matches("\\w+@localhost") && !hostname.matches("\\w+@\\d{1,3}[.]\\d{1,3}[.]\\d{1,3}[.]\\d{1,3}")){
+                    if (!hostname.matches("\\w+@localhost") && !hostname.matches("\\w+@\\d{1,3}[.]\\d{1,3}[.]\\d{1,3}[.]\\d{1,3}")) {
                         messages.put("ClientsHostnames", "Please check clients, some of them are not correct");
                     }
                 }
             }
-            if(actualClientsHostnames.isEmpty()){
+            if (actualClientsHostnames.isEmpty()) {
                 messages.put("ClientsHostnames", "Please enter at least one client");
-            }
-            else{
-                if(numberOfClients.matches("\\d+") && actualClientsHostnames.size() < Integer.parseInt(numberOfClients)){
+            } else {
+                if (numberOfClients.matches("\\d+") && actualClientsHostnames.size() < Integer.parseInt(numberOfClients)) {
                     messages.put("ClientsHostnames", "Please enter at least as many hostnames as the number of clients");
                 }
                 request.setAttribute("hostnames", actualClientsHostnames);
                 valuesGeneral.put("ClientsHostnames", hostnameValue);
             }
-        }
-        else{
+        } else {
             messages.put("ClientsHostnames", "Please enter at least one client");
         }
 
@@ -104,7 +101,7 @@ public class AdminPage extends HttpServlet {
             messages.put("RandomClientsSeed", "Please enter RandomClientsSeed");
         } else if (!randomClientsSeed.matches("\\d+")) {
             messages.put("RandomClientsSeed", "Please enter digits only");
-        } else{
+        } else {
             valuesGeneral.put("RandomClientsSeed", randomClientsSeed);
         }
 
@@ -113,7 +110,7 @@ public class AdminPage extends HttpServlet {
             messages.put("MaxNumberRound", "Please enter MaxNumberRound");
         } else if (!maxNumberRound.matches("\\d+")) {
             messages.put("MaxNumberRound", "Please enter digits only");
-        } else{
+        } else {
             valuesGeneral.put("MaxNumberRound", maxNumberRound);
         }
 
@@ -122,7 +119,7 @@ public class AdminPage extends HttpServlet {
             messages.put("MaxAttemptsClientCrash", "Please enter MaxAttemptsClientCrash");
         } else if (!maxAttemptsClientCrash.matches("\\d+")) {
             messages.put("MaxAttemptsClientCrash", "Please enter digits only");
-        } else{
+        } else {
             valuesGeneral.put("MaxAttemptsClientCrash", maxAttemptsClientCrash);
         }
 
@@ -131,7 +128,7 @@ public class AdminPage extends HttpServlet {
             messages.put("MaxAttemptsServerCrash", "Please enter MaxAttemptsServerCrash");
         } else if (!maxAttemptsServerCrash.matches("\\d+")) {
             messages.put("MaxAttemptsServerCrash", "Please enter digits only");
-        } else{
+        } else {
             valuesGeneral.put("MaxAttemptsServerCrash", maxAttemptsServerCrash);
         }
 
@@ -140,7 +137,7 @@ public class AdminPage extends HttpServlet {
             messages.put("MaxAttemptsOverallCrash", "Please enter MaxAttemptsOverallCrash");
         } else if (!maxAttemptsOverallCrash.matches("\\d+")) {
             messages.put("MaxAttemptsOverallCrash", "Please enter digits only");
-        } else{
+        } else {
             valuesGeneral.put("MaxAttemptsOverallCrash", maxAttemptsOverallCrash);
         }
 
@@ -149,7 +146,7 @@ public class AdminPage extends HttpServlet {
             messages.put("Mode", "Please enter Mode");
         } else if (!mode.matches("\\d+")) {
             messages.put("Mode", "Please enter digits only");
-        } else{
+        } else {
             valuesKMeans.put("Mode", mode);
         }
 
@@ -157,7 +154,7 @@ public class AdminPage extends HttpServlet {
             messages.put("success", String.format("Everything fine"));
             myConfigurationService.insertGeneral(valuesGeneral);
             myConfigurationService.insertSpecific(valuesKMeans, "kmeans");
-        } else{
+        } else {
             messages.put("success", String.format("Something went wrong, check fields"));
         }
 

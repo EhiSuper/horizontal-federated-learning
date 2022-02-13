@@ -38,7 +38,7 @@ public class Communication {
         currentExperiment = experiment;
         node = new Node("server@localhost", "COOKIE", "javaServer");
         try {
-            String[] cmd = {"bash", "-c", "erl -sname erl@localhost -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
+            String[] cmd = {"bash", "-c", "erl -sname erl@localhost -setcookie COOKIE -pa '/home/antonio/Documents/repos/horizontal-federated-learning/erlangFiles'"}; // type last element your command
             final Process p = Runtime.getRuntime().exec(cmd);
             //final Process p = Runtime.getRuntime().exec("erl -sname erl@localhost -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
@@ -47,8 +47,8 @@ public class Communication {
                     String line;
                     String editedLine;
                     try {
-                        while ((line = input.readLine()) != null){
-                            if(line.contains("1> "))
+                        while ((line = input.readLine()) != null) {
+                            if (line.contains("1> "))
                                 editedLine = line.split("1> ")[1];
                             else editedLine = line;
                             System.out.println(editedLine);
@@ -56,7 +56,7 @@ public class Communication {
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (ArrayIndexOutOfBoundsException ie){
+                    } catch (ArrayIndexOutOfBoundsException ie) {
 
                     }
                 }
@@ -70,7 +70,7 @@ public class Communication {
         } catch (IOException e) {
             startExperiment(experiment);
             e.printStackTrace();
-        } catch (Exception ee){
+        } catch (Exception ee) {
             ee.printStackTrace();
         }
     }
@@ -131,10 +131,10 @@ public class Communication {
             OtpErlangList chunkList = (OtpErlangList) tupleElement.elementAt(2);
             List<List<Double>> points = new ArrayList<>();
             List<Double> point;
-            for(OtpErlangObject elemChunk: chunkList) {
+            for (OtpErlangObject elemChunk : chunkList) {
                 OtpErlangList pointChunk = (OtpErlangList) elemChunk;
                 point = new ArrayList<>();
-                for(OtpErlangObject coordinate: pointChunk) {
+                for (OtpErlangObject coordinate : pointChunk) {
                     point.add(Double.parseDouble(coordinate.toString()));
                 }
                 points.add(point);
@@ -149,10 +149,10 @@ public class Communication {
             OtpErlangList chunkList = (OtpErlangList) tupleElement.elementAt(2);
             List<List<Double>> points = new ArrayList<>();
             List<Double> point;
-            for(OtpErlangObject elemChunk: chunkList) {
+            for (OtpErlangObject elemChunk : chunkList) {
                 OtpErlangList pointChunk = (OtpErlangList) elemChunk;
                 point = new ArrayList<>();
-                for(OtpErlangObject coordinate: pointChunk) {
+                for (OtpErlangObject coordinate : pointChunk) {
                     point.add(Double.parseDouble(coordinate.toString()));
                 }
                 points.add(point);

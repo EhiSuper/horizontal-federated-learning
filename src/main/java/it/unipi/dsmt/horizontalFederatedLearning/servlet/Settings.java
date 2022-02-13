@@ -1,4 +1,5 @@
 package it.unipi.dsmt.horizontalFederatedLearning.servlet;
+
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
@@ -16,6 +17,10 @@ public class Settings extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (request.getSession().getAttribute("login") == null) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
         HttpSession session = request.getSession();
         String username = (String) session.getAttribute("login");
         User myUser = myUserService.findUserByUsername(username);

@@ -25,6 +25,10 @@ public class Home extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (request.getSession().getAttribute("login") == null) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
         String targetJSP = "/pages/jsp/home.jsp";
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
@@ -35,6 +39,7 @@ public class Home extends HttpServlet {
         //Parametri che non so dove andare a prendere: mode, numRounds, numCrashes, numClients
         //numMinClients, randomCliens, randomClientsSeed, timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash
         //MaxAttemptsServerCrash, clients, algorithm(tipo), SeedCenters,
+
         HttpSession session = request.getSession();
         String username = (String) session.getAttribute("login");
         User myUser = myUserService.findUserByUsername(username);
@@ -45,7 +50,7 @@ public class Home extends HttpServlet {
         int maxNumberRounds = Integer.parseInt(request.getParameter("maxNumberRounds"));
         String distance = request.getParameter("distance");
         double epsilon = Double.parseDouble(request.getParameter("epsilon"));
-        String normFn = request.getParameter(request.getParameter("normFn"));
+        String normFn = request.getParameter("normFn");
         int numClusters = Integer.parseInt(request.getParameter("numClusters"));
 
         Experiment experiment = new Experiment();
@@ -93,6 +98,7 @@ public class Home extends HttpServlet {
                 System.out.println("finished experiment");
                 break;
             }
+
             //round contiene le info di quel round
             //printo il round in maniera momentanea nella home page
             request.setAttribute("round", round);
@@ -103,5 +109,4 @@ public class Home extends HttpServlet {
         //creato oggetto esperimento e richiesta esecuzione va aggiornato oggetto esperimento
         // vedere come chiedere esecuzione esperimento
     }
-
 }
