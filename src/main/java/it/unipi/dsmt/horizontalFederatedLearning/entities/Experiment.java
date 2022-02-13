@@ -279,6 +279,7 @@ public class Experiment {
         objects.add((new OtpErlangInt(timeout)));
         objects.add((new OtpErlangInt(maxAttemptsClientCrash)));
         objects.add((new OtpErlangInt(maxAttemptsOverallCrash)));
+        objects.add((new OtpErlangInt(mode)));
         OtpErlangObject[] array2 = new OtpErlangObject[objects.size()];
         OtpErlangObject[] array = objects.toArray(array2);
         OtpErlangTuple tuple = new OtpErlangTuple(array);

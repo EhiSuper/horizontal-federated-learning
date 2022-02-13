@@ -3,6 +3,7 @@ package it.unipi.dsmt.horizontalFederatedLearning.service.erlang;
 import com.ericsson.otp.erlang.*;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorException;
+import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +15,11 @@ public class Communication {
     private static OtpErlangPid destination;
     private static Node node;
     private static Experiment currentExperiment;
+    private static Log log;
+
+    static {
+        log = new Log("experimentsLog.txt");
+    }
 
     private static OtpErlangList prepareArguments(Experiment experiment) {
         OtpErlangTuple params = experiment.prepareTuple();
@@ -38,12 +44,20 @@ public class Communication {
             new Thread(new Runnable() {
                 public void run() {
                     BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                    String line = null;
+                    String line;
+                    String editedLine;
                     try {
-                        while ((line = input.readLine()) != null)
-                            System.out.println(line);
+                        while ((line = input.readLine()) != null){
+                            if(line.contains("1> "))
+                                editedLine = line.split("1> ")[1];
+                            else editedLine = line;
+                            System.out.println(editedLine);
+                            log.logExperimentLine(editedLine);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (ArrayIndexOutOfBoundsException ie){
+
                     }
                 }
             }).start();
@@ -51,6 +65,7 @@ public class Communication {
             OtpSelf caller = new OtpSelf("caller", "COOKIE");
             OtpPeer supervisor = new OtpPeer("erl@localhost");
             OtpConnection conn = caller.connect(supervisor);
+            log.startLogExperiment(experiment);
             conn.sendRPC("supervisorNode", "start", arguments);
         } catch (IOException e) {
             startExperiment(experiment);

@@ -2,7 +2,8 @@
 %%% @author BPT
 %%% @copyright (C) 2022, <COMPANY>
 %%% @doc
-%%%
+%%%     This module contains the functions needed for the KMeans module of a
+%%%     client node in a federated learning distributed algorithm.
 %%% @end
 %%% Created : 05. feb 2022 15:20
 %%%-------------------------------------------------------------------

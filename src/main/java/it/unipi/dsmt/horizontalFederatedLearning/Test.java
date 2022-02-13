@@ -22,7 +22,6 @@ import java.util.List;
 public class Test {
 
     public static void main(String[] args){
-
         LevelDB db = LevelDB.getInstance();
         UserService myUserService = new UserService(db);
         /*new ExperimentService(db);

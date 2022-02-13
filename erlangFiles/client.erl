@@ -2,7 +2,8 @@
 %%% @author BPT
 %%% @copyright (C) 2021, <COMPANY>
 %%% @doc
-%%%
+%%%     This module contains the functions needed for the client of a
+%%%     federated learning distributed algorithm
 %%% @end
 %%% Created : 10. dic 2021 17:40
 %%%-------------------------------------------------------------------
@@ -15,22 +16,13 @@
 
 start(Chunk, Server, Timeout) ->
   io:format("Client ~w - Launching python client...~n", [self()]),
-  % register(erlangNode, self()),
-  % invio al nodo dove deve inviarmi il pid così che io possa settare il link
-  spawn(fun() -> os:cmd("python3 client.py py " ++ atom_to_list(node()) ++ " " ++ atom_to_list(erlNode)) end),
-  net_kernel:connect_node('py@localhost'),
-  timer:sleep(1000),
-  %% Prova 1 linko uso registered name
-  %%erlang:link(whereis('pyrlang')),
-  %% Prova 2 ricevo Pid
-  %%Pid = rpc:call('py@localhost', 'client', 'get_pid', [{2}]),
-  %% io:format("Pid: ~p~n", [Pid]),
-  receive
-    Pid when is_atom(Pid) ->
-      io:format("Received Pyrlang Pid: ~p~n", [Pid])
-  after 5000 -> io:format("Can't link to the pyrlang Node~n")
-  end,
+  createPythonClient(),
   loop(Chunk, Server, Timeout).
+
+createPythonClient() ->
+    spawn(fun() -> os:cmd("python3 client.py py " ++ atom_to_list(node()) ++ " " ++ atom_to_list(erlNode)) end),
+    net_kernel:connect_node('py@localhost'),
+    timer:sleep(2000).
 
 loop(Chunk, Server, Timeout) ->
   receive
@@ -49,5 +41,3 @@ loop(Chunk, Server, Timeout) ->
     true
   end.
 
-%% Shutting down pyrlang? rpc:call('py@127.0.0.1', 'e02_registered_process', 'shutdown', []),
-%% Set Timeout

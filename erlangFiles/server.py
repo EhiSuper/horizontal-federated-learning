@@ -19,16 +19,14 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.utils import shuffle as shuffleSK
 from array import array
 
-LOG = logging.getLogger(color("EXAMPLE2", fg='lime'))
+LOG = logging.getLogger(color("LOGGER server.py", fg='lime'))
 logging.getLogger("").setLevel(logging.DEBUG)
 
-FROBENIUS_NORM = 'fro'
-
 def norm_fro(u:np.ndarray):
-    return np.linalg.norm(u, ord = FROBENIUS_NORM)
+    return np.linalg.norm(u, ord = 'fro')
 
 def erlang_request_generate_centers(parameters):
-    # parameters is a tuple, sending from Erlang {seed, n_clusters, n_features}
+    # parameters is a tuple, sent from Erlang {seed, n_clusters, n_features}
     seed = parameters[0]
     n_clusters = parameters[1]
     n_features = parameters[2]
@@ -37,7 +35,7 @@ def erlang_request_generate_centers(parameters):
     return centers_list
 
 def erlang_request_process_clustering_results(parameters):
-    # parameters is a tuple, sending from Erlang {epsilon, max_number_rounds, n_clusters, N_features, norm_fro, centers, client_responses, all_centers_list, f_norm_values, executed_rounds}
+    # parameters is a tuple, sent from Erlang {epsilon, max_number_rounds, n_clusters, N_features, norm_fro, centers, client_responses, all_centers_list, f_norm_values, executed_rounds}
     parameters[7].reverse()
     parameters[8].reverse()
     server_params: Dict[str, bytes] = {
@@ -57,18 +55,15 @@ def erlang_request_process_clustering_results(parameters):
     new_centers = server.get_centers()
     finished = int(server.next_round())
     new_fnorm = server.get_new_fnorm() #? can we do it?
-    print(new_fnorm)
     for i in range(len(new_centers)):
         if(type(new_centers[i]) is not list):
             new_centers[i] = new_centers[i].tolist()
     tuple_to_response = (new_centers, new_fnorm, finished)
-    print(tuple_to_response)
     return tuple_to_response
 
 def erlang_request_get_involved_clients(parameters):
-    #parameters is a tuple, sending from Erlang {NClients, NMinClients, RandomClientSeed}
+    #parameters is a tuple, sent from Erlang {NClients, NMinClients, RandomClientSeed}
     x = random.sample(range(parameters[0]), parameters[1])
-    print(x)
     return x
 
 def generate_dataset_chunks(X: np.array, Y: List, n_splits: int, shuffle: bool = False, 
@@ -86,7 +81,6 @@ def generate_dataset_chunks(X: np.array, Y: List, n_splits: int, shuffle: bool =
 
       factor = 1.2
       total = len(X)-int(np.floor(len(X)/factor))
-      print(total)
       temp = []
       for i in range(n_splits-1):
         val = np.random.randint(0, total)
@@ -107,17 +101,14 @@ def generate_dataset_chunks(X: np.array, Y: List, n_splits: int, shuffle: bool =
 def generate_chunks(n_splits: int = 10, dataset: str = "https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff", mode: int = 1):
     df = pd.read_csv(dataset,delimiter = ',',names = ["a","b","c"],error_bad_lines = False)
     df = df[8:]
-    dataset_file = 'clara'
     df['a'] = [float(x) for x in (df['a'])]
     df['b'] = [float(x) for x in (df['b'])]
     df['c'] = [float(x) for x in (df['c'])]
     Y = df.c.tolist()
     X_original = np.array(df[['a','b']])
     rows = len(X_original)
-    print(f'Dataset size {rows}')
     min_max_scaler = MinMaxScaler()
     X = min_max_scaler.fit_transform(X_original)
-    # Aggiusta nome dataset, colonne, righe da skippare
     if(mode == 1):
         mode = 'non_iid_distr'
         iid_seed = None
@@ -133,25 +124,8 @@ def generate_chunks(n_splits: int = 10, dataset: str = "https://raw.githubuserco
     else:
         return None
     shuffle_dataset: bool = True
-    print("Going to generate chunks")
     dataset_chunks = generate_dataset_chunks(X, Y, n_splits, shuffle = shuffle_dataset, mode = mode, shuffle_seed = shuffle_seed, iid_seed = iid_seed)
-    print("Chunks generated")
-    print(type(dataset_chunks))
     return np.array(dataset_chunks).tolist()
-
-def read_conf(file_path: str = "confParams.txt"):
-    with open(file_path,'r') as conf:
-        x = conf.read().splitlines()
-    for index, elem in enumerate(x):
-        elem = elem.split(": ")[1]
-        x[index] = elem
-    x[5] = x[5].split(",")
-    x[1] = int(x[1])
-    x[2] = int(x[2])
-    x[3] = int(x[3])
-    x[4] = float(x[4])
-    x[6] = int(x[6])
-    return x
 
 def generate_random_centers(seed, n_clusters: int, n_features: int):
     np.random.seed(int(float(seed)))
@@ -162,7 +136,6 @@ class CMeansFederatedServer:
     def __init__(self):
         self.__current_round = 0
 
-    # UPDATE: REMOVE CLUSTER'S CENTERS RANDOM INITIALIZATION
     def initialize(self, params: Dict) -> None:
         self.__epsilon = params['epsilon']
         self.__max_number_rounds = params.get('max_number_rounds', 10)
@@ -179,19 +152,12 @@ class CMeansFederatedServer:
                 self.__cluster_centers.append(params['centers'][i])
 
     def next_round(self) -> bool:
-        num_clusters = self.__num_clusters
         cluster_centers = self.__cluster_centers
-        print("i centri fino ad\'ora sono:")
-        print(cluster_centers)
         num_centers = len(cluster_centers)
 
         if (num_centers > 1):
             centers_r = np.array(cluster_centers[-1])
             centers_r_1 = np.array(cluster_centers[-2])
-            print("centro 1 calcolare la norma")
-            print(centers_r)
-            print("centro 2 calcolare la norma")
-            print(centers_r_1)
             fnorm_value = self.__norm_fm(centers_r - centers_r_1)
             self.__fnorms.append(fnorm_value)
             if (fnorm_value < self.__epsilon):
@@ -205,13 +171,12 @@ class CMeansFederatedServer:
     def process_clustering_results(self, client_responses: List):
         num_clients = len(client_responses)
         num_clusters = self.__num_clusters
-        #client_responses is a list of list of tuples where the first element of this tuple is LSC and second element is NC
+        #client_responses is a list of list of tuples where the first element of this tuple is LSC and second element is NC for each cluster
         num_features = self.__num_features
         nc_list = [0] * num_clusters
         lsc_list = [np.array([0] * num_features) for i in range(num_clusters)]
 
         for client_idx in range(num_clients):
-            # remember the response is a list of tuples where each tuple represents the (LSC, NC) for each cluster
             response = client_responses[client_idx]
             for i in range(num_clusters):
                 client_lsc = response[i][0] if response[i][0] is np.array else np.array(response[i][0])
@@ -221,7 +186,6 @@ class CMeansFederatedServer:
 
         new_cluster_centers = []
         prev_cluster_centers = self.__cluster_centers[-1]
-        #modificato
         if(len(prev_cluster_centers) != num_clusters):
             prev_cluster_centers = self.__cluster_centers
         for i in range(num_clusters):
@@ -249,7 +213,6 @@ class CMeansFederatedServer:
         return self.__current_round
 
     def finalize(self, enabled_print: bool = False) -> None:
-        """ HERE WE CAN SAVE FOR EACH ROUND THE VALUES OF THE CENTERS """
         centers = self.__cluster_centers[1:]
         fnorms = self.__fnorms
         if (enabled_print):

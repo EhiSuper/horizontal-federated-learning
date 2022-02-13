@@ -89,7 +89,6 @@ public class KMeansAlgorithm extends Algorithm{
         //start( {NumClusters, Distance, Mode, Epsilon, SeedCenters, NormFn}, MaxAttemptsServerCrash).
         objects.add((new OtpErlangInt(numClusters)));
         objects.add((new OtpErlangString(distance)));
-        objects.add((new OtpErlangInt(1)));
         objects.add((new OtpErlangDouble(epsilon)));
         objects.add((new OtpErlangDouble(seedCenters)));
         objects.add((new OtpErlangString(normFn)));
