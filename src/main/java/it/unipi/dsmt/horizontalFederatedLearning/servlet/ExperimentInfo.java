@@ -7,7 +7,6 @@ import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ExperimentService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
-import sun.tools.tree.ExprExpression;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
