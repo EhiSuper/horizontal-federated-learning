@@ -10,6 +10,7 @@ import random
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
 from sklearn.utils import shuffle as shuffleSK
+import urllib.request
 
 LOG = logging.getLogger("LOGGER server.py")
 logging.getLogger("").setLevel(logging.DEBUG)
@@ -93,15 +94,17 @@ def generate_dataset_chunks(X: np.array, Y: List, n_splits: int, shuffle: bool =
       dataset_chunks = [X[i:i + int(np.floor(len(X)/n_splits)),:] for i in range(0, len(X), int(np.floor(len(X)/n_splits)))]
     return dataset_chunks
 
-def generate_chunks(n_splits: int = 10, dataset: str = "https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff", mode: int = 1):
-    df = pd.read_csv(dataset,delimiter = ',',names = ["a","b","c"],error_bad_lines = False)
-    df = df[8:]
-    df['a'] = [float(x) for x in (df['a'])]
-    df['b'] = [float(x) for x in (df['b'])]
-    df['c'] = [float(x) for x in (df['c'])]
-    Y = df.c.tolist()
-    X_original = np.array(df[['a','b']])
-    rows = len(X_original)
+def generate_chunks(n_splits: int = 10, dataset: str = "https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff", mode: int = 1, numFeatures: int = 2, skipRows: int = 8):
+    data = urllib.request.urlopen(dataset)
+    counter = 0
+    for line in data:
+        if line.startswith(b'@') | line.startswith(b'%') | line.startswith(b'\n'):
+            counter += 1
+    df = pd.read_csv(dataset,delimiter = ',',error_bad_lines = False, skiprows = counter, header=None)
+    for i in range(0,numFeatures-1):
+        df.iloc[:,i] = [float(x) for x in (df.iloc[:,i])]
+    Y = df.iloc[:,numFeatures-1].tolist()
+    X_original = np.array(df.iloc[:,:numFeatures])
     min_max_scaler = MinMaxScaler()
     X = min_max_scaler.fit_transform(X_original)
     if(mode == 1):

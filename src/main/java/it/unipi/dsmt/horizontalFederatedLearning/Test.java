@@ -35,11 +35,11 @@ public class Test {
         Experiment experiment = new Experiment();
         experiment.setId(2);
         experiment.setName("Experiment5");
-        experiment.setDataset("https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff");
-        //experiment.setDataset("https://storm.cis.fordham.edu/~gweiss/data-mining/weka-data/cpu.arff");
+        //experiment.setDataset("https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff");
+        experiment.setDataset("https://storm.cis.fordham.edu/~gweiss/data-mining/weka-data/diabetes.arff");
         experiment.setLastUpdateDate(LocalDate.now());
         experiment.setCreationDate(LocalDate.now());
-        experiment.setNumFeatures(2);
+        experiment.setNumFeatures(4);
         experiment.setMode(1);
         experiment.setUser(user);
         experiment.setNumRounds(4);

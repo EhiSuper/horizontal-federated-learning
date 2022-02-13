@@ -24,7 +24,7 @@ start({NClients,NMinClients, Dataset, NumFeatures, ClientsHostnames, RandomClien
   io:format("Server - Launching python server...~n"),
   createPythonServer(),
   io:format("Server - Generating chunks...~n"),
-  DatasetChunks = generateChunks(NClients, Dataset, Mode),
+  DatasetChunks = generateChunks(NClients, Dataset, Mode, NumFeatures),
   io:format("Server - Starting the algorithm...~n"),
   FirstIterationParameters = startAlgorithm(AlgParams, NumFeatures),
   CompleteListClients = spawnClients(NClients, DatasetChunks, ClientsHostnames, [], Timeout),
@@ -176,10 +176,10 @@ createPythonServer() ->
          _ -> io:format("Server - Pyrlang node up...~n")
     end.
 
-generateChunks(NClients, Dataset, Mode) ->
+generateChunks(NClients, Dataset, Mode, NumFeatures) ->
     [_|[IPList]] = string:split(atom_to_list(node()),"@"),
     IP = list_to_atom("py@" ++ IPList),
-    rpc:call(IP, 'server', 'generate_chunks', [NClients, Dataset, Mode]).
+    rpc:call(IP, 'server', 'generate_chunks', [NClients, Dataset, Mode, NumFeatures]).
 
 sendResults(Supervisor, NewIterationElements, NewNumCrashes, InvolvedClients, UpdatedClients, ExecutedRounds) ->
     Supervisor ! {self(), round, {getOutputIterationResults(NewIterationElements), NewNumCrashes, InvolvedClients, UpdatedClients, ExecutedRounds + 1}}.
