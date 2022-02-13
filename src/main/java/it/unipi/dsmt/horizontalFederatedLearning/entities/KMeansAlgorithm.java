@@ -11,6 +11,8 @@ public class KMeansAlgorithm extends Algorithm{
     private String distance;
     private double seedCenters;
     private String normFn;
+    private List<List<Double>> centers;
+    private double fNorm;
 
     public KMeansAlgorithm(){ super("KMeans"); }
 
@@ -21,6 +23,17 @@ public class KMeansAlgorithm extends Algorithm{
         this.distance = distance;
         this.seedCenters = seedCenters;
         this.normFn = normFn;
+    }
+
+    public KMeansAlgorithm(int numClusters, double epsilon, String distance, double seedCenters, String normFn, List<List<Double>> centers, double fNorm) {
+        super("KMeans");
+        this.numClusters = numClusters;
+        this.epsilon = epsilon;
+        this.distance = distance;
+        this.seedCenters = seedCenters;
+        this.normFn = normFn;
+        this.fNorm = fNorm;
+        this.centers = centers;
     }
 
     public int getNumClusters() {
@@ -61,6 +74,22 @@ public class KMeansAlgorithm extends Algorithm{
 
     public void setNormFn(String normFn) {
         this.normFn = normFn;
+    }
+
+    public void setfNorm(double fNorm) {
+        this.fNorm = fNorm;
+    }
+
+    public double getfNorm() {
+        return fNorm;
+    }
+
+    public void setCenters(List<List<Double>> centers) {
+        this.centers = centers;
+    }
+
+    public List<List<Double>> getCenters() {
+        return centers;
     }
 
     @Override

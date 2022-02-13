@@ -1,10 +1,7 @@
 package it.unipi.dsmt.horizontalFederatedLearning;
 
 import com.ericsson.otp.erlang.*;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.ExperimentRound;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
+import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ExperimentService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
@@ -18,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Test {
@@ -25,18 +23,20 @@ public class Test {
     public static void main(String[] args){
         LevelDB db = LevelDB.getInstance();
         UserService myUserService = new UserService(db);
-        /*new ExperimentService(db);
-        List<String> list = db.iterateDB();
+        ExperimentService myExperimentService = new ExperimentService(db);
+        /*List<String> list = db.iterateDB();
         for(String elem: list)
-                System.out.println(elem);
+                System.out.println(elem);*/
+        /*
         User user = new User(1, "Franco", "Terranova", "franchinino", "terranova");
         UserService.register(user);
         UserService.login("franchino", "terranova");*/
-        User user = myUserService.findUserByUsername("antonio");
+        User user = myUserService.findUserByUsername("franchino");
         Experiment experiment = new Experiment();
         experiment.setId(2);
-        experiment.setName("Experiment3");
+        experiment.setName("Experiment5");
         experiment.setDataset("https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff");
+        //experiment.setDataset("https://storm.cis.fordham.edu/~gweiss/data-mining/weka-data/cpu.arff");
         experiment.setLastUpdateDate(LocalDate.now());
         experiment.setCreationDate(LocalDate.now());
         experiment.setNumFeatures(2);
@@ -60,9 +60,9 @@ public class Test {
         experiment.setClientsHostnames(clients);
         KMeansAlgorithm algorithm = new KMeansAlgorithm();
         algorithm.setDistance("numba_norm");
-        algorithm.setEpsilon(0.05);
+        algorithm.setEpsilon(0.001);
         algorithm.setNormFn("norm_fro");
-        algorithm.setNumClusters(3);
+        algorithm.setNumClusters(4);
         algorithm.setSeedCenters(100);
         experiment.setAlgorithm(algorithm);
         Communication.startExperiment(experiment);
@@ -71,7 +71,8 @@ public class Test {
         while(true) {
             try {
                 round = Communication.receiveRound();
-                rounds.add(round);
+                if(round != null)
+                    rounds.add(round);
             } catch(ErlangErrorException ex){
                 System.out.println("Error during erlang computations: " + ex.getMessage());
                 continue;
@@ -86,6 +87,62 @@ public class Test {
             if(rounds.get(i) != null)
                 System.out.println(rounds.get(i));
         }
+        KMeansAlgorithmRound lastRound = (KMeansAlgorithmRound) rounds.get(rounds.size()-2).getAlgorithmRound();
+        System.out.println(lastRound);;
+        algorithm.setCenters(lastRound.getCenters());
+        algorithm.setfNorm(lastRound.getfNorm());
+        // altri settaggi
+        myExperimentService.insert(experiment);
+        List<String> list = db.iterateDB();
+        for(String elem: list)
+            System.out.println(elem);
+        Experiment foundExperiment = myExperimentService.findExperimentById(experiment.getId());
+        KMeansAlgorithm km = (KMeansAlgorithm) foundExperiment.getAlgorithm();
+        /*System.out.println(km.getfNorm());
+        List<List<Double>> centers = km.getCenters();
+        String result = "";
+        for(int i = 0; i < centers.size(); ++i){
+            result += "[";
+            List<Double> center = centers.get(i);
+            for(int j = 0; j < center.size(); ++j) {
+                result += center.get(j);
+                if(j != center.size()-1)
+                    result += ",";
+            }
+            result += "]";
+            if(i != centers.size()-1)
+                result += ",";
+        }
+        System.out.println(result);*/
+        /*result = result.substring(1, result.length()-1);
+        List<String> centersString = Arrays.asList(result.split("],"));
+        List<List<Double>> list = new ArrayList<>();
+        List<Double> elem;
+        for(String centerString: centersString){
+            System.out.println(centersString);
+            elem = new ArrayList<>();
+            centerString = centerString.substring(1,centerString.length()-1);
+            for(String valueString: centerString.split(",")){
+                System.out.println(valueString);
+                elem.add(Double.parseDouble(valueString));
+            }
+            list.add(elem);
+        }
+        result = "";
+        for(int i = 0; i < list.size(); ++i){
+            result += "[";
+            List<Double> x = list.get(i);
+            for(int j = 0; j < x.size(); ++j) {
+                result += x.get(j);
+                if(j != x.size()-1)
+                    result += ",";
+            }
+            result += "]";
+            if(i != list.size()-1)
+                result += ",";
+        }
+        System.out.println(result);
+        */
         Log.exportLogExperiment(experiment);
         //creato oggetto esperimento e richiesta esecuzione va aggiornato oggetto esperimento
         // vedere come chiedere esecuzione esperimento

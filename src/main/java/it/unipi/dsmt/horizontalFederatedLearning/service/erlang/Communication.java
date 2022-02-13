@@ -64,7 +64,6 @@ public class Communication {
             conn.sendRPC("supervisorNode", "start", arguments);
         } catch (IOException e) {
             startExperiment(experiment);
-            e.printStackTrace();
         } catch (Exception ee){
             ee.printStackTrace();
         }

@@ -69,6 +69,22 @@ public class ExperimentService {
             map.put(prefixKey + "distance", kMeansAlgorithm.getDistance());
             map.put(prefixKey + "seedCenters", Double.toString(kMeansAlgorithm.getSeedCenters()));
             map.put(prefixKey + "normFn", kMeansAlgorithm.getNormFn());
+            map.put(prefixKey + "fNorm", String.valueOf(kMeansAlgorithm.getfNorm()));
+            List<List<Double>> centers = kMeansAlgorithm.getCenters();
+            String result = "";
+            for(int i = 0; i < centers.size(); ++i){
+                result += "[";
+                List<Double> list = centers.get(i);
+                for(int j = 0; j < list.size(); ++j) {
+                    result += list.get(j);
+                    if(j != list.size()-1)
+                        result += ",";
+                }
+                result += "]";
+                if(i != centers.size()-1)
+                    result += ",";
+            }
+            map.put(prefixKey + "centers", result);
         }
     }
 
@@ -221,6 +237,25 @@ public class ExperimentService {
                         break;
                     case "normFn":
                         algorithm.setNormFn(map.get(key));
+                        break;
+                    case "fNorm":
+                        algorithm.setfNorm(Double.parseDouble(map.get(key)));
+                        break;
+                    case "centers":
+                        String result = map.get(key);
+                        result = result.substring(1, result.length()-1);
+                        List<String> centersString = Arrays.asList(result.split("],"));
+                        List<List<Double>> list = new ArrayList<>();
+                        List<Double> elem;
+                        for(String centerString: centersString){
+                            elem = new ArrayList<>();
+                            centerString = centerString.substring(1,centerString.length()-1);
+                            for(String valueString: centerString.split(",")){
+                                elem.add(Double.parseDouble(valueString));
+                            }
+                            list.add(elem);
+                        }
+                        algorithm.setCenters(list);
                         break;
                 }
             }
