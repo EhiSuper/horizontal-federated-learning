@@ -47,8 +47,8 @@ public class Communication {
                     String line;
                     String editedLine;
                     try {
-                        while ((line = input.readLine()) != null){
-                            if(line.contains("1> "))
+                        while ((line = input.readLine()) != null) {
+                            if (line.contains("1> "))
                                 editedLine = line.split("1> ")[1];
                             else editedLine = line;
                             System.out.println(editedLine);
@@ -56,7 +56,7 @@ public class Communication {
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (ArrayIndexOutOfBoundsException ie){
+                    } catch (ArrayIndexOutOfBoundsException ie) {
 
                     }
                 }
