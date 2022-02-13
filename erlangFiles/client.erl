@@ -19,10 +19,19 @@ start(Chunk, Server, Timeout) ->
   createPythonClient(),
   loop(Chunk, Server, Timeout).
 
+
 createPythonClient() ->
-    spawn(fun() -> os:cmd("python3 client.py py " ++ atom_to_list(node()) ++ " " ++ atom_to_list(erlNode)) end),
-    net_kernel:connect_node('py@localhost'),
-    timer:sleep(2000).
+    [_|[IPList]] = string:split(atom_to_list(node()),"@"),
+    Node = "py@" ++ IPList,
+    IP = list_to_atom(Node),
+    try throw(rpc:call(IP, 'client', 'is_alive', []))
+    catch
+        {badrpc,nodedown} ->
+            io:format("Client ~w - Pyrlang node dead, re-starting the pyrlang node...~n", [self()]),
+            spawn(fun() -> os:cmd("python3 client.py " ++ Node) end),
+            timer:sleep(2000);
+         _ -> io:format("Client ~w Pyrlang node already up...~n", [self()])
+    end.
 
 loop(Chunk, Server, Timeout) ->
   receive

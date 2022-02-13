@@ -11,7 +11,7 @@
 -author("BPT").
 
 %% API
--export([getResults/6, getOutputIterationResults/1, getFinishedReason/0, printCenters/1, getRoundParameters/1, startAlgorithm/2]).
+-export([getResults/6, getOutputIterationResults/1, getFinishedReason/0, getRoundParameters/1, startAlgorithm/2]).
 
 getResults( {NumClusters, _, Epsilon, _, NormFn},  MaxNumberRounds, NumFeatures, Client_responses, Executed_rounds, {All_centers_list, RoundCenters, F_norm_values}) ->
   {New_round_centers, New_f_norm, Finished} = getClusteringResults(Epsilon, MaxNumberRounds, NumClusters, NumFeatures, NormFn, RoundCenters, Client_responses, All_centers_list, F_norm_values, Executed_rounds),
@@ -39,15 +39,19 @@ getOutputIterationResults({_, New_round_centers, [H|_]}) ->
 getRoundParameters({_, RoundCenters, _}) -> RoundCenters.
 
 getClusteringResults(Epsilon, Max_number_rounds, Num_cluster, Num_features, Norm_fm, Centers, Client_responses, All_centers_list, F_norm_values, Executed_rounds) ->
-  rpc:call('py@localhost', 'server', 'erlang_request_process_clustering_results',  [{Epsilon, Max_number_rounds, Num_cluster, Num_features, Norm_fm, Centers, Client_responses, All_centers_list, F_norm_values, Executed_rounds}]).
+  [_|[IPList]] = string:split(atom_to_list(node()),"@"),
+  IP = list_to_atom("py@" ++ IPList),
+  rpc:call(IP, 'server', 'erlang_request_process_clustering_results',  [{Epsilon, Max_number_rounds, Num_cluster, Num_features, Norm_fm, Centers, Client_responses, All_centers_list, F_norm_values, Executed_rounds}]).
 
 startAlgorithm({NumClusters, _, _, SeedCenters, _}, NumFeatures) ->
   io:format("Server - Generating random initial centers~n"),
-  Centers = rpc:call('py@localhost', 'server', 'generate_random_centers', [SeedCenters, NumClusters, NumFeatures]),
+  [_|[IPList]] = string:split(atom_to_list(node()),"@"),
+  IP = list_to_atom("py@" ++ IPList),
+  Centers = rpc:call(IP, 'server', 'generate_random_centers', [SeedCenters, NumClusters, NumFeatures]),
   printCenters(Centers),
   {Centers, Centers, []}.
 
 printCenters([]) -> ok;
 printCenters([H | T]) ->
-  io:format("Center: ~p~n", [H]),
+  io:format("Server - Center: ~p~n", [H]),
   printCenters(T).

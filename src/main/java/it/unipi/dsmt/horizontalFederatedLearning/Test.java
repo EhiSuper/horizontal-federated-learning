@@ -52,10 +52,9 @@ public class Test {
         experiment.setMaxAttemptsOverallCrash(20);
         experiment.setMaxAttemptsServerCrash(2);
         List<String> clients = new ArrayList<>();
-        clients.add("x@localhost");
-        clients.add("y@localhost");
-        clients.add("z@localhost");
-        clients.add("h@localhost");
+        clients.add("node@172.18.0.18");
+        clients.add("node@172.18.0.42");
+        clients.add("node@172.18.0.43");
         experiment.setClientsHostnames(clients);
         KMeansAlgorithm algorithm = new KMeansAlgorithm();
         algorithm.setDistance("numba_norm");
@@ -66,19 +65,24 @@ public class Test {
         experiment.setAlgorithm(algorithm);
         Communication.startExperiment(experiment);
         ExperimentRound round = null;
+        List<ExperimentRound> rounds = new ArrayList<>();
         while(true) {
             try {
                 round = Communication.receiveRound();
+                rounds.add(round);
             } catch(ErlangErrorException ex){
                 System.out.println("Error during erlang computations: " + ex.getMessage());
                 continue;
             }
             if(round == null){
-                System.out.println("finished experiment");
+                System.out.println("Experiment completed");
                 break;
             }
             //round contiene le info di quel round
-            System.out.println(round);
+        }
+        for(int i = 0; i<rounds.size(); ++i){
+            if(rounds.get(i) != null)
+                System.out.println(rounds.get(i));
         }
         //creato oggetto esperimento e richiesta esecuzione va aggiornato oggetto esperimento
         // vedere come chiedere esecuzione esperimento

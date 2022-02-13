@@ -36,9 +36,9 @@ public class Communication {
         OtpErlangList arguments = prepareArguments(experiment);
         destination = null;
         currentExperiment = experiment;
-        node = new Node("server@localhost", "COOKIE", "javaServer");
+        node = new Node("server@127.0.0.1", "COOKIE", "javaServer");
         try {
-            String[] cmd = {"bash", "-c", "erl -sname erl@localhost -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
+            String[] cmd = {"bash", "-c", "erl -name erl@127.0.0.1 -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
             final Process p = Runtime.getRuntime().exec(cmd);
             //final Process p = Runtime.getRuntime().exec("erl -sname erl@localhost -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
@@ -63,7 +63,7 @@ public class Communication {
             }).start();
             Thread.sleep(1000);
             OtpSelf caller = new OtpSelf("caller", "COOKIE");
-            OtpPeer supervisor = new OtpPeer("erl@localhost");
+            OtpPeer supervisor = new OtpPeer("erl@127.0.0.1");
             OtpConnection conn = caller.connect(supervisor);
             log.startLogExperiment(experiment);
             conn.sendRPC("supervisorNode", "start", arguments);
@@ -80,7 +80,7 @@ public class Communication {
         OtpErlangTuple tuple = null;
         tuple = (OtpErlangTuple) node.getOtpMbox().receive();
         OtpErlangPid sender = (OtpErlangPid) tuple.elementAt(0);
-        if (!sender.node().equals("erl@localhost"))
+        if (!sender.node().equals("erl@127.0.0.1"))
             throw new ErlangErrorException();
         if (destination == null) {
             destination = sender;
@@ -97,7 +97,6 @@ public class Communication {
                 return null;
             }
             OtpErlangAtom msgType = (OtpErlangAtom) result.elementAt(1);
-            System.out.println("msg type: " + msgType.toString());
             if (msgType.toString().equals("error")) {
                 throw new ErlangErrorException(result.elementAt(2).toString());
             } else if (msgType.toString().equals("completed")) {

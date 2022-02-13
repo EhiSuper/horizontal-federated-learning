@@ -1,16 +1,14 @@
 import logging
 import sys
-from time import sleep
-
 from term import Atom
 from pyrlang.node import Node
 from pyrlang.process import Process
-from colors import color
 from typing import Dict, List, Tuple
 import numpy as np
 
-LOG = logging.getLogger(color("LOGGER client.py", fg='lime'))
+LOG = logging.getLogger("LOGGER client.py")
 logging.getLogger("").setLevel(logging.DEBUG)
+
 
 def numba_norm(u: np.ndarray, v: np.ndarray):
     return np.linalg.norm(u - v)
@@ -76,6 +74,9 @@ def run_round(parameters):
     client.finalize()
     return result
 
+def is_alive():
+    return 1    
+
 class MyProcess(Process):
     def __init__(self) -> None:
         super().__init__()
@@ -85,7 +86,7 @@ class MyProcess(Process):
         LOG.info("Incoming %s", msg)
 
 def main():
-    n = Node(node_name=sys.argv[1]+"@localhost", cookie="COOKIE")
+    n = Node(node_name=sys.argv[1], cookie="COOKIE")
     n.run()
 
 if __name__ == "__main__":

@@ -42,7 +42,8 @@ start() ->
   MaxAttemptsServerCrash = 2,
   MaxAttemptsClientCrash = 3,
   MaxAttemptsOverallCrash = 20,
-  ClientsHostnames = ["x@localhost","y@localhost","z@localhost", "h@localhost"],
+  %%ClientsHostnames = ["x@127.0.0.1","y@127.0.0.1","z@127.0.0.1"],
+  ClientsHostnames = ["node@172.18.0.18","node@172.18.0.42","node@172.18.0.43"],
   start({NClients,NMinClients, Dataset, NumFeatures, ClientsHostnames, RandomClients, RandomClientsSeed, MaxNumberRounds, RandomClientsSeed, RandomClients, Timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, Mode}, {NumClusters, Distance, Epsilon, SeedCenters, NormFn}, MaxAttemptsServerCrash).
 
 loop(Server, ServerParams, AlgParams, MaxAttemptsServer, CurrentAttempt) ->
@@ -51,10 +52,9 @@ loop(Server, ServerParams, AlgParams, MaxAttemptsServer, CurrentAttempt) ->
       io:format("Supervisor - Received round message~n"),
       sendResults(round, Message),
       loop(Server, ServerParams, AlgParams, MaxAttemptsServer, CurrentAttempt);
-    {Server, norm_under_epsilon} ->
-      io:format("Supervisor - Received norm_under_epsilon message~n"),
-      Message = norm_under_epsilon,
-      sendResults(completed, Message),
+    {Server, completed, Reason} ->
+      io:format("Supervisor - Received completed message~n"),
+      sendResults(completed, Reason),
       finished;
     {Server, reached_max_rounds} ->
       io:format("Supervisor - Received reached_max_rounds message~n"),
@@ -73,7 +73,9 @@ loop(Server, ServerParams, AlgParams, MaxAttemptsServer, CurrentAttempt) ->
   end.
 
 sendResults(Type, Message) ->
-    {javaServer, server@localhost} ! {self(), Type, Message}.
+    [_|[IPList]] = string:split(atom_to_list(node()),"@"),
+    Node = list_to_atom("server@" ++ IPList),
+    {javaServer, Node} ! {self(), Type, Message}.
 
 handleServerFault(ServerParams, AlgParams, MaxAttemptsServer, CurrentAttempt) ->
     case CurrentAttempt >= MaxAttemptsServer of

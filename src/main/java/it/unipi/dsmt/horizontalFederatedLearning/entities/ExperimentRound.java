@@ -95,7 +95,7 @@ public class ExperimentRound {
     public String toString(){
         String result = "";
         if(last)
-            return "{ last: " + last + ", reason: " + reason + "}";
+            return "{ reason of termination: " + reason + "}";
         else {
             result += "{ round: " + round + ", numCrashes: " + numCrashes + ", algorithmRound: " + algorithmRound + ", ";
             result += "involvedClients: ";

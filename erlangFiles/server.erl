@@ -15,7 +15,6 @@
 -author("BPT").
 
 %% API
--import('net_adm', [ping/1]).
 -import('rpc', [call/3, call/4]).
 -import('cMeansServer', [getResults/6, getFinishedReason/0, getOutputIterationResults/1, getRoundParameters/1, startAlgorithm/2]).
 
@@ -61,7 +60,7 @@ loop(NClients, NMinClients, ListClients, DatasetChunks, NumFeatures, RandomClien
       sendResults(Supervisor, NewIterationElements, NewNumCrashes, InvolvedClients, UpdatedClients, ExecutedRounds),
       case Finished == 0 of %% Norm Under Epsilon Reached for KMeans
         true ->
-          Supervisor ! {self(), getFinishedReason()},
+          Supervisor ! {self(), completed, getFinishedReason()},
           io:format("Server - Shutting down all nodes~n"),
           shutdownClients(UpdatedClients);
         false ->
@@ -79,9 +78,11 @@ performRound(IterationElements, InvolvedClients) ->
 
 getInvolvedClients(NClients, NMinClients, ListClients, RandomClientSeed, RandomClients) ->
   io:format("Server - Selecting nodes to be involved..~n"),
+  [_|[IPList]] = string:split(atom_to_list(node()),"@"),
+  IP = list_to_atom("py@" ++ IPList),
   InvolvedClients = case NClients == NMinClients of
     false when RandomClients == true ->
-      InvolvedClientsIndexes = rpc:call('py@localhost', 'server', 'erlang_request_get_involved_clients', [{NClients, NMinClients, RandomClientSeed}]),
+      InvolvedClientsIndexes = rpc:call(IP, 'server', 'erlang_request_get_involved_clients', [{NClients, NMinClients, RandomClientSeed}]),
       selectClients(ListClients, InvolvedClientsIndexes);
     false when RandomClients == false ->
       lists:sublist(ListClients, NMinClients);
@@ -162,11 +163,23 @@ checkOverallCrashes(NumCrashes, MaxAttemptsOverallCrash) ->
   end.
 
 createPythonServer() ->
-    spawn(fun() -> os:cmd("python3 \"erlangFiles/server.py\"") end),
-    timer:sleep(5000).
+    [_|[IPList]] = string:split(atom_to_list(node()),"@"),
+    Node = "py@" ++ IPList,
+    IP = list_to_atom(Node),
+    try throw(rpc:call(IP, 'server', 'is_alive', []))
+    catch
+        {badrpc,nodedown} ->
+            io:format("Server - Pyrlang node dead, re-starting the pyrlang node...~n"),
+            spawn(fun() -> os:cmd("python3 \"erlangFiles/server.py\" " ++ Node) end),
+            timer:sleep(8000),
+            createPythonServer();
+         _ -> io:format("Server - Pyrlang node up...~n")
+    end.
 
 generateChunks(NClients, Dataset, Mode) ->
-    rpc:call('py@localhost', 'server', 'generate_chunks', [NClients, Dataset, Mode]).
+    [_|[IPList]] = string:split(atom_to_list(node()),"@"),
+    IP = list_to_atom("py@" ++ IPList),
+    rpc:call(IP, 'server', 'generate_chunks', [NClients, Dataset, Mode]).
 
 sendResults(Supervisor, NewIterationElements, NewNumCrashes, InvolvedClients, UpdatedClients, ExecutedRounds) ->
     Supervisor ! {self(), round, {getOutputIterationResults(NewIterationElements), NewNumCrashes, InvolvedClients, UpdatedClients, ExecutedRounds + 1}}.
@@ -174,7 +187,7 @@ sendResults(Supervisor, NewIterationElements, NewNumCrashes, InvolvedClients, Up
 printList([]) -> ok;
 printList([H | T]) ->
   {_, Pid, _, _} = H,
-  io:format("Element: ~p~n", [Pid]),
+  io:format("Server - Element: ~p~n", [Pid]),
   printList(T).
 
 spawnClientAtHostname(Hostname, Chunk, Timeout, Attempts, RoundParameters) ->
@@ -191,6 +204,3 @@ selectNextLocation(ListClients, [HostnamesHead | HostnamesTail]) ->
     false ->
       HostnamesHead
   end.
-
-terminate() ->
-    rpc:call('py@localhost', 'server', 'exit_process', []).

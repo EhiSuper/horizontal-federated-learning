@@ -2,7 +2,6 @@ package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ConfigurationService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
-import jdk.management.jfr.ConfigurationInfo;
 
 import javax.servlet.*;
 import javax.servlet.http.*;

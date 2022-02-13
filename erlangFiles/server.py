@@ -1,25 +1,17 @@
 import logging
+import sys
 from term import Atom
 from pyrlang.node import Node
 from pyrlang.process import Process
-from colors import color
-from abc import ABC, abstractmethod
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Dict, List
 import numpy as np
 import pandas as pd
-from scipy.io import arff
-import math
 import random
-from numba import jit
-import os
-import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
 from sklearn.utils import shuffle as shuffleSK
-from array import array
 
-LOG = logging.getLogger(color("LOGGER server.py", fg='lime'))
+LOG = logging.getLogger("LOGGER server.py")
 logging.getLogger("").setLevel(logging.DEBUG)
 
 def norm_fro(u:np.ndarray):
@@ -65,6 +57,9 @@ def erlang_request_get_involved_clients(parameters):
     #parameters is a tuple, sent from Erlang {NClients, NMinClients, RandomClientSeed}
     x = random.sample(range(parameters[0]), parameters[1])
     return x
+
+def is_alive():
+    return 1
 
 def generate_dataset_chunks(X: np.array, Y: List, n_splits: int, shuffle: bool = False, 
                             shuffle_seed:int = None, mode: str = 'iid', iid_seed: int = None):
@@ -231,7 +226,7 @@ class MyProcess(Process):
         LOG.info("Incoming %s", msg)
 
 def main():
-    n = Node(node_name="py@localhost", cookie="COOKIE")
+    n = Node(node_name=sys.argv[1], cookie="COOKIE")
     MyProcess()
     n.run()
 
