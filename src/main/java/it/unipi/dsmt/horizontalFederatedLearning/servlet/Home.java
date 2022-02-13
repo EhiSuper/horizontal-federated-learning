@@ -29,7 +29,7 @@ public class Home extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
-        String targetJSP = "/pages/jsp/home.jsp";
+        String targetJSP = "/pages/jsp/fake.jsp";
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
     }
@@ -52,6 +52,8 @@ public class Home extends HttpServlet {
         double epsilon = Double.parseDouble(request.getParameter("epsilon"));
         String normFn = request.getParameter("normFn");
         int numClusters = Integer.parseInt(request.getParameter("numClusters"));
+        String firstFeature = request.getParameter("firstFeature");
+        String secondFeature = request.getParameter("secondFeature");
 
         Experiment experiment = new Experiment();
         experiment.setName(name);
@@ -101,8 +103,14 @@ public class Home extends HttpServlet {
 
             //round contiene le info di quel round
             //printo il round in maniera momentanea nella home page
+            System.out.println("Round: " + round);
+            if (request.getAttribute("round") != null) {
+                request.removeAttribute("round");
+            }
             request.setAttribute("round", round);
-            String targetJSP = "/pages/jsp/home.jsp";
+            request.setAttribute("firstFeature", firstFeature);
+            request.setAttribute("secondFeature", secondFeature);
+            String targetJSP = "/pages/jsp/fake.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
         }
