@@ -60,6 +60,11 @@
             chart.render();
             <%}%>
         }
+
+        function showForm() {
+            var algorithmValue = document.getElementById("algorithm").value;
+            document.getElementById(algorithmValue).style.display = "block";
+        }
     </script>
 </head>
 <body>
@@ -74,16 +79,34 @@
         <label for="name">Name: </label><input id="name" type="text" name="name" value="Primo Esperimento"><br>
         <label for="dataset">Dataset: </label><input id="dataset" type="text" name="dataset"
                                                      value="https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff"><br>
-        <label for="numFeatures">Features: </label><input id="numFeatures" type="number" name="numFeatures"
-                                                          value="3"><br>
-        <label for="maxNumberRounds">Maximum number of rounds: </label><input id="maxNumberRounds" type="number"
-                                                                              name="maxNumberRounds" value="10"><br>
-        <label for="numClusters">Clusters: </label><input id="numClusters" type="number" name="numClusters"
-                                                          value="3"><br>
-        <label for="distance">Distance: </label><input id="distance" type="text" name="distance" value="numba_norm"><br>
-        <label for="epsilon">Epsilon: </label><input id="epsilon" type="number" step="any" name="epsilon"
-                                                     value="0.05"><br>
-        <label for="normFn">Norm Fn: </label><input id="normFn" type="text" name="normFn" value="norm_fro"><br><br>
+        <label for="numFeatures">Number of features: </label><input id="numFeatures" type="number" name="numFeatures"
+                                                                    value="3"><br>
+        <label for="numMinClients">Number of minimum clients: </label><input id="numMinClients" type="number"
+                                                                             name="numMinClients"
+                                                                             value="3"><br>
+        <label for="randomClients">Random Clients: </label><input id="randomClients" type="text" name="randomClients"
+                                                                  value="false"><br>
+        <label for="timeout">Features: </label><input id="timeout" type="number" name="timeout"
+                                                      value="25000"><br>
+        <label for="algorithm">Select the algorithm: </label>
+        <select name="algorithm" id="algorithm" onchange="showForm()">
+            <option disabled selected value> -- select an algorithm --</option>
+            <option value="kmeans">kmeans</option>
+        </select>
+
+
+        <div id="kmeans" style="display: none">
+            <label for="numClusters">Clusters: </label><input id="numClusters" type="number" name="numClusters"
+                                                              value="3"><br>
+            <label for="distance">Distance: </label><input id="distance" type="text" name="distance" value="numba_norm"><br>
+            <label for="epsilon">Epsilon: </label><input id="epsilon" type="number" step="any" name="epsilon"
+                                                         value="0.05"><br>
+            <label for="seedCenters">Features: </label><input id="seedCenters" type="number" name="seedCenters"
+                                                              value="0"><br>
+            <label for="normFn">Norm Fn: </label><input id="normFn" type="text" name="normFn" value="norm_fro"><br><br>
+        </div>
+        <br>
+
         <label for="firstFeature">First feature: </label><input id="firstFeature" type="text" name="firstFeature"
                                                                 value="0"><br>
         <label for="secondFeature">Second feature: </label><input id="secondFeature" type="text"

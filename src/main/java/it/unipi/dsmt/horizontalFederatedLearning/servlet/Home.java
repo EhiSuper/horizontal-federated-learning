@@ -1,9 +1,6 @@
 package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
-import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.ExperimentRound;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
+import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Communication;
@@ -12,6 +9,7 @@ import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorE
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
+import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,16 +27,13 @@ public class Home extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
-        String targetJSP = "/pages/jsp/fake.jsp";
+        String targetJSP = "/pages/jsp/home.jsp";
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        //Parametri che non so dove andare a prendere: mode, numRounds, numCrashes, numClients
-        //numMinClients, randomCliens, randomClientsSeed, timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash
-        //MaxAttemptsServerCrash, clients, algorithm(tipo), SeedCenters,
 
         HttpSession session = request.getSession();
         String username = (String) session.getAttribute("login");
@@ -47,51 +42,65 @@ public class Home extends HttpServlet {
         String name = request.getParameter("name");
         String dataset = request.getParameter("dataset");
         int numFeatures = Integer.parseInt(request.getParameter("numFeatures"));
-        int maxNumberRounds = Integer.parseInt(request.getParameter("maxNumberRounds"));
-        String distance = request.getParameter("distance");
-        double epsilon = Double.parseDouble(request.getParameter("epsilon"));
-        String normFn = request.getParameter("normFn");
-        int numClusters = Integer.parseInt(request.getParameter("numClusters"));
+        int numMinClients = Integer.parseInt(request.getParameter("numMinClients"));
+        boolean randomClients = Boolean.parseBoolean(request.getParameter("randomClients"));
+        int timeout = Integer.parseInt(request.getParameter("timeout"));
+
         String firstFeature = request.getParameter("firstFeature");
         String secondFeature = request.getParameter("secondFeature");
 
+        String selectedAlgorithm = request.getParameter("algorithm");
+        Algorithm algorithm = null;
+        switch (selectedAlgorithm) {
+            case "kmeans":
+                int numClusters = Integer.parseInt(request.getParameter("numClusters"));
+                String distance = request.getParameter("distance");
+                double epsilon = Double.parseDouble(request.getParameter("epsilon"));
+                String normFn = request.getParameter("normFn");
+                int seedCenters = Integer.parseInt(request.getParameter("seedCenters"));
+                KMeansAlgorithm kMeansAlgorithm = new KMeansAlgorithm();
+                kMeansAlgorithm.setDistance(distance);
+                kMeansAlgorithm.setEpsilon(epsilon);
+                kMeansAlgorithm.setNormFn(normFn);
+                kMeansAlgorithm.setNumClusters(numClusters);
+                kMeansAlgorithm.setSeedCenters(seedCenters);
+                algorithm = kMeansAlgorithm;
+
+        }
         Experiment experiment = new Experiment();
+        experiment.setAlgorithm(algorithm);
+
+        experiment.setUser(myUser);
         experiment.setName(name);
         experiment.setDataset(dataset);
         experiment.setLastUpdateDate(LocalDate.now());
         experiment.setCreationDate(LocalDate.now());
         experiment.setNumFeatures(numFeatures);
+        experiment.setNumMinClients(numMinClients);
+        experiment.setRandomClients(randomClients);
+        experiment.setTimeout(timeout);
+
         experiment.setMode(1);
-        experiment.setUser(myUser);
-        experiment.setNumRounds(4);
-        experiment.setMaxNumRounds(maxNumberRounds);
-        experiment.setNumCrashes(5);
+        experiment.setMaxNumRounds(10);
         experiment.setNumClients(3);
-        experiment.setNumMinClients(3);
-        experiment.setRandomClients(false);
         experiment.setRandomClientsSeed(0);
-        experiment.setTimeout(25000);
         experiment.setMaxAttemptsClientCrash(3);
         experiment.setMaxAttemptsOverallCrash(20);
         experiment.setMaxAttemptsServerCrash(2);
         List<String> clients = new ArrayList<>();
-        clients.add("x@localhost");
-        clients.add("y@localhost");
-        clients.add("z@localhost");
-        clients.add("h@localhost");
+        clients.add("x@127.0.0.1");
+        clients.add("y@127.0.0.1");
+        clients.add("z@127.0.0.1");
+        clients.add("h@127.0.0.1");
         experiment.setClientsHostnames(clients);
-        KMeansAlgorithm algorithm = new KMeansAlgorithm();
-        algorithm.setDistance(distance);
-        algorithm.setEpsilon(epsilon);
-        algorithm.setNormFn(normFn);
-        algorithm.setNumClusters(numClusters);
-        algorithm.setSeedCenters(100);
-        experiment.setAlgorithm(algorithm);
+
         Communication.startExperiment(experiment);
+        List<ExperimentRound> rounds = null;
         ExperimentRound round = null;
         while (true) {
             try {
                 round = Communication.receiveRound();
+                rounds.add(round);
             } catch (ErlangErrorException ex) {
                 System.out.println("Error during erlang computations: " + ex.getMessage());
                 continue;
@@ -100,21 +109,26 @@ public class Home extends HttpServlet {
                 System.out.println("finished experiment");
                 break;
             }
-
-            //round contiene le info di quel round
-            //printo il round in maniera momentanea nella home page
-            System.out.println("Round: " + round);
-            if (request.getAttribute("round") != null) {
-                request.removeAttribute("round");
-            }
-            request.setAttribute("round", round);
-            request.setAttribute("firstFeature", firstFeature);
-            request.setAttribute("secondFeature", secondFeature);
-            String targetJSP = "/pages/jsp/fake.jsp";
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
-            requestDispatcher.forward(request, response);
         }
-        //creato oggetto esperimento e richiesta esecuzione va aggiornato oggetto esperimento
-        // vedere come chiedere esecuzione esperimento
+
+        request.setAttribute("rounds", rounds);
+
+        request.setAttribute("firstFeature", firstFeature);
+        request.setAttribute("secondFeature", secondFeature);
+
+        String targetJSP = "/pages/jsp/home.jsp";
+        RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
+        requestDispatcher.forward(request, response);
+
+
+        int numCrashes = 0;
+        for (ExperimentRound singleRound : rounds) {
+            numCrashes += singleRound.getNumCrashes();
+        }
+        experiment.setNumCrashes(numCrashes);
+        experiment.setNumRounds(rounds.size());
+
+
+        //salvare il round nel database
     }
 }
