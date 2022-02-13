@@ -31,7 +31,9 @@ public class Login extends HttpServlet {
             myUserService.login(username, password);
             User myUser = myUserService.findUserByUsername(username);
             if(myUser.getAdmin() == true) {
-                //reindirizzare
+                HttpSession session = request.getSession();
+                session.setAttribute("isAdmin", true);
+                response.sendRedirect(request.getContextPath() + "/AdminPage");
             } else {
                 HttpSession session = request.getSession();
                 session.setAttribute("login", username);
