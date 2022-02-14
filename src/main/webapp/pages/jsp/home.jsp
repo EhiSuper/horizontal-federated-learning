@@ -15,7 +15,7 @@
     ArrayList<String> involvedClients = new ArrayList<>();
     int numMinClients = 0;
     int numOverallCrashes = 0;
-    int numClients = (int)request.getAttribute("numClients");
+    int numClients = (int) request.getAttribute("numClients");
     int numRounds = 0;
     int experimentId = 0;
     String reason = "";
@@ -25,19 +25,19 @@
         Map<Object, Object> map = null;
         List<ExperimentRound> roundList = (List<ExperimentRound>) request.getAttribute("rounds");
         List<Map<Object, Object>> normList = new ArrayList<Map<Object, Object>>();
-        for(int i=0; i<(roundList.size() - 1); i++){
+        for (int i = 0; i < (roundList.size() - 1); i++) {
             List<Map<Object, Object>> pointList = new ArrayList<Map<Object, Object>>();
-            if(!roundList.get(i).getLast()){
+            if (!roundList.get(i).getLast()) {
                 KMeansAlgorithmRound kmRound = (KMeansAlgorithmRound) roundList.get(i).getAlgorithmRound();
                 List<List<Double>> centers = kmRound.getCenters();
                 List<Client> availableClientsRound = roundList.get(i).getClientsState();
                 List<Client> involvedClientsRound = roundList.get(i).getInvolvedClients();
-                for(Client involvedClient: involvedClientsRound)
+                for (Client involvedClient : involvedClientsRound)
                     involvedClients.add(involvedClient.getHostname() + " ");
                 int numcrashesRound = roundList.get(i).getNumCrashes();
                 for (Client client : involvedClientsRound) {
                     List<List<Double>> chunk = client.getChunk();
-                    for(List<Double> point: chunk){
+                    for (List<Double> point : chunk) {
                         map = new HashMap<Object, Object>();
                         map.put("x", point.get(Integer.parseInt((String) request.getAttribute("firstFeature"))));
                         map.put("y", point.get(Integer.parseInt((String) request.getAttribute("secondFeature"))));
@@ -57,7 +57,7 @@
                     pointList.add(map);
                 }
                 String selectedAlgorithm = request.getParameter("algorithm");
-                switch(selectedAlgorithm){
+                switch (selectedAlgorithm) {
                     case "KMeans":
                         KMeansAlgorithmRound round = (KMeansAlgorithmRound) roundList.get(i).getAlgorithmRound();
                         double norm = round.getfNorm();
@@ -74,11 +74,11 @@
                 reason = roundList.get(i).getReason();
             }
         }
-        for(int i = 0; i < crashes.size(); ++i)
+        for (int i = 0; i < crashes.size(); ++i)
             numOverallCrashes += crashes.get(i);
-        experimentId = (int)request.getAttribute("experimentId");
+        experimentId = (int) request.getAttribute("experimentId");
         logExecution = (List<String>) request.getAttribute("logExecution");
-        numMinClients = (int)request.getAttribute("numMinClients");
+        numMinClients = (int) request.getAttribute("numMinClients");
         System.out.println(logExecution);
         numRounds = roundList.size() - 2;
     }
@@ -111,13 +111,13 @@
         window.onload = function () {
             <% if(request.getAttribute("rounds")!=null){
             %>
-            time = setInterval(delayRounds ,4000);
+            time = setInterval(delayRounds, 4000);
             <%}%>
         }
 
         function delayRounds() {
             rounds++;
-            if(rounds==totalRounds+1){
+            if (rounds == totalRounds + 1) {
                 document.getElementById("numroundsText").textContent = "Total number of rounds:";
                 document.getElementById("clientsInvolvedText").textContent = "Overall clients involved:";
                 document.getElementById("crashesText").textContent = "Overall crashes:";
@@ -133,14 +133,14 @@
             }
         }
 
-        function showRound(){
+        function showRound() {
             document.getElementById("numrounds").textContent = rounds;
-            document.getElementById("crashes").textContent = crashes.slice(rounds-1,rounds);
+            document.getElementById("crashes").textContent = crashes.slice(rounds - 1, rounds);
             document.getElementById("results").style.display = "block";
             console.log(rounds)
             console.log(totalRounds)
             console.log(involvedClientsJS.slice(numMinClients * rounds, numMinClients * rounds + numMinClients).join("\r\n"));
-            document.getElementById("clientsInvolved").textContent = involvedClientsJS.slice(numMinClients * (rounds-1), numMinClients * (rounds-1) + numMinClients).join(", ");
+            document.getElementById("clientsInvolved").textContent = involvedClientsJS.slice(numMinClients * (rounds - 1), numMinClients * (rounds - 1) + numMinClients).join(", ");
             printCenters();
             <% if(request.getAttribute("algorithm") != null && request.getAttribute("algorithm").equals("KMeans")){
             %>
@@ -148,7 +148,7 @@
             <%}%>
         }
 
-        function printCenters(){
+        function printCenters() {
             var chart = new CanvasJS.Chart("chartContainerCenters", {
                 animationEnabled: false,
                 theme: "light2",
@@ -170,13 +170,13 @@
                     xValueFormatString: "#,##0.000",
                     yValueFormatString: "#,##0.000",
                     toolTipContent: "<b>First Feature:</b> {x} <br><b>Second feature:</b> {y}",
-                    dataPoints: datapointsJS[rounds-1]
+                    dataPoints: datapointsJS[rounds - 1]
                 }]
             });
             chart.render();
         }
 
-        function printNorms(){
+        function printNorms() {
             var chart = new CanvasJS.Chart("chartContainerNorms", {
                 animationEnabled: false,
                 theme: "light2",
@@ -198,7 +198,7 @@
                     xValueFormatString: "#,##0.000",
                     yValueFormatString: "#,##0.000",
                     toolTipContent: "<b>Round:</b> {x} <br><b>FNorm:</b> {y}",
-                    dataPoints: normpointsJS[rounds-1]
+                    dataPoints: normpointsJS[rounds - 1]
                 }]
             });
             chart.render();
@@ -225,7 +225,8 @@
         <label for="numFeatures">Number of features: </label><input id="numFeatures" type="number" name="numFeatures"
                                                                     value="3"><br>
         <label for="numMinClients">Number of clients: </label>
-        <input id="numMinClients" type="number" name="numMinClients" min="1" max="<%=numClients%>" value="<%=numClients%>"> / <%=numClients%><br>
+        <input id="numMinClients" type="number" name="numMinClients" min="1" max="<%=numClients%>"
+               value="<%=numClients%>"> / <%=numClients%><br>
         <label for="randomClients">Different clients at each round: </label>
         <select name="randomClients" id="randomClients">
             <option value="false">false</option>
@@ -258,12 +259,25 @@
             </select>
         </div>
         <br>
+        <button type="submit" name="run">Run</button>
+        <br><br>
+    </form>
+    <form action="<%=request.getContextPath()%>/Home/Features" method="post">
         <label for="firstFeature">First feature: </label><input id="firstFeature" type="text" name="firstFeature"
                                                                 value="0"><br>
         <label for="secondFeature">Second feature: </label><input id="secondFeature" type="text"
                                                                   name="secondFeature" value="1"><br>
-        <button type="submit" name="run">Run</button>
-        <br>
+        <button type="submit">Show</button>
+        <%
+            request.setAttribute("numClients", request.getAttribute("numClients"));
+            request.setAttribute("rounds", request.getAttribute("rounds"));
+            request.setAttribute("experimentId", request.getAttribute("experimentId"));
+            request.setAttribute("logExperiment", request.getAttribute("logExperiment"));
+            request.setAttribute("numMinClients", request.getAttribute("numMinClients"));
+            request.setAttribute("algorithm", request.getAttribute("algorithm"));
+        %>
+    </form>
+    <br>
     </form>
 </div>
 <div id="experimentResult" style="width:1400px">

@@ -56,9 +56,6 @@ public class Home extends HttpServlet {
             boolean randomClients = Boolean.parseBoolean(request.getParameter("randomClients"));
             int timeout = Integer.parseInt(request.getParameter("timeout"));
 
-            String firstFeature = request.getParameter("firstFeature");
-            String secondFeature = request.getParameter("secondFeature");
-
             String selectedAlgorithm = request.getParameter("algorithm");
             Algorithm algorithm = null;
             switch (selectedAlgorithm) {
@@ -127,10 +124,10 @@ public class Home extends HttpServlet {
                 ExperimentRound singleRound = rounds.get(i);
                 if (singleRound != null && !singleRound.getLast())
                     numCrashes += singleRound.getNumCrashes();
-                else if(singleRound != null && singleRound.getLast()){
+                else if (singleRound != null && singleRound.getLast()) {
                     switch (experiment.getAlgorithm().getName()) {
                         case "KMeans":
-                            KMeansAlgorithmRound kmround = (KMeansAlgorithmRound)rounds.get(i-1).getAlgorithmRound();
+                            KMeansAlgorithmRound kmround = (KMeansAlgorithmRound) rounds.get(i - 1).getAlgorithmRound();
                             KMeansAlgorithm kMeansAlgorithm = (KMeansAlgorithm) experiment.getAlgorithm();
                             kMeansAlgorithm.setfNorm(kmround.getfNorm());
                             kMeansAlgorithm.setCenters(kmround.getCenters());
@@ -140,28 +137,28 @@ public class Home extends HttpServlet {
                 }
             }
             experiment.setNumCrashes(numCrashes);
-            experiment.setNumRounds(rounds.size()-2);
+            experiment.setNumRounds(rounds.size() - 2);
             experiment.setAlgorithm(algorithm);
             myExperimentService.editExperiment(experiment);
             myLevelDb.printContent();
             List<String> logExecution = Log.getLogExperimentText(experiment);
-            for(int i = 0; i < logExecution.size(); ++i)
-                logExecution.set(i, "'"+logExecution.get(i)+"'");
+            for (int i = 0; i < logExecution.size(); ++i)
+                logExecution.set(i, "'" + logExecution.get(i) + "'");
             request.setAttribute("rounds", rounds);
             request.setAttribute("algorithm", selectedAlgorithm);
             request.setAttribute("logExecution", logExecution);
-            request.setAttribute("firstFeature", firstFeature);
-            request.setAttribute("secondFeature", secondFeature);
+            request.setAttribute("firstFeature", 0);
+            request.setAttribute("secondFeature", 1);
             request.setAttribute("numClients", experiment.getNumClients());
             request.setAttribute("experimentId", experiment.getId());
             request.setAttribute("numMinClients", experiment.getNumMinClients());
             String targetJSP = "/pages/jsp/home.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
-        } else if(request.getParameter("export") != null) {
+        } else if (request.getParameter("export") != null) {
             int id = Integer.parseInt(request.getParameter("id"));
             List<String> logs = Log.getLogExperimentText(myExperimentService.findExperimentById(id));
-            String result = String.join( "\n", logs);
+            String result = String.join("\n", logs);
             response.setContentType("plain/text");
             response.addHeader("Content-Disposition", "attachment:filename=\"log.txt\"");
             PrintWriter writer = response.getWriter();
