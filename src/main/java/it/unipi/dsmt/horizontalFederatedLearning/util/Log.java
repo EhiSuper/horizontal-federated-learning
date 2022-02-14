@@ -6,6 +6,8 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Log {
     private static String logFile;
@@ -46,20 +48,50 @@ public class Log {
         }
     }
 
-    public static void exportLogExperiment(Experiment experiment) {
+    public static List<String> getLogExperimentText(Experiment experiment) {
+        int id = experiment.getId();
+        boolean exp = false;
+        List<String> result = new ArrayList<>();
+        try {
+            File file = new File("experimentsLog.txt");
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                if(line.startsWith("----")){
+                    int expId = Integer.parseInt(line.split("---- Log experiment ")[1].split(" ")[0]);
+                    if(id == expId){
+                        exp = true;
+                    } else exp = false;
+                }
+                if(exp) {
+                    result.add(line);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static void exportLogExperimentFile(Experiment experiment) {
         int id = experiment.getId();
         boolean exp = false;
         BufferedWriter bw = null;
         FileWriter fw = null;
+        File fileLog;
         try {
-            fw = new FileWriter("experiment" + experiment.getId() + ".txt", false);
+            fileLog = new File("experiment" + experiment.getId() + ".txt");
+            fw = new FileWriter(fileLog, false);
             bw = new BufferedWriter(fw);
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            File file = new File("experimentsLog.txt");
-            FileReader fr = new FileReader(file);
+            File fileAllLogs = new File("experimentsLog.txt");
+            FileReader fr = new FileReader(fileAllLogs);
             BufferedReader br = new BufferedReader(fr);
             String line;
             while ((line = br.readLine()) != null) {

@@ -35,7 +35,8 @@ public class ExperimentService {
         if(findExperimentByName(experiment.getName()) != null)
             throw new RegistrationException("Experiment name already taken!");
         System.out.println(experiment);
-        experiment.setId(++counterID);
+        if(experiment.getId() == 0)
+            experiment.setId(++counterID);
         String prefixKey = "Experiment:" + experiment.getId() + ":" + experiment.getUser().getId() + ":";
         map.put(prefixKey + "name", experiment.getName());
         map.put(prefixKey + "dataset", experiment.getDataset());
@@ -51,6 +52,7 @@ public class ExperimentService {
         map.put(prefixKey + "randomClients", Boolean.toString(experiment.getRandomClients()));
         map.put(prefixKey + "randomClientsSeed", Double.toString(experiment.getRandomClientsSeed()));
         map.put(prefixKey + "timeout", Double.toString(experiment.getTimeout()));
+        map.put(prefixKey + "numCrashes", Integer.toString(experiment.getNumCrashes()));
         map.put(prefixKey + "maxAttemptsClientCrash", Integer.toString(experiment.getMaxAttemptsClientCrash()));
         map.put(prefixKey + "maxAttemptsServerCrash", Integer.toString(experiment.getMaxAttemptsServerCrash()));
         map.put(prefixKey + "maxAttemptsOverallCrash", Integer.toString(experiment.getMaxAttemptsOverallCrash()));
@@ -69,22 +71,25 @@ public class ExperimentService {
             map.put(prefixKey + "distance", kMeansAlgorithm.getDistance());
             map.put(prefixKey + "seedCenters", Double.toString(kMeansAlgorithm.getSeedCenters()));
             map.put(prefixKey + "normFn", kMeansAlgorithm.getNormFn());
-            map.put(prefixKey + "fNorm", String.valueOf(kMeansAlgorithm.getfNorm()));
+            if(kMeansAlgorithm.getfNorm() != 0)
+                map.put(prefixKey + "fNorm", String.valueOf(kMeansAlgorithm.getfNorm()));
             List<List<Double>> centers = kMeansAlgorithm.getCenters();
             String result = "";
-            for(int i = 0; i < centers.size(); ++i){
-                result += "[";
-                List<Double> list = centers.get(i);
-                for(int j = 0; j < list.size(); ++j) {
-                    result += list.get(j);
-                    if(j != list.size()-1)
+            if(centers != null) {
+                for (int i = 0; i < centers.size(); ++i) {
+                    result += "[";
+                    List<Double> list = centers.get(i);
+                    for (int j = 0; j < list.size(); ++j) {
+                        result += list.get(j);
+                        if (j != list.size() - 1)
+                            result += ",";
+                    }
+                    result += "]";
+                    if (i != centers.size() - 1)
                         result += ",";
                 }
-                result += "]";
-                if(i != centers.size()-1)
-                    result += ",";
+                map.put(prefixKey + "centers", result);
             }
-            map.put(prefixKey + "centers", result);
         }
     }
 

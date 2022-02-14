@@ -49,7 +49,16 @@ public class Client {
         return "{ Hostname: "+ hostname +", Pid:" + pid + ", NumCrashes:" + numCrashes + " }";
     }
 
-    public String getChunk(){
+
+    public List<List<Double>> getChunk() {
+        return chunk;
+    }
+
+    public void setChunk(List<List<Double>> chunk) {
+        this.chunk = chunk;
+    }
+
+    public String getStringChunk(){
         String result = "";
         for(int i = 0; i < chunk.size(); ++i){
             result += "[";

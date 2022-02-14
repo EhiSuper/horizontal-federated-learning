@@ -29,15 +29,20 @@ public class Communication {
     }
 
     public static void startExperiment(Experiment experiment) {
+        System.out.println("Working Directory = " + System.getProperty("user.dir"));
         OtpErlangList arguments = prepareArguments(experiment);
         destination = null;
         currentExperiment = experiment;
         if(node == null){
+            System.out.println("1");
             node = new Node("server@127.0.0.1", "COOKIE", "javaServer");
+            System.out.println("1");
         }
         try {
+            System.out.println("1");
             String[] cmd = {"bash", "-c", "erl -name erl@127.0.0.1 -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
             final Process p = Runtime.getRuntime().exec(cmd);
+            System.out.println("1");
             //final Process p = Runtime.getRuntime().exec("erl -name erl@127.0.0.1 -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
                 public void run() {
@@ -45,6 +50,7 @@ public class Communication {
                     String line;
                     String editedLine;
                     try {
+                        System.out.println("T");
                         while ((line = input.readLine()) != null) {
                             if (line.contains("1> "))
                                 editedLine = line.split("1> ")[1];
@@ -60,11 +66,13 @@ public class Communication {
                 }
             }).start();
             Thread.sleep(1000);
+            System.out.println("1");
             if(caller == null){
                 OtpSelf callerNode = new OtpSelf("caller", "COOKIE");
                 OtpPeer supervisor = new OtpPeer("erl@127.0.0.1");
                 caller = callerNode.connect(supervisor);
             }
+            System.out.println("1");
             Log.startLogExperiment(experiment);
             caller.sendRPC("supervisorNode", "start", arguments);
         } catch (IOException e) {
