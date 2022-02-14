@@ -147,7 +147,7 @@ public class AdminPage extends HttpServlet {
         } else if (!mode.matches("\\d+")) {
             messages.put("Mode", "Please enter digits only");
         } else {
-            valuesKMeans.put("Mode", mode);
+            valuesGeneral.put("Mode", mode);
         }
 
         if (messages.isEmpty()) {

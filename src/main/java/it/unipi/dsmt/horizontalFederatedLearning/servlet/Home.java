@@ -1,6 +1,7 @@
 package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
+import it.unipi.dsmt.horizontalFederatedLearning.service.db.ConfigurationService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Communication;
@@ -13,13 +14,16 @@ import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet(name = "Home", value = "/Home")
 public class Home extends HttpServlet {
 
     private final LevelDB myLevelDb = LevelDB.getInstance();
     private final UserService myUserService = new UserService(myLevelDb);
+    private final ConfigurationService myConfigurationService = new ConfigurationService(myLevelDb);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -58,6 +62,7 @@ public class Home extends HttpServlet {
                 double epsilon = Double.parseDouble(request.getParameter("epsilon"));
                 String normFn = request.getParameter("normFn");
                 int seedCenters = Integer.parseInt(request.getParameter("seedCenters"));
+                //Map<String, String> kmeansDefaultValues = myConfigurationService.retrieveSpecific("kmeans");
                 KMeansAlgorithm kMeansAlgorithm = new KMeansAlgorithm();
                 kMeansAlgorithm.setDistance(distance);
                 kMeansAlgorithm.setEpsilon(epsilon);
@@ -80,22 +85,21 @@ public class Home extends HttpServlet {
         experiment.setRandomClients(randomClients);
         experiment.setTimeout(timeout);
 
-        experiment.setMode(1);
-        experiment.setMaxNumRounds(10);
-        experiment.setNumClients(3);
-        experiment.setRandomClientsSeed(0);
-        experiment.setMaxAttemptsClientCrash(3);
-        experiment.setMaxAttemptsOverallCrash(20);
-        experiment.setMaxAttemptsServerCrash(2);
-        List<String> clients = new ArrayList<>();
-        clients.add("x@127.0.0.1");
-        clients.add("y@127.0.0.1");
-        clients.add("z@127.0.0.1");
-        clients.add("h@127.0.0.1");
-        experiment.setClientsHostnames(clients);
+        Map<String, String> defaultValues = myConfigurationService.retrieveGeneral();
+        experiment.setMode(Integer.parseInt(defaultValues.get("Mode")));
+        experiment.setMaxNumRounds(Integer.parseInt(defaultValues.get("MaxNumberRound")));
+        experiment.setNumClients(Integer.parseInt(defaultValues.get("NumberOfClients")));
+        experiment.setRandomClientsSeed(Integer.parseInt(defaultValues.get("RandomClientsSeed")));
+        experiment.setMaxAttemptsClientCrash(Integer.parseInt(defaultValues.get("MaxAttemptsClientCrash")));
+        experiment.setMaxAttemptsOverallCrash(Integer.parseInt(defaultValues.get("MaxAttemptsOverallCrash")));
+        experiment.setMaxAttemptsServerCrash(Integer.parseInt(defaultValues.get("MaxAttemptsServerCrash")));
+
+        String[] clients = defaultValues.remove("ClientsHostnames").split(",");
+        List<String> clientsHostnames = Arrays.asList(clients);
+        experiment.setClientsHostnames(clientsHostnames);
 
         Communication.startExperiment(experiment);
-        List<ExperimentRound> rounds = null;
+        List<ExperimentRound> rounds = new ArrayList<>();
         ExperimentRound round = null;
         while (true) {
             try {
@@ -112,6 +116,7 @@ public class Home extends HttpServlet {
         }
 
         request.setAttribute("rounds", rounds);
+        request.setAttribute("algorithm", selectedAlgorithm);
 
         request.setAttribute("firstFeature", firstFeature);
         request.setAttribute("secondFeature", secondFeature);

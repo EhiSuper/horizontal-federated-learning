@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Communication {
-    private static OtpErlangPid destination;
-    private static Node node;
+    private static OtpErlangPid destination;//concurrency problems
+    private static Node node; //concurrency problems
+    private static OtpConnection caller;//concurrency problems
     private static Experiment currentExperiment;
 
     private static OtpErlangList prepareArguments(Experiment experiment) {
@@ -22,7 +23,7 @@ public class Communication {
         OtpErlangObject[] listParams = new OtpErlangObject[3];
         listParams[0] = params;
         listParams[1] = algParams;
-        listParams[2] = new OtpErlangInt(experiment.getMaxAttemptsOverallCrash());
+        listParams[2] = new OtpErlangInt(experiment.getMaxAttemptsServerCrash());
         OtpErlangList arguments = new OtpErlangList(listParams);
         return arguments;
     }
@@ -31,11 +32,13 @@ public class Communication {
         OtpErlangList arguments = prepareArguments(experiment);
         destination = null;
         currentExperiment = experiment;
-        node = new Node("server@127.0.0.1", "COOKIE", "javaServer");
+        if(node == null){
+            node = new Node("server@127.0.0.1", "COOKIE", "javaServer");
+        }
         try {
             String[] cmd = {"bash", "-c", "erl -name erl@127.0.0.1 -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
             final Process p = Runtime.getRuntime().exec(cmd);
-            //final Process p = Runtime.getRuntime().exec("erl -sname erl@localhost -setcookie COOKIE -pa \"./erlangFiles\"");
+            //final Process p = Runtime.getRuntime().exec("erl -name erl@127.0.0.1 -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
                 public void run() {
                     BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -57,12 +60,16 @@ public class Communication {
                 }
             }).start();
             Thread.sleep(1000);
-            OtpSelf caller = new OtpSelf("caller", "COOKIE");
-            OtpPeer supervisor = new OtpPeer("erl@127.0.0.1");
-            OtpConnection conn = caller.connect(supervisor);
+            if(caller == null){
+                OtpSelf callerNode = new OtpSelf("caller", "COOKIE");
+                OtpPeer supervisor = new OtpPeer("erl@127.0.0.1");
+                caller = callerNode.connect(supervisor);
+            }
             Log.startLogExperiment(experiment);
-            conn.sendRPC("supervisorNode", "start", arguments);
+            caller.sendRPC("supervisorNode", "start", arguments);
         } catch (IOException e) {
+            System.out.println(e.toString());
+            //conn.sendRPC("supervisorNode", "start", arguments);
             startExperiment(experiment);
         } catch (Exception ee){
             ee.printStackTrace();

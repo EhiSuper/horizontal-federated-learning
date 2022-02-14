@@ -149,15 +149,11 @@
         <input id="MaxAttemptsOverallCrash" name="MaxAttemptsOverallCrash" value=<%=maxAttemptsOverallCrash%>>
         <span class="error"><%=maxAttemptsOverallCrashError%></span>
     </p>
-    <select name="select algorithm" id="select_alg" onchange="show_form()">
-        <option disabled selected value> -- select an algorithm -- </option>
-        <option value="kmeans">kmeans</option>
-    </select>
-    <p class="kmeans" style="display:none;">
+    <p>
         <%  String mode = "";
             String modeError = "";
-            if(valuesKMeans.get("Mode") != null){
-                mode = (String)valuesKMeans.get("Mode");
+            if(valuesGeneral.get("Mode") != null){
+                mode = (String)valuesGeneral.get("Mode");
             }
             if(message.get("Mode") != null){
                 modeError = (String)message.get("Mode");
@@ -167,6 +163,10 @@
         <input id="Mode" name="Mode" value=<%=mode%>>
         <span class="error"><%=modeError%></span>
     </p>
+    <select name="select algorithm" id="select_alg" onchange="show_form()">
+        <option disabled selected value> -- select an algorithm -- </option>
+        <option value="kmeans">kmeans</option>
+    </select>
     <p>
         <input type="submit">
         <span class="success"><%=successError%></span>
