@@ -18,7 +18,7 @@
 -export([start/4, start/0]).
 
 start(ServerParams, AlgParams, MaxAttemptsServer, JavaPid) ->
-  io:format("Supervisor - Spawning the server~n"),
+  io:format("Supervisor ~p - Spawning the server~n", [self()]),
   process_flag(trap_exit, true),
   Server = spawn_link('server', start, [ServerParams, AlgParams, self()]),
   loop(Server, ServerParams, AlgParams, MaxAttemptsServer, 0, JavaPid).

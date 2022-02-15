@@ -62,11 +62,19 @@ public class Log {
                     int expId = Integer.parseInt(line.split("---- Log experiment ")[1].split(" ")[0]);
                     if(id == expId){
                         result.clear();
+                        //result.add(line);
                         exp = true;
-                    } else exp = false;
+                    }
+                    else{
+                        exp = false;
+                    }
                 }
                 if(exp) {
                     result.add(line);
+                    /*String[] parsedLine = line.split("#");
+                    if(parsedLine.length > 1 && parsedLine[0].equals(experiment.getId() + " ")){
+                        result.add(parsedLine[1]);
+                    }*/
                 }
             }
         } catch (FileNotFoundException e) {

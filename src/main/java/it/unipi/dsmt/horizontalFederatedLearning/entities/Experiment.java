@@ -188,7 +188,7 @@ public class Experiment {
     }
 
     public void setRandomClients(boolean randomClients) {
-        randomClients = randomClients;
+        this.randomClients = randomClients;
     }
 
     public double getRandomClientsSeed() {
@@ -196,13 +196,12 @@ public class Experiment {
     }
 
     public void setRandomClientsSeed(double randomClientsSeed) {
-        randomClientsSeed = randomClientsSeed;
+        this.randomClientsSeed = randomClientsSeed;
     }
 
     public int getTimeout() {
         return timeout;
     }
-
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
