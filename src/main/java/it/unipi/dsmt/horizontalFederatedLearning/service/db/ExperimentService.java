@@ -30,11 +30,16 @@ public class ExperimentService {
         }
     }
 
+    public void checkInsert(Experiment experiment) throws RegistrationException{
+        if(findExperimentByName(experiment.getName()) != null)
+            throw new RegistrationException("Experiment name already taken!");
+    }
+
     public void insert(Experiment experiment) throws RegistrationException{
         HashMap<String, String> map = new HashMap<>();
         if(findExperimentByName(experiment.getName()) != null)
             throw new RegistrationException("Experiment name already taken!");
-        System.out.println(experiment);
+        //System.out.println(experiment);
         if(experiment.getId() == 0)
             experiment.setId(++counterID);
         String prefixKey = "Experiment:" + experiment.getId() + ":" + experiment.getUser().getId() + ":";

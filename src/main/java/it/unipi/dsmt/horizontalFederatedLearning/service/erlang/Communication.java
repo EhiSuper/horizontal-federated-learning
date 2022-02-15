@@ -12,32 +12,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Communication {
-    private static OtpErlangPid destination;//concurrency problems
-    private static Node node; //concurrency problems
-    private static OtpConnection caller;//concurrency problems
-    private static Experiment currentExperiment;
-    private static long elapsedTime;
-    private static long start;
+    private OtpErlangPid destination;//concurrency problems
+    private OtpMbox erlangProcess;
+    private OtpConnection caller;//concurrency problems
+    private Experiment currentExperiment;
+    private long elapsedTime;
+    private long start;
 
-    private static OtpErlangList prepareArguments(Experiment experiment) {
+    private OtpErlangList prepareArguments(Experiment experiment, OtpErlangPid javaPid) {
         OtpErlangTuple params = experiment.prepareTuple();
         OtpErlangTuple algParams = experiment.getAlgorithm().prepareSpecificParameters();
-        OtpErlangObject[] listParams = new OtpErlangObject[3];
+        OtpErlangObject[] listParams = new OtpErlangObject[4];
         listParams[0] = params;
         listParams[1] = algParams;
         listParams[2] = new OtpErlangInt(experiment.getMaxAttemptsServerCrash());
+        listParams[3] = javaPid;
         OtpErlangList arguments = new OtpErlangList(listParams);
         return arguments;
     }
 
-    public static void startExperiment(Experiment experiment) {
+    public void startExperiment(Experiment experiment) {
         System.out.println("Working Directory = " + System.getProperty("user.dir"));
-        OtpErlangList arguments = prepareArguments(experiment);
         destination = null;
         currentExperiment = experiment;
-        if(node == null){
-            node = new Node("server@127.0.0.1", "COOKIE", "javaServer");
-        }
+        Node node = Node.getNode();
+        erlangProcess = node.getOtpNode().createMbox();
+        OtpErlangPid javaPid = erlangProcess.self();
+        OtpErlangList arguments = prepareArguments(experiment, javaPid);
         try {
             start = System.nanoTime();
             String[] cmd = {"bash", "-c", "erl -name erl@127.0.0.1 -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
@@ -64,16 +65,10 @@ public class Communication {
                 }
             }).start();
             Thread.sleep(1000);
-            if(caller == null){
-                OtpSelf callerNode = new OtpSelf("caller", "COOKIE");
-                OtpPeer supervisor = new OtpPeer("erl@127.0.0.1");
-                caller = callerNode.connect(supervisor);
-            }
             Log.startLogExperiment(experiment);
+            caller = Caller.getCaller().getCallerConnection();
             caller.sendRPC("supervisorNode", "start", arguments);
         } catch (IOException e) {
-            System.out.println(e.toString());
-            //conn.sendRPC("supervisorNode", "start", arguments);
             startExperiment(experiment);
         } catch (Exception ee){
             ee.printStackTrace();
@@ -81,21 +76,21 @@ public class Communication {
     }
 
     // accertarsi ricezione da chi vogliamo noi
-    private static OtpErlangTuple receive() throws OtpErlangDecodeException, OtpErlangExit {
+    private OtpErlangTuple receive() throws OtpErlangDecodeException, OtpErlangExit {
         OtpErlangTuple tuple = null;
-        tuple = (OtpErlangTuple) node.getOtpMbox().receive();
+        tuple = (OtpErlangTuple) erlangProcess.receive();
         OtpErlangPid sender = (OtpErlangPid) tuple.elementAt(0);
         if (!sender.node().equals("erl@127.0.0.1"))
             throw new ErlangErrorException();
         if (destination == null) {
             destination = sender;
-            node.getOtpMbox().link(destination);
+            erlangProcess.link(destination);
         }
         return tuple;
 
     }
 
-    public static ExperimentRound receiveRound() {
+    public ExperimentRound receiveRound() {
         try {
             OtpErlangTuple result = receive();
             if (result == null) {
@@ -122,7 +117,7 @@ public class Communication {
         return null;
     }
 
-    private static ExperimentRound composeRound(OtpErlangTuple result) {
+    private ExperimentRound composeRound(OtpErlangTuple result) {
         OtpErlangTuple content = (OtpErlangTuple) result.elementAt(2);
         OtpErlangTuple algorithmContent = (OtpErlangTuple) content.elementAt(0);
         // deve diventare chiamata generica
@@ -168,7 +163,7 @@ public class Communication {
     }
 
     // mettere in un luogo independent da logica generale
-    private static AlgorithmRound getKMeansIterationInfo(OtpErlangTuple algorithmContent) {
+    private AlgorithmRound getKMeansIterationInfo(OtpErlangTuple algorithmContent) {
         OtpErlangList centersContent = (OtpErlangList) algorithmContent.elementAt(0);
         //System.out.println("centersContent: " + centersContent);
         List<List<Double>> centers = new ArrayList<>();

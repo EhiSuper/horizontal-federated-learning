@@ -85,12 +85,13 @@ public class ExperimentInfo extends HttpServlet {
             Experiment oldExperiment = myExperimentService.findExperimentById(experimentId);
             myExperimentService.editExperiment(experiment);
             if(experiment.different(oldExperiment)) {
-                Communication.startExperiment(experiment);
+                Communication communication = new Communication();
+                communication.startExperiment(experiment);
                 List<ExperimentRound> rounds = new ArrayList<>();
                 ExperimentRound round = null;
                 while (true) {
                     try {
-                        round = Communication.receiveRound();
+                        round = communication.receiveRound();
                         rounds.add(round);
                     } catch (ErlangErrorException ex) {
                         System.out.println("Error during erlang computations: " + ex.getMessage());

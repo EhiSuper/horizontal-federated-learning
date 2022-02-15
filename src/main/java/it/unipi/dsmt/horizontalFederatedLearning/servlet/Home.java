@@ -104,7 +104,7 @@ public class Home extends HttpServlet {
             List<String> clientsHostnames = Arrays.asList(clients);
             experiment.setClientsHostnames(clientsHostnames);
             try {
-                myExperimentService.insert(experiment);
+                myExperimentService.insert(experiment); //da vedere
             } catch (RegistrationException e) {
                 request.setAttribute("error", e.getMessage());
                 String targetJSP = "/pages/jsp/home.jsp";
@@ -113,12 +113,13 @@ public class Home extends HttpServlet {
                 requestDispatcher.forward(request, response);
                 return;
             }
-            Communication.startExperiment(experiment);
+            Communication communication = new Communication();
+            communication.startExperiment(experiment);
             List<ExperimentRound> rounds = new ArrayList<>();
             ExperimentRound round = null;
             while (true) {
                 try {
-                    round = Communication.receiveRound();
+                    round = communication.receiveRound();
                     rounds.add(round);
                 } catch (ErlangErrorException ex) {
                     System.out.println("Error during erlang computations: " + ex.getMessage());
@@ -190,12 +191,13 @@ public class Home extends HttpServlet {
             System.out.println(experiment);
             System.out.println(firstFeature);
             System.out.println(secondFeature);
-            Communication.startExperiment(experiment);
+            Communication communication = new Communication();
+            communication.startExperiment(experiment);
             List<ExperimentRound> rounds = new ArrayList<>();
             ExperimentRound round = null;
             while (true) {
                 try {
-                    round = Communication.receiveRound();
+                    round = communication.receiveRound();
                     rounds.add(round);
                 } catch (ErlangErrorException ex) {
                     System.out.println("Error during erlang computations: " + ex.getMessage());

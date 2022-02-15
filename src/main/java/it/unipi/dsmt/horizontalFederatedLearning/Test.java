@@ -65,12 +65,13 @@ public class Test {
         algorithm.setNumClusters(4);
         algorithm.setSeedCenters(100);
         experiment.setAlgorithm(algorithm);
-        Communication.startExperiment(experiment);
+        Communication communication = new Communication();
+        communication.startExperiment(experiment);
         ExperimentRound round = null;
         List<ExperimentRound> rounds = new ArrayList<>();
         while(true) {
             try {
-                round = Communication.receiveRound();
+                round = communication.receiveRound();
                 if(round != null)
                     rounds.add(round);
             } catch(ErlangErrorException ex){
