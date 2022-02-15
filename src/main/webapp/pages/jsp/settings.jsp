@@ -12,7 +12,6 @@
     <title>Settings</title>
 </head>
 <body>
-<h1>My User Settings</h1>
 <% if (request.getAttribute("error") != null) { %>
 <p><%=request.getAttribute("error")%>
 </p>

@@ -15,14 +15,18 @@
     ArrayList<String> involvedClients = new ArrayList<>();
     int numMinClients = 0;
     int numOverallCrashes = 0;
-    int numClients = (int)request.getAttribute("numClients");
     int numRounds = 0;
     int experimentId = 0;
     int numFeatures = 0;
     long time = 0;
+    int firstFeature = 0;
+    int secondFeature = 1;
     String reason = "";
     List<String> logExecution = new ArrayList<>();
     if (request.getAttribute("rounds") != null) {
+        firstFeature = (int)request.getAttribute("firstFeature");
+        secondFeature = (int)request.getAttribute("secondFeature");
+        System.out.println("different than null");
         Gson gsonObj = new Gson();
         Map<Object, Object> map = null;
         List<ExperimentRound> roundList = (List<ExperimentRound>) request.getAttribute("rounds");
@@ -41,8 +45,8 @@
                     List<List<Double>> chunk = client.getChunk();
                     for(List<Double> point: chunk){
                         map = new HashMap<Object, Object>();
-                        map.put("x", point.get(0));
-                        map.put("y", point.get(1));
+                        map.put("x", point.get(firstFeature));
+                        map.put("y", point.get(secondFeature));
                         map.put("color", "grey");
                         map.put("markerSize", 3);
                         map.put("fillOpacity", ".3");
@@ -51,14 +55,15 @@
                 }
                 for (List<Double> center : centers) {
                     map = new HashMap<Object, Object>();
-                    map.put("x", center.get(0));
-                    map.put("y", center.get(1));
+                    map.put("x", center.get(firstFeature));
+                    map.put("y", center.get(secondFeature));
                     map.put("color", "black");
                     map.put("markerSize", 20);
                     map.put("markerBorderColor", "red");
                     pointList.add(map);
                 }
-                String selectedAlgorithm = request.getParameter("algorithm");
+                String selectedAlgorithm = (String) request.getAttribute("algorithm");
+                System.out.println(selectedAlgorithm);
                 switch(selectedAlgorithm){
                     case "KMeans":
                         KMeansAlgorithmRound round = (KMeansAlgorithmRound) roundList.get(i).getAlgorithmRound();
@@ -102,11 +107,9 @@
         crashes = <%=crashes%>;
         overallCrashes = <%=numOverallCrashes%>;
         totalRounds = <%=numRounds%>;
-        numClients = <%=numClients%>;
         numMinClients = <%=numMinClients%>;
         terminationReason = '<%=reason%>';
         timeNeeded = <%=time%>;
-        console.log(numClients);
         console.log(availableClientsJS);
         console.log(involvedClientsJS);
         console.log(crashes);
@@ -121,22 +124,32 @@
         }
 
         function delayRounds() {
-            if (rounds != 0) {
+            if (rounds == 0) {
                 numFeatures = <%= numFeatures %>;
                 selectList = document.getElementById("firstFeature");
                 selectList2 = document.getElementById("secondFeature");
                 document.getElementById("features").style.display = "block";
                 for (var i = 0; i < numFeatures; i++) {
                     var option = document.createElement("option");
-                    option.value = "Feature "+ i;
+                    option.value = i;
                     option.text = "Feature "+ i;
+                    if(i == <%= firstFeature %>)
+                        option.selected = true
                     selectList.appendChild(option);
+
+                }
+                for (var i = 0; i < numFeatures; i++) {
+                    var option = document.createElement("option");
+                    option.value = i;
+                    option.text = "Feature "+ i;
+                    if(i ==  <%= secondFeature %>)
+                        option.selected = true
                     selectList2.appendChild(option);
                 }
             }
             rounds++;
             if(rounds==totalRounds+1){
-
+                document.getElementById("changeButton").disabled = false;
                 document.getElementById("numroundsText").textContent = "Total number of rounds:";
                 document.getElementById("clientsInvolvedText").textContent = "Overall clients involved:";
                 document.getElementById("crashesText").textContent = "Overall crashes:";
@@ -156,9 +169,9 @@
         function showRound(){
             document.getElementById("numrounds").textContent = rounds;
             document.getElementById("crashes").textContent = crashes.slice(rounds-1,rounds);
-            document.getElementById("results").style.display = "block";
             console.log(rounds)
             console.log(totalRounds)
+            document.getElementById("results").style.display = "block";
             console.log(involvedClientsJS.slice(numMinClients * rounds, numMinClients * rounds + numMinClients).join("\r\n"));
             document.getElementById("clientsInvolved").textContent = involvedClientsJS.slice(numMinClients * (rounds-1), numMinClients * (rounds-1) + numMinClients).join(", ");
             printCenters();
@@ -207,11 +220,11 @@
                     text: ""
                 }],
                 axisY: {
-                    title: "fnorm",
+                    title: "FNorm",
                     includeZero: true
                 },
                 axisX: {
-                    title: "rounds"
+                    title: "Rounds"
                 },
                 data: [{
                     type: "line",
@@ -223,11 +236,6 @@
             });
             chart.render();
         }
-
-        function showForm() {
-            var algorithmValue = document.getElementById("algorithm").value;
-            document.getElementById(algorithmValue).style.display = "block";
-        }
     </script>
 </head>
 <body>
@@ -237,61 +245,21 @@
     <button><a href="<%=request.getContextPath()%>/Settings">Settings</a></button>
     <button><a href="<%=request.getContextPath()%>/Logout">Logout</a></button>
 </div>
-<div id="options">
-    <form action="<%=request.getContextPath()%>/Home" method="post">
-        <label for="name">Name: </label><input id="name" type="text" name="name" value="Primo Esperimento"><br>
-        <label for="dataset">Dataset: </label><input id="dataset" type="text" name="dataset"
-                                                     value="https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff"><br>
-        <label for="numFeatures">Number of features: </label><input id="numFeatures" type="number" name="numFeatures"
-                                                                    value="3"><br>
-        <label for="numMinClients">Number of clients: </label>
-        <input id="numMinClients" type="number" name="numMinClients" min="1" max="<%=numClients%>" value="<%=numClients%>"> / <%=numClients%><br>
-        <label for="randomClients">Different clients at each round: </label>
-        <select name="randomClients" id="randomClients">
-            <option value="false">false</option>
-            <option value="true">true</option>
-        </select>
-        <br>
-
-        <label for="timeout">Timeout: </label><input id="timeout" type="number" name="timeout"
-                                                     value="25000"><br>
-        <label for="algorithm">Select the algorithm: </label>
-        <select name="algorithm" id="algorithm" onchange="showForm()" required>
-            <option disabled selected value> -- select an algorithm --</option>
-            <option value="KMeans">KMeans</option>
-        </select>
-        <div id="KMeans" style="background-color: floralwhite; border-color: aquamarine; display: none">
-            <label for="numClusters">Clusters: </label><input id="numClusters" type="number" name="numClusters"
-                                                              value="3"><br>
-            <label for="distance">Distance: </label>
-            <select name="distance" id="distance">
-                <option value="numba_norm">numba_norm</option>
-            </select>
-            <br>
-            <label for="epsilon">Epsilon: </label><input id="epsilon" type="number" step="any" name="epsilon"
-                                                         value="0.05"><br>
-            <label for="seedCenters">Seed centers: </label><input id="seedCenters" type="number" name="seedCenters"
-                                                                  value="0"><br>
-            <label for="normFn">Norm Fn: </label>
-            <select name="normFn" id="normFn">
-                <option value="norm_fro">norm_fro</option>
-            </select>
-        </div>
-        <br>
-        <button type="submit" name="run">Run</button>
-        <br>
-    </form>
-</div>
 <div id="experimentResult" style="width:1400px">
+    <form action="<%=request.getContextPath()%>/Home" method="post">
+        <button type="submit" name="back">Back</button>
+    </form>
+    <br>
     <div id="features" style=" display: none;">
         <form action="<%=request.getContextPath()%>/Home" method="post">
+            <input type="hidden" id="experimentId" name="experimentId" value="<%=experimentId%>">
             <label for="firstFeature">First Feature:</label>
             <select name="firstFeature" id="firstFeature">
             </select>
             <label for="secondFeature">Second Feature:</label>
             <select name="secondFeature" id="secondFeature">
             </select>
-            <button type="change" name="changeFeatures">Change</button>
+            <button type="submit" name="change" id="changeButton" disabled>Change</button>
         </form>
     </div>
     <br>

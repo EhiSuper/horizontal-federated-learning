@@ -277,6 +277,14 @@ public class Experiment {
                 "user =" + user.getUsername() + ", algorithm=" + algorithm.getName();
     }
 
+    public boolean different(Experiment ex2){
+        if(!this.getDataset().equals(ex2.getDataset()) || this.numFeatures != ex2.numFeatures || this.maxNumRounds != ex2.maxNumRounds
+            || this.numMinClients != ex2.numMinClients || this.randomClientsSeed != ex2.randomClientsSeed ||
+                this.timeout != ex2.getTimeout() || this.getRandomClients() != ex2.getRandomClients() || this.getAlgorithm().different(ex2.getAlgorithm()))
+            return true;
+        else return false;
+    }
+
     public OtpErlangTuple prepareTuple(){
         ArrayList<OtpErlangObject> objects = new ArrayList<>();
         //start( {NumClusters, Distance, Mode, Epsilon, SeedCenters, NormFn}, MaxAttemptsServerCrash).

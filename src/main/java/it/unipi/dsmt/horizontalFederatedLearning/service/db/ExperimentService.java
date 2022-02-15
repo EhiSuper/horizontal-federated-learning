@@ -124,15 +124,17 @@ public class ExperimentService {
     }
 
     public void deleteExperimentById(int id) {
-        List<String> keys = db.findKeysByPrefix("Experiment:"+id);
-        for(String key: keys)
+        List<String> keys = db.findKeysByPrefix("Experiment:"+id+":");
+        for(String key: keys) {
             db.deleteValue(key);
+        }
     }
 
     public void editExperiment(Experiment newExperiment){
+        db.printContent();
         deleteExperimentById(newExperiment.getId());
         insert(newExperiment);
-        newExperiment.setId(counterID);
+        db.printContent();
     }
 
     public Experiment findExperimentById(int id){

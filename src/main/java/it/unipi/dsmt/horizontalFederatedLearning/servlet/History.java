@@ -48,7 +48,8 @@ public class History extends HttpServlet {
         String username = (String) session.getAttribute("login");
         User myUser = myUserService.findUserByUsername(username);
         if (!user.equals("all"))
-            user = "" + myUser.getId();
+            user = String.valueOf(myUser.getId());
+        System.out.println(user);
         List<Experiment> listExperiments = myExperimentService.findExperimentsByFilter(user, filter, value);
         request.setAttribute("listExperiment", listExperiments);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);

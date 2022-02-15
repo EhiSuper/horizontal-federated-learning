@@ -18,8 +18,13 @@ public abstract class Algorithm {
         this.name = name;
     }
 
+
     public abstract AlgorithmRound getIterationInfo(OtpErlangTuple algorithmContent);
 
     public abstract OtpErlangTuple prepareSpecificParameters();
+
+    public boolean different(Algorithm alg2){
+        return false;
+    }
 }
 

@@ -112,6 +112,33 @@ public class KMeansAlgorithm extends Algorithm{
         return "{name = " + getName() + ",numClusters = " + numClusters + ",epsilon = " + epsilon + "}";
     }
 
+    public String toStringCenters(){
+        String result = "";
+        for(int i = 0; i < centers.size(); ++i){
+            result += "[";
+            List<Double> list = centers.get(i);
+            for(int j = 0; j < list.size(); ++j) {
+                result += list.get(j);
+                if(j != list.size()-1)
+                    result += ",";
+            }
+            result += "]";
+            if(i != centers.size()-1)
+                result += ",";
+        }
+        return result;
+    }
+
+    public boolean different(Algorithm alg2){
+        if(!alg2.getName().equals("KMeans"))
+            return false;
+        KMeansAlgorithm kmalg2 = (KMeansAlgorithm) alg2;
+        if(!distance.equals(kmalg2.getDistance()) || epsilon != kmalg2.getEpsilon() || !normFn.equals(((KMeansAlgorithm) alg2).normFn)
+            || seedCenters != kmalg2.getSeedCenters() || numClusters != kmalg2.getNumClusters())
+            return true;
+        else return false;
+    }
+
     @Override
     public OtpErlangTuple prepareSpecificParameters() {
         ArrayList<OtpErlangObject> objects = new ArrayList<>();

@@ -59,8 +59,12 @@ public class Settings extends HttpServlet {
         }
 
         try {
-            myUserService.updateUser(new User(firstName, lastName, username, password));
             myUser = myUserService.findUserByUsername(username);
+            myUser.setFirstName(firstName);
+            myUser.setLastName(lastName);
+            myUser.setUsername(username);
+            myUser.setPassword(password);
+            myUserService.updateUser(myUser);
             request.setAttribute("username", myUser.getUsername());
             request.setAttribute("firstName", myUser.getFirstName());
             request.setAttribute("lastName", myUser.getLastName());

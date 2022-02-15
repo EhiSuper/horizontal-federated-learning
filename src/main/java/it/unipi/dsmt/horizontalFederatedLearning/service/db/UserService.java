@@ -15,7 +15,6 @@ public class UserService {
         setCounterID();
     }
 
-
     private void setCounterID() {
         List<String> keys = db.findKeysByPrefix("User:");
         if (keys != null)

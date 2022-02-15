@@ -20,21 +20,6 @@
     <title>Admin Page</title>
 </head>
 <script>
-    function show_form(){
-        var allOptions = document.getElementById("select_alg").options;
-        for(var option of allOptions){
-            var elements = document.getElementsByClassName(option.value);
-            for(var element of elements){
-                element.style.display = "none";
-            }
-        }
-        var value = document.getElementById("select_alg").value;
-        var elements = document.getElementsByClassName(value);
-        for(var element of elements){
-            element.style.display = "block";
-        }
-    }
-
     function addInput(){
         element = document.createElement("input");
         element.name = "ClientsHostnames";
@@ -63,7 +48,6 @@
         <span class="error"><%=numberOfClientsError%></span>
     </p>
     <p id="hostnames">
-        <button type="button" onclick="addInput()">add</button>
         <label >Clients hostnames</label>
         <%  if(hostnames != null){
             for(String hostname: hostnames){
@@ -78,6 +62,7 @@
             }
         %>
     </p>
+    <button type="button" onclick="addInput()">add</button>
     <span class="error"><%=clientHostnamesError%></span>
     <p>
         <%  String randomClientSeed = "";
@@ -160,13 +145,9 @@
             }
         %>
         <label for="Mode">Mode</label>
-        <input id="Mode" name="Mode" value=<%=mode%>>
+        <input id="Mode" name="Mode" min="1" max="3" value=<%=mode%>>
         <span class="error"><%=modeError%></span>
     </p>
-    <select name="select algorithm" id="select_alg" onchange="show_form()">
-        <option disabled selected value> -- select an algorithm -- </option>
-        <option value="kmeans">kmeans</option>
-    </select>
     <p>
         <input type="submit">
         <span class="success"><%=successError%></span>

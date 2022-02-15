@@ -113,7 +113,6 @@ public class Home extends HttpServlet {
                 requestDispatcher.forward(request, response);
                 return;
             }
-            myLevelDb.printContent();
             Communication.startExperiment(experiment);
             List<ExperimentRound> rounds = new ArrayList<>();
             ExperimentRound round = null;
@@ -155,7 +154,6 @@ public class Home extends HttpServlet {
             experiment.setNumRounds(rounds.size()-2);
             experiment.setAlgorithm(algorithm);
             myExperimentService.editExperiment(experiment);
-            myLevelDb.printContent();
             List<String> logExecution = Log.getLogExperimentText(experiment);
             for(int i = 0; i < logExecution.size(); ++i)
                 logExecution.set(i, "'"+logExecution.get(i)+"'");
@@ -170,7 +168,7 @@ public class Home extends HttpServlet {
             request.setAttribute("time", experiment.getTime());
             request.setAttribute("numFeatures", experiment.getNumFeatures());
             System.out.println(experiment.getTime());
-            String targetJSP = "/pages/jsp/home.jsp";
+            String targetJSP = "/pages/jsp/run.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
         } else if(request.getParameter("export") != null) {
@@ -182,7 +180,9 @@ public class Home extends HttpServlet {
             PrintWriter writer = response.getWriter();
             writer.write(result);
             writer.close();
-        } else if(request.getParameter("change") != null) {
+        } else if(request.getParameter("back") != null) {
+            response.sendRedirect(request.getContextPath() + "/Home");
+        }else if(request.getParameter("change") != null) {
             int id = Integer.parseInt(request.getParameter("experimentId"));
             int firstFeature = Integer.parseInt(request.getParameter("firstFeature"));
             int secondFeature = Integer.parseInt(request.getParameter("secondFeature"));
@@ -244,7 +244,7 @@ public class Home extends HttpServlet {
             request.setAttribute("numMinClients", experiment.getNumMinClients());
             request.setAttribute("time", experiment.getTime());
             request.setAttribute("numFeatures", experiment.getNumFeatures());
-            String targetJSP = "/pages/jsp/home.jsp";
+            String targetJSP = "/pages/jsp/run.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
         }
