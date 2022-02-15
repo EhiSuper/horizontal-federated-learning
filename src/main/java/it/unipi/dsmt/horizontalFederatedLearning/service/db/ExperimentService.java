@@ -52,6 +52,7 @@ public class ExperimentService {
         map.put(prefixKey + "randomClients", Boolean.toString(experiment.getRandomClients()));
         map.put(prefixKey + "randomClientsSeed", Double.toString(experiment.getRandomClientsSeed()));
         map.put(prefixKey + "timeout", Double.toString(experiment.getTimeout()));
+        map.put(prefixKey + "time", Double.toString(experiment.getTime()));
         map.put(prefixKey + "numCrashes", Integer.toString(experiment.getNumCrashes()));
         map.put(prefixKey + "maxAttemptsClientCrash", Integer.toString(experiment.getMaxAttemptsClientCrash()));
         map.put(prefixKey + "maxAttemptsServerCrash", Integer.toString(experiment.getMaxAttemptsServerCrash()));
@@ -105,6 +106,23 @@ public class ExperimentService {
         return experiments;
     }
 
+    public double getAverageTimeout(String algorithmName) {
+        List<Experiment> list = readAllExperiments();
+        double avgTime = 0;
+        int counter = 0;
+        for(Experiment exp: list){
+            if(exp.getAlgorithm().getName().equals(algorithmName)){
+                if(exp.getTime() != 0){
+                    avgTime += (exp.getTime() / exp.getNumRounds());
+                    counter++;
+                }
+            }
+        }
+        if(counter != 0)
+            return 2*(avgTime/counter);
+        else return -1;
+    }
+
     public void deleteExperimentById(int id) {
         List<String> keys = db.findKeysByPrefix("Experiment:"+id);
         for(String key: keys)
@@ -119,7 +137,7 @@ public class ExperimentService {
 
     public Experiment findExperimentById(int id){
         Experiment experiment = new Experiment();
-        if(db.findKeysByPrefix("Experiment:" + id).size()==0)
+        if(db.findKeysByPrefix("Experiment:" + id+":").size()==0)
             return null;
         HashMap<String, String> map = db.findByPrefix("Experiment:"+id);
         experiment.setId(id);
@@ -160,6 +178,9 @@ public class ExperimentService {
                     break;
                 case "randomClientsSeed":
                     experiment.setRandomClientsSeed(Double.parseDouble(map.get(key)));
+                    break;
+                case "time":
+                    experiment.setTime((long) Double.parseDouble(map.get(key)));
                     break;
                 case "timeout":
                     experiment.setTimeout((int)Double.parseDouble(map.get(key)));
@@ -219,6 +240,7 @@ public class ExperimentService {
     //aggiustare poi
     public KMeansAlgorithm readAlgorithm(int id, int userId){
         HashMap<String, String> map = db.findByPrefix("Experiment:"+id+":"+userId+":Algorithm");
+        System.out.println("Experiment:"+id+":"+userId+":Algorithm:name");
         String name = db.findValuesByPrefix("Experiment:"+id+":"+userId+":Algorithm:name").get(0);
         // codice dipendente
         if(name.equals("KMeans")) {

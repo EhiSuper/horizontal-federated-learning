@@ -143,7 +143,6 @@ public class Test {
         }
         System.out.println(result);
         */
-        Log.exportLogExperimentFile(experiment);
         //creato oggetto esperimento e richiesta esecuzione va aggiornato oggetto esperimento
         // vedere come chiedere esecuzione esperimento
     }

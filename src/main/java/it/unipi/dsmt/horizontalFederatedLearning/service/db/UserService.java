@@ -50,7 +50,7 @@ public class UserService {
                 else throw new LoginException("The password is not correct");
             }
         }
-        throw new LoginException("Username not present in the database");
+        throw new LoginException("Username not valid!");
     }
 
     public User findUserByUsername(String username) {

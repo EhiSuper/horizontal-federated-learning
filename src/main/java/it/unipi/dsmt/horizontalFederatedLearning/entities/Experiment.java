@@ -21,6 +21,7 @@ public class Experiment {
     private int numCrashes; //auto
     private int numClients; //admin
     private int numMinClients; //user
+    private long time;
     private List<String> clientsHostnames; //admin
     private boolean randomClients; //user
     private double randomClientsSeed; //admin
@@ -28,6 +29,7 @@ public class Experiment {
     private int maxAttemptsClientCrash; //admin
     private int maxAttemptsServerCrash; //admin
     private int maxAttemptsOverallCrash; //admin
+    private List<ExperimentRound> roundsInfo;
 
     public Experiment(){}
 
@@ -251,6 +253,22 @@ public class Experiment {
 
     public void setClientsHostnames(List<String> clientsHostnames) {
         this.clientsHostnames = clientsHostnames;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public List<ExperimentRound> getRoundsInfo() {
+        return roundsInfo;
+    }
+
+    public void setRoundsInfo(List<ExperimentRound> roundsInfo) {
+        this.roundsInfo = roundsInfo;
+    }
+
+    public long getTime() {
+        return time;
     }
 
     public String toString(){

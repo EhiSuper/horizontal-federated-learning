@@ -86,7 +86,7 @@ public class ExperimentInfo extends HttpServlet {
             // non ho controllato se campi diversi
             // reindirizza su pagina opportuna per rieseguire algoritmo
             String targetJSP = "/pages/jsp/experimentInfo.jsp";
-            experiment = myExperimentService.findExperimentById(experiment.getId());
+            System.out.println(experiment.getId());
             request.setAttribute("experiment", experiment);
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);

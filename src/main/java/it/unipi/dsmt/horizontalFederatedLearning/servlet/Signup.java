@@ -10,15 +10,15 @@ import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
 
-@WebServlet(name = "Subscribe", value = "/Subscribe")
-public class Subscribe extends HttpServlet {
+@WebServlet(name = "Signup", value = "/Signup")
+public class Signup extends HttpServlet {
 
     private final LevelDB myLevelDb = LevelDB.getInstance();
     private final UserService myUserService = new UserService(myLevelDb);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String targetJSP = "/pages/jsp/subscribe.jsp";
+        String targetJSP = "/pages/jsp/signup.jsp";
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
     }
@@ -33,18 +33,20 @@ public class Subscribe extends HttpServlet {
 
         if(!password.equals(confirmPassword)){
             request.setAttribute("error", "The two passwords are not equal");
-            String targetJSP = "/pages/jsp/subscribe.jsp";
+            String targetJSP = "/pages/jsp/signup.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
         }
 
         try {
             myUserService.register(new User(firstName, lastName, username, password));
-            response.sendRedirect(request.getContextPath() + "/Login");
+            HttpSession session = request.getSession();
+            session.setAttribute("login", username);
+            response.sendRedirect(request.getContextPath() + "/Home");
         }
         catch(RegistrationException e){
             request.setAttribute("error", e.getMessage());
-            String targetJSP = "/pages/jsp/subscribe.jsp";
+            String targetJSP = "/pages/jsp/signup.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
         }

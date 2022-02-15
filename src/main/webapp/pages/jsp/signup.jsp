@@ -9,15 +9,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Subscribe</title>
+    <title>Sign up</title>
 </head>
 <body>
-<h1>Subscribe</h1>
+<h1>Sign up</h1>
 <% if (request.getAttribute("error") != null) { %>
 <p><%=request.getAttribute("error")%>
 </p>
 <% } %>
-<form action="<%=request.getContextPath()%>/Subscribe" method="post">
+<form action="<%=request.getContextPath()%>/Signup" method="post">
     <div><label for="username">Username: </label> <input type="text" name="username" id="username"
                                                          placeholder="username" required></div>
 
@@ -35,7 +35,7 @@
                                                                         placeholder="Confirm Password" required></div>
 
     <div>
-        <button type="submit">Subscribe</button>
+        <button type="submit">Sign up</button>
     </div>
 </form>
 </body>

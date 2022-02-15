@@ -11,6 +11,7 @@ public class ExperimentRound {
     private List<Client> clientsState;
     private boolean last;
     private String reason;
+    private long time;
 
     public ExperimentRound(){}
 
@@ -22,9 +23,16 @@ public class ExperimentRound {
         this.clientsState = clientsState;
     }
 
+    public ExperimentRound(boolean last, String reason, long time) {
+        this.last = last;
+        this.reason = reason;
+        this.time = time;
+    }
+
     public ExperimentRound(boolean last, String reason) {
         this.last = last;
         this.reason = reason;
+        this.time = time;
     }
 
     public void setNumCrashes(int numCrashes) {
@@ -89,6 +97,14 @@ public class ExperimentRound {
 
     public void setClientsState(List<Client> clientsState) {
         this.clientsState = clientsState;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     // anche output clients

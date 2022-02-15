@@ -13,7 +13,6 @@ public class Node {
             this.otpNode = new OtpNode(nodeId, cookie);
             this.otpMbox = otpNode.createMbox(mBox);
         } catch(IOException ioe){
-            ioe.printStackTrace();
         }
     }
 

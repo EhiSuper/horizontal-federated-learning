@@ -30,7 +30,6 @@ public class History extends HttpServlet {
             return;
         }
         String targetJSP = "/pages/jsp/history.jsp";
-        //myLevelDb.addExperiment();
         myLevelDb.printContent();
         List<Experiment> listExperiment = myExperimentService.readAllExperiments();
         request.setAttribute("listExperiment", listExperiment);

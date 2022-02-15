@@ -7,6 +7,8 @@ import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Communication;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorException;
+import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.LoginException;
+import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.RegistrationException;
 import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
 
 import javax.servlet.*;
@@ -55,10 +57,8 @@ public class Home extends HttpServlet {
             int numMinClients = Integer.parseInt(request.getParameter("numMinClients"));
             boolean randomClients = Boolean.parseBoolean(request.getParameter("randomClients"));
             int timeout = Integer.parseInt(request.getParameter("timeout"));
-
-            String firstFeature = request.getParameter("firstFeature");
-            String secondFeature = request.getParameter("secondFeature");
-
+            int firstFeature = 0;
+            int secondFeature = 1;
             String selectedAlgorithm = request.getParameter("algorithm");
             Algorithm algorithm = null;
             switch (selectedAlgorithm) {
@@ -76,7 +76,7 @@ public class Home extends HttpServlet {
                     kMeansAlgorithm.setNumClusters(numClusters);
                     kMeansAlgorithm.setSeedCenters(seedCenters);
                     algorithm = kMeansAlgorithm;
-
+                    algorithm.setName("KMeans");
             }
             Experiment experiment = new Experiment();
             experiment.setAlgorithm(algorithm);
@@ -103,7 +103,16 @@ public class Home extends HttpServlet {
             String[] clients = defaultValues.remove("ClientsHostnames").split(",");
             List<String> clientsHostnames = Arrays.asList(clients);
             experiment.setClientsHostnames(clientsHostnames);
-            myExperimentService.insert(experiment);
+            try {
+                myExperimentService.insert(experiment);
+            } catch (RegistrationException e) {
+                request.setAttribute("error", e.getMessage());
+                String targetJSP = "/pages/jsp/home.jsp";
+                request.setAttribute("numClients", experiment.getNumClients());
+                RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
+                requestDispatcher.forward(request, response);
+                return;
+            }
             myLevelDb.printContent();
             Communication.startExperiment(experiment);
             List<ExperimentRound> rounds = new ArrayList<>();
@@ -128,6 +137,8 @@ public class Home extends HttpServlet {
                 if (singleRound != null && !singleRound.getLast())
                     numCrashes += singleRound.getNumCrashes();
                 else if(singleRound != null && singleRound.getLast()){
+                    System.out.println(rounds.get(i).getTime());
+                    experiment.setTime(rounds.get(i).getTime());
                     switch (experiment.getAlgorithm().getName()) {
                         case "KMeans":
                             KMeansAlgorithmRound kmround = (KMeansAlgorithmRound)rounds.get(i-1).getAlgorithmRound();
@@ -139,6 +150,7 @@ public class Home extends HttpServlet {
                     }
                 }
             }
+            experiment.setRoundsInfo(rounds);
             experiment.setNumCrashes(numCrashes);
             experiment.setNumRounds(rounds.size()-2);
             experiment.setAlgorithm(algorithm);
@@ -155,6 +167,9 @@ public class Home extends HttpServlet {
             request.setAttribute("numClients", experiment.getNumClients());
             request.setAttribute("experimentId", experiment.getId());
             request.setAttribute("numMinClients", experiment.getNumMinClients());
+            request.setAttribute("time", experiment.getTime());
+            request.setAttribute("numFeatures", experiment.getNumFeatures());
+            System.out.println(experiment.getTime());
             String targetJSP = "/pages/jsp/home.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
@@ -163,10 +178,75 @@ public class Home extends HttpServlet {
             List<String> logs = Log.getLogExperimentText(myExperimentService.findExperimentById(id));
             String result = String.join( "\n", logs);
             response.setContentType("plain/text");
-            response.addHeader("Content-Disposition", "attachment:filename=\"log.txt\"");
+            response.addHeader("Content-Disposition", "attachment; filename=\"log.txt\"");
             PrintWriter writer = response.getWriter();
             writer.write(result);
             writer.close();
+        } else if(request.getParameter("change") != null) {
+            int id = Integer.parseInt(request.getParameter("experimentId"));
+            int firstFeature = Integer.parseInt(request.getParameter("firstFeature"));
+            int secondFeature = Integer.parseInt(request.getParameter("secondFeature"));
+            Experiment experiment = myExperimentService.findExperimentById(id);
+            System.out.println(experiment);
+            System.out.println(firstFeature);
+            System.out.println(secondFeature);
+            Communication.startExperiment(experiment);
+            List<ExperimentRound> rounds = new ArrayList<>();
+            ExperimentRound round = null;
+            while (true) {
+                try {
+                    round = Communication.receiveRound();
+                    rounds.add(round);
+                } catch (ErlangErrorException ex) {
+                    System.out.println("Error during erlang computations: " + ex.getMessage());
+                    continue;
+                }
+                if (round == null) {
+                    System.out.println("finished experiment");
+                    break;
+                }
+            }
+            int numCrashes = 0;
+            Algorithm algorithm = null;
+            for (int i = 0; i < rounds.size(); ++i) {
+                ExperimentRound singleRound = rounds.get(i);
+                if (singleRound != null && !singleRound.getLast())
+                    numCrashes += singleRound.getNumCrashes();
+                else if(singleRound != null && singleRound.getLast()){
+                    System.out.println(rounds.get(i).getTime());
+                    experiment.setTime(rounds.get(i).getTime());
+                    switch (experiment.getAlgorithm().getName()) {
+                        case "KMeans":
+                            KMeansAlgorithmRound kmround = (KMeansAlgorithmRound)rounds.get(i-1).getAlgorithmRound();
+                            KMeansAlgorithm kMeansAlgorithm = (KMeansAlgorithm) experiment.getAlgorithm();
+                            kMeansAlgorithm.setfNorm(kmround.getfNorm());
+                            kMeansAlgorithm.setCenters(kmround.getCenters());
+                            algorithm = kMeansAlgorithm;
+                            break;
+                    }
+                }
+            }
+            experiment.setRoundsInfo(rounds);
+            experiment.setNumCrashes(numCrashes);
+            experiment.setNumRounds(rounds.size()-2);
+            experiment.setAlgorithm(algorithm);
+            myExperimentService.editExperiment(experiment);
+            List<String> logExecution = Log.getLogExperimentText(experiment);
+            for(int i = 0; i < logExecution.size(); ++i)
+                logExecution.set(i, "'"+logExecution.get(i)+"'");
+            request.setAttribute("rounds", experiment.getRoundsInfo());
+            request.setAttribute("algorithm", experiment.getAlgorithm().getName());
+            request.setAttribute("logExecution", logExecution);
+            request.setAttribute("firstFeature", firstFeature);
+            request.setAttribute("secondFeature", secondFeature);
+            request.setAttribute("numClients", experiment.getNumClients());
+            request.setAttribute("experimentId", experiment.getId());
+            request.setAttribute("numMinClients", experiment.getNumMinClients());
+            request.setAttribute("time", experiment.getTime());
+            request.setAttribute("numFeatures", experiment.getNumFeatures());
+            String targetJSP = "/pages/jsp/home.jsp";
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
+            requestDispatcher.forward(request, response);
         }
     }
 }
