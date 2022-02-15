@@ -25,7 +25,7 @@ public class History extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getSession().getAttribute("login") == null) {
+        if (request.getSession().getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
@@ -45,8 +45,8 @@ public class History extends HttpServlet {
         String user = request.getParameter("user");
         // agisci su user
         HttpSession session = request.getSession();
-        String username = (String) session.getAttribute("login");
-        User myUser = myUserService.findUserByUsername(username);
+        int id = (int) session.getAttribute("user");
+        User myUser = myUserService.findUserById(id);
         if (!user.equals("all"))
             user = String.valueOf(myUser.getId());
         System.out.println(user);

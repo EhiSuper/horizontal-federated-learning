@@ -24,6 +24,7 @@
     String reason = "";
     List<String> logExecution = new ArrayList<>();
     if (request.getAttribute("rounds") != null) {
+        System.out.println("not null");
         firstFeature = (int)request.getAttribute("firstFeature");
         secondFeature = (int)request.getAttribute("secondFeature");
         Gson gsonObj = new Gson();
@@ -247,7 +248,7 @@
     </form>
     <br>
     <div id="features" style=" display: none;">
-        <form action="<%=request.getContextPath()%>/Home" method="post">
+        <form action="<%=request.getContextPath()%>/Home/Features" method="post">
             <input type="hidden" id="experimentId" name="experimentId" value="<%=experimentId%>">
             <label for="firstFeature">First Feature:</label>
             <select name="firstFeature" id="firstFeature">
@@ -255,6 +256,17 @@
             <label for="secondFeature">Second Feature:</label>
             <select name="secondFeature" id="secondFeature">
             </select>
+            <%
+                request.setAttribute("numClients", request.getAttribute("numClients"));
+                request.setAttribute("rounds", request.getAttribute("rounds"));
+                request.setAttribute("experimentId", request.getAttribute("experimentId"));
+                request.setAttribute("logExperiment", request.getAttribute("LogExperiment"));
+                request.setAttribute("numClients", request.getAttribute("numClients"));
+                request.setAttribute("numMinClients", request.getAttribute("numMinClients"));
+                request.setAttribute("algorithm", request.getAttribute("algorithm"));
+                request.setAttribute("numFeatures", request.getAttribute("numFeatures"));
+                request.setAttribute("time", request.getAttribute("time"));
+            %>
             <button type="submit" name="change" id="changeButton" disabled>Change</button>
         </form>
     </div>

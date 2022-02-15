@@ -98,13 +98,16 @@ public class Communication {
             }
             OtpErlangAtom msgType = (OtpErlangAtom) result.elementAt(1);
             if (msgType.toString().equals("error")) {
+                System.out.println( "Error");
                 throw new ErlangErrorException(result.elementAt(2).toString());
             } else if (msgType.toString().equals("completed")) {
+                System.out.println( "completed");
                 elapsedTime = (System.nanoTime() - start) / 1000000;
                 return new ExperimentRound(true, result.elementAt(2).toString(), elapsedTime);
             } else { //round
                 //System.out.println(result.elementAt(2).toString());
                 ExperimentRound round = composeRound(result);
+                System.out.println(round);
                 return round;
             }
         } catch (OtpErlangExit e) {

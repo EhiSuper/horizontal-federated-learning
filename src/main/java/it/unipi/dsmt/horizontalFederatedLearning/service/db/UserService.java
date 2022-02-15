@@ -34,7 +34,8 @@ public class UserService {
         map.put(prefixKey + "firstName", user.getFirstName());
         map.put(prefixKey + "lastName", user.getLastName());
         map.put(prefixKey + "password", user.getPassword());
-        map.put(prefixKey + "admin", String.valueOf(user.getAdmin()));
+        if(user.getAdmin() == true)
+            map.put(prefixKey + "admin", String.valueOf(user.getAdmin()));
         db.putBatchValues(map);
     }
 
@@ -60,10 +61,10 @@ public class UserService {
                 String password = db.getValue("User:" + id + ":password");
                 String firstName = db.getValue("User:" + id + ":firstName");
                 String lastName = db.getValue("User:" + id + ":lastName");
-                String admin = db.getValue("User:" + id + ":admin");
-                if(admin == null)
-                    return new User(id, firstName, lastName, username, password);
-                else return new User(id, firstName, lastName, username, password, Boolean.parseBoolean(admin));
+                boolean admin = false;
+                if(db.getValue("User:" + id + ":admin") != null)
+                    admin = Boolean.parseBoolean(db.getValue("User:" + id + ":admin"));
+                return new User(id, firstName, lastName, username, password, admin);
             }
         }
         return null;
@@ -77,10 +78,10 @@ public class UserService {
         String password = db.getValue("User:" + id + ":password");
         String firstName = db.getValue("User:" + id + ":firstName");
         String lastName = db.getValue("User:" + id + ":lastName");
-        String admin = db.getValue("User:" + id + ":admin");
-        if(admin == null)
-            return new User(id, firstName, lastName, username, password);
-        else return new User(id, firstName, lastName, username, password, Boolean.parseBoolean(admin));
+        boolean admin = false;
+        if(db.getValue("User:" + id + ":admin") != null)
+            admin = Boolean.parseBoolean(db.getValue("User:" + id + ":admin"));
+        return new User(id, firstName, lastName, username, password, admin);
     }
 
     public void updateUser(User user) {

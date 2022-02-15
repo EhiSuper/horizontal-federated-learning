@@ -29,6 +29,10 @@ public class ExperimentInfo extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (request.getSession().getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
         String targetJSP = "/pages/jsp/experimentInfo.jsp";
         String id = request.getParameter("id");
         System.out.println(id);

@@ -114,6 +114,8 @@ public class KMeansAlgorithm extends Algorithm{
 
     public String toStringCenters(){
         String result = "";
+        if(centers == null)
+            return result;
         for(int i = 0; i < centers.size(); ++i){
             result += "[";
             List<Double> list = centers.get(i);

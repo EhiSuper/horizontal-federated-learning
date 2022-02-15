@@ -40,6 +40,7 @@ public class Log {
         try {
             FileWriter fw = new FileWriter(logFile, true);
             BufferedWriter bw = new BufferedWriter(fw);
+            line = line.replace("'", "");
             bw.write(line);
             bw.newLine();
             bw.close();

@@ -136,10 +136,8 @@ public class ExperimentService {
     }
 
     public void editExperiment(Experiment newExperiment){
-        db.printContent();
         deleteExperimentById(newExperiment.getId());
         insert(newExperiment);
-        db.printContent();
     }
 
     public Experiment findExperimentById(int id){

@@ -39,9 +39,10 @@ public class Signup extends HttpServlet {
         }
 
         try {
-            myUserService.register(new User(firstName, lastName, username, password));
+            User user = new User(firstName, lastName, username, password);
+            myUserService.register(user);
             HttpSession session = request.getSession();
-            session.setAttribute("login", username);
+            session.setAttribute("user", user.getId());
             response.sendRedirect(request.getContextPath() + "/Home");
         }
         catch(RegistrationException e){

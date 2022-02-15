@@ -32,7 +32,7 @@ public class Home extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getSession().getAttribute("login") == null) {
+        if (request.getSession().getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
@@ -46,9 +46,8 @@ public class Home extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
-        String username = (String) session.getAttribute("login");
-        User myUser = myUserService.findUserByUsername(username);
+        int userId = (int)request.getSession().getAttribute("user");
+        User myUser = myUserService.findUserById(userId);
 
         if (request.getParameter("run") != null) {
             String name = request.getParameter("name");
@@ -134,10 +133,9 @@ public class Home extends HttpServlet {
             int numCrashes = 0;
             for (int i = 0; i < rounds.size(); ++i) {
                 ExperimentRound singleRound = rounds.get(i);
-                if (singleRound != null && !singleRound.getLast())
-                    numCrashes += singleRound.getNumCrashes();
-                else if(singleRound != null && singleRound.getLast()){
-                    System.out.println(rounds.get(i).getTime());
+                if(singleRound != null && singleRound.getLast()){
+                    numCrashes = rounds.get(i-1).getNumCrashes();
+                    System.out.println(numCrashes);
                     experiment.setTime(rounds.get(i).getTime());
                     switch (experiment.getAlgorithm().getName()) {
                         case "KMeans":
@@ -168,7 +166,6 @@ public class Home extends HttpServlet {
             request.setAttribute("numMinClients", experiment.getNumMinClients());
             request.setAttribute("time", experiment.getTime());
             request.setAttribute("numFeatures", experiment.getNumFeatures());
-            System.out.println(experiment.getTime());
             String targetJSP = "/pages/jsp/run.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
@@ -188,9 +185,6 @@ public class Home extends HttpServlet {
             int firstFeature = Integer.parseInt(request.getParameter("firstFeature"));
             int secondFeature = Integer.parseInt(request.getParameter("secondFeature"));
             Experiment experiment = myExperimentService.findExperimentById(id);
-            System.out.println(experiment);
-            System.out.println(firstFeature);
-            System.out.println(secondFeature);
             Communication communication = new Communication();
             communication.startExperiment(experiment);
             List<ExperimentRound> rounds = new ArrayList<>();
@@ -215,7 +209,6 @@ public class Home extends HttpServlet {
                 if (singleRound != null && !singleRound.getLast())
                     numCrashes += singleRound.getNumCrashes();
                 else if(singleRound != null && singleRound.getLast()){
-                    System.out.println(rounds.get(i).getTime());
                     experiment.setTime(rounds.get(i).getTime());
                     switch (experiment.getAlgorithm().getName()) {
                         case "KMeans":

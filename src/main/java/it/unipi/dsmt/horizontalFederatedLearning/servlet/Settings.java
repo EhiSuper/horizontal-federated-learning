@@ -17,13 +17,12 @@ public class Settings extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getSession().getAttribute("login") == null) {
+        if (request.getSession().getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/");
             return;
         }
-        HttpSession session = request.getSession();
-        String username = (String) session.getAttribute("login");
-        User myUser = myUserService.findUserByUsername(username);
+        int id = (int) request.getSession().getAttribute("user");
+        User myUser = myUserService.findUserById(id);
         request.setAttribute("username", myUser.getUsername());
         request.setAttribute("firstName", myUser.getFirstName());
         request.setAttribute("lastName", myUser.getLastName());
@@ -41,8 +40,7 @@ public class Settings extends HttpServlet {
         String lastName = request.getParameter("lastName");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
-        HttpSession session = request.getSession();
-        User myUser = myUserService.findUserByUsername((String) session.getAttribute("login"));
+        User myUser = myUserService.findUserById((int) request.getSession().getAttribute("user"));
 
         if (!password.equals(confirmPassword)) {
             request.setAttribute("error", "The two passwords are not equal");
