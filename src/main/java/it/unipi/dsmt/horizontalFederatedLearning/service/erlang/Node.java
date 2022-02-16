@@ -33,9 +33,6 @@ public class Node {
         return otpNode;
     }
 
-    public void setOtpNode(OtpNode otpNode) {
-        this.otpNode = otpNode;
-    }
 }
 
 

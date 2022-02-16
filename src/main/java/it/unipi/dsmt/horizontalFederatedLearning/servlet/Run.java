@@ -2,13 +2,8 @@ package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
 import com.google.gson.Gson;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.ConfigurationService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ExperimentService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Communication;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorException;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.RegistrationException;
+import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.ExperimentProcess;
 import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
 
 import javax.servlet.RequestDispatcher;
@@ -19,15 +14,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDate;
 import java.util.*;
 
 @WebServlet(name = "Run", value = "/Run")
 public class Run extends HttpServlet {
-
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final ExperimentService myExperimentService = new ExperimentService(myLevelDb);
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/run.jsp";
@@ -44,19 +34,19 @@ public class Run extends HttpServlet {
             System.out.println("1st branch");
             if(request.getAttribute("ExperimentId") != null) {
                 System.out.println("1st inner branch");
-                experiment = myExperimentService.findExperimentById((Integer)request.getAttribute("ExperimentId"));
+                experiment = ExperimentService.findExperimentById((Integer)request.getAttribute("ExperimentId"));
                 firstFeature = (Integer)request.getAttribute("firstFeature");
                 secondFeature = (Integer)request.getAttribute("secondFeature");
             } else if (request.getParameter("ExperimentId") != null){
                 System.out.println("2nd inner branch");
-                experiment = myExperimentService.findExperimentById(Integer.parseInt(request.getParameter("ExperimentId")));
+                experiment = ExperimentService.findExperimentById(Integer.parseInt(request.getParameter("ExperimentId")));
                 firstFeature = Integer.parseInt(request.getParameter("firstFeature"));
                 secondFeature = Integer.parseInt(request.getParameter("secondFeature"));
             }
-            Communication communication = new Communication();
+            ExperimentProcess communication = new ExperimentProcess();
             List<ExperimentRound> rounds = communication.startExperiment(experiment);
             experiment.setPostAlgorithmParameters(rounds);
-            myExperimentService.editExperiment(experiment);
+            ExperimentService.editExperiment(experiment);
             List<String> logExecution = Log.getLogExperiment(experiment);
             for(int i = 0; i < logExecution.size(); ++i)
                 logExecution.set(i, "'"+logExecution.get(i)+"'");
@@ -81,13 +71,13 @@ public class Run extends HttpServlet {
                     for (Client client : involvedClientsRound) {
                         List<List<Double>> chunk = client.getChunk();
                         for(List<Double> point: chunk){
-                                map = new HashMap<>();
-                                map.put("x", point.get(firstFeature));
-                                map.put("y", point.get(secondFeature));
-                                map.put("color", "grey");
-                                map.put("markerSize", 3);
-                                map.put("fillOpacity", ".3");
-                                pointList.add(map);
+                            map = new HashMap<>();
+                            map.put("x", point.get(firstFeature));
+                            map.put("y", point.get(secondFeature));
+                            map.put("color", "grey");
+                            map.put("markerSize", 3);
+                            map.put("fillOpacity", ".3");
+                            pointList.add(map);
                         }
                     }
                     for (List<Double> center : centers) {
@@ -138,7 +128,7 @@ public class Run extends HttpServlet {
             requestDispatcher.forward(request, response);
         } else if(request.getParameter("export") != null) {
             int id = Integer.parseInt(request.getParameter("id"));
-            List<String> logs = Log.getLogExperiment(myExperimentService.findExperimentById(id));
+            List<String> logs = Log.getLogExperiment(ExperimentService.findExperimentById(id));
             String result = String.join( "\n", logs);
             response.setContentType("plain/text");
             response.addHeader("Content-Disposition", "attachment; filename=\"log.txt\"");

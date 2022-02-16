@@ -2,10 +2,9 @@ package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ExperimentService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Communication;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorException;
+import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.ExperimentProcess;
+import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.CommunicationException;
 import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
 
 import javax.servlet.RequestDispatcher;
@@ -23,16 +22,12 @@ import java.util.List;
 @WebServlet(name = "ExperimentInfo", value = "/ExperimentInfo")
 public class ExperimentInfo extends HttpServlet {
 
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final ExperimentService myExperimentService = new ExperimentService(myLevelDb);
-    private final UserService myUserService = new UserService(myLevelDb);
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/experimentInfo.jsp";
         String id = request.getParameter("id");
         System.out.println(id);
-        Experiment experiment = myExperimentService.findExperimentById(Integer.parseInt(id));
+        Experiment experiment = ExperimentService.findExperimentById(Integer.parseInt(id));
         System.out.println(experiment);
         request.setAttribute("experiment", experiment);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
@@ -43,10 +38,8 @@ public class ExperimentInfo extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         int experimentId = Integer.parseInt(request.getParameter("id"));
-        if(action.equals("back")) {
-            response.sendRedirect(request.getContextPath() + "/History");
-        } else if(action.equals("delete")){
-            myExperimentService.deleteExperimentById(experimentId);
+        if(action.equals("delete")){
+            ExperimentService.deleteExperimentById(experimentId);
             response.sendRedirect(request.getContextPath() + "/History");
         } else if(action.equals("update")){
             String name = request.getParameter("name");
@@ -68,7 +61,7 @@ public class ExperimentInfo extends HttpServlet {
             int maxAttemptsServerCrash = Integer.parseInt(request.getParameter("maxAttemptsServerCrash"));
             int maxAttemptsOverallCrash = Integer.parseInt(request.getParameter("maxAttemptsOverallCrash"));
             String username = request.getParameter("username");
-            User user = myUserService.findUserByUsername(username);
+            User user = UserService.findUserByUsername(username);
             String algorithmName = request.getParameter("algorithmName");
             Algorithm algorithm = null;
             if(algorithmName.equals("KMeans")){
@@ -81,11 +74,11 @@ public class ExperimentInfo extends HttpServlet {
             }
             algorithm.setName(algorithmName);
             Experiment experiment = new Experiment(experimentId, name, algorithm, dataset, numFeatures, mode, user, creationDate, lastUpdateDate,numRounds,maxNumRounds,numCrashes,numClients, numMinClients,
-            clientsHostnames,  randomClients, randomClientsSeed, (int) timeout,maxAttemptsClientCrash, maxAttemptsServerCrash, maxAttemptsOverallCrash);
-            Experiment oldExperiment = myExperimentService.findExperimentById(experimentId);
-            myExperimentService.editExperiment(experiment);
+                    clientsHostnames,  randomClients, randomClientsSeed, (int) timeout,maxAttemptsClientCrash, maxAttemptsServerCrash, maxAttemptsOverallCrash);
+            Experiment oldExperiment = ExperimentService.findExperimentById(experimentId);
+            ExperimentService.editExperiment(experiment);
             if(experiment.different(oldExperiment)) {
-                Communication communication = new Communication();
+                ExperimentProcess communication = new ExperimentProcess();
                 communication.startExperiment(experiment);
                 List<ExperimentRound> rounds = new ArrayList<>();
                 ExperimentRound round = null;
@@ -93,7 +86,7 @@ public class ExperimentInfo extends HttpServlet {
                     try {
                         round = communication.receiveRound();
                         rounds.add(round);
-                    } catch (ErlangErrorException ex) {
+                    } catch (CommunicationException ex) {
                         System.out.println("Error during erlang computations: " + ex.getMessage());
                         continue;
                     }
@@ -125,8 +118,7 @@ public class ExperimentInfo extends HttpServlet {
                 experiment.setNumCrashes(numCrashes);
                 experiment.setNumRounds(rounds.size() - 2);
                 experiment.setAlgorithm(algorithm);
-                myExperimentService.editExperiment(experiment);
-                myLevelDb.printContent();
+                ExperimentService.editExperiment(experiment);
                 List<String> logExecution = Log.getLogExperiment(experiment);
                 for (int i = 0; i < logExecution.size(); ++i)
                     logExecution.set(i, "'" + logExecution.get(i) + "'");

@@ -1,23 +1,14 @@
 package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.ConfigurationService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.ExperimentService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Communication;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorException;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.LoginException;
+import it.unipi.dsmt.horizontalFederatedLearning.service.db.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.RegistrationException;
-import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,15 +16,10 @@ import java.util.Map;
 @WebServlet(name = "Home", value = "/Home")
 public class Home extends HttpServlet {
 
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final UserService myUserService = new UserService(myLevelDb);
-    private final ExperimentService myExperimentService = new ExperimentService(myLevelDb);
-    private final ConfigurationService myConfigurationService = new ConfigurationService(myLevelDb);
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/home.jsp";
-        Map<String, String> defaultValues = myConfigurationService.retrieveGeneral();
+        Map<String, String> defaultValues = ConfigurationService.retrieveGeneral();
         request.setAttribute("numClients", Integer.parseInt(defaultValues.get("NumberOfClients")));
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
@@ -42,9 +28,7 @@ public class Home extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int userId = (int) request.getSession().getAttribute("user");
-        User myUser = myUserService.findUserById(userId);
-        
-
+        User myUser = UserService.findUserById(userId);
         if (request.getParameter("run") != null) {
             String name = request.getParameter("name");
             String dataset = request.getParameter("dataset");
@@ -83,7 +67,7 @@ public class Home extends HttpServlet {
             experiment.setNumMinClients(numMinClients);
             experiment.setRandomClients(randomClients);
             experiment.setTimeout(timeout);
-            Map<String, String> defaultValues = myConfigurationService.retrieveGeneral();
+            Map<String, String> defaultValues = ConfigurationService.retrieveGeneral();
             experiment.setMode(Integer.parseInt(defaultValues.get("Mode")));
             experiment.setMaxNumRounds(Integer.parseInt(defaultValues.get("MaxNumberRound")));
             experiment.setNumClients(Integer.parseInt(defaultValues.get("NumberOfClients")));
@@ -99,7 +83,7 @@ public class Home extends HttpServlet {
                 System.out.println(x);
             experiment.setClientsHostnames(clientsHostnames);
             try {
-                myExperimentService.insert(experiment); //da vedere
+                ExperimentService.insert(experiment); //da vedere
             } catch (RegistrationException e) {
                 request.setAttribute("error", e.getMessage());
                 String targetJSP = "/pages/jsp/home.jsp";

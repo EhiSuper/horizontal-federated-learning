@@ -8,17 +8,15 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
+import java.util.logging.Level;
 
 @WebServlet(name = "Settings", value = "/Settings")
 public class Settings extends HttpServlet {
 
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final UserService myUserService = new UserService(myLevelDb);
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int id = (int) request.getSession().getAttribute("user");
-        User myUser = myUserService.findUserById(id);
+        User myUser = UserService.findUserById(id);
         request.setAttribute("username", myUser.getUsername());
         request.setAttribute("firstName", myUser.getFirstName());
         request.setAttribute("lastName", myUser.getLastName());
@@ -36,7 +34,7 @@ public class Settings extends HttpServlet {
         String lastName = request.getParameter("lastName");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
-        User myUser = myUserService.findUserById((int) request.getSession().getAttribute("user"));
+        User myUser = UserService.findUserById((int) request.getSession().getAttribute("user"));
 
         if (!password.equals(confirmPassword)) {
             request.setAttribute("error", "The two passwords are not equal");
@@ -53,12 +51,12 @@ public class Settings extends HttpServlet {
         }
 
         try {
-            myUser = myUserService.findUserByUsername(username);
+            myUser = UserService.findUserByUsername(username);
             myUser.setFirstName(firstName);
             myUser.setLastName(lastName);
             myUser.setUsername(username);
             myUser.setPassword(password);
-            myUserService.updateUser(myUser);
+            UserService.updateUser(myUser);
             request.setAttribute("username", myUser.getUsername());
             request.setAttribute("firstName", myUser.getFirstName());
             request.setAttribute("lastName", myUser.getLastName());

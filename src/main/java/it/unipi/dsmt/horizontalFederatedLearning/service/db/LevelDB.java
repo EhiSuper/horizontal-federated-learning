@@ -17,10 +17,10 @@ public class LevelDB {
     private DB db = null;
     private String pathDatabase;
 
-    //Private Constructor
     private LevelDB(String pathDatabase) {
         this.pathDatabase = pathDatabase;
         openDB();
+        //addAdmin();
     }
 
     //Singleton Pattern
@@ -37,15 +37,12 @@ public class LevelDB {
 
     public void openDB() {
         Options options = new Options();
-        // check if we have problems with lexicographic order or we need to define a comparator
-        options.createIfMissing(true);
-        try {
+        try{
             db = factory.open(new File(pathDatabase), options);
-        } catch (IOException ioe) {
+        }
+        catch (IOException ioe) {
             closeDB();
         }
-        //addExperiment();
-        //addAdmin();
     }
 
     public void closeDB() {
@@ -57,10 +54,6 @@ public class LevelDB {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-    }
-
-    public boolean isDBOpen() {
-        return db != null;
     }
 
     public void putValue(String key, String value) {
@@ -75,7 +68,7 @@ public class LevelDB {
         db.delete(bytes(key));
     }
 
-    public void putBatchValues(HashMap<String, String> entries) {
+    public synchronized void putBatchValues(HashMap<String, String> entries) {
         try (WriteBatch batch = db.createWriteBatch()) {
             for (int i = 0; i < entries.size(); ++i) {
                 batch.put(bytes((String) entries.keySet().toArray()[i]), bytes(entries.get(entries.keySet().toArray()[i])));
@@ -86,21 +79,22 @@ public class LevelDB {
         }
     }
 
+
     public List<String> iterateDB() {
         List<String> results = new ArrayList<>();
         try (DBIterator iterator = db.iterator()) {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 String key = asString(iterator.peekNext().getKey());
                 String value = asString(iterator.peekNext().getValue());
-                results.add(key + " " + value);
+                deleteValue(key);
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
         return results;
     }
-
-    public void addExperiment() {
+    /*
+   public void addExperiment() {
         UserService myUserService = new UserService(this);
         new ExperimentService(this);
         User user = myUserService.findUserByUsername("antonio");
@@ -142,11 +136,18 @@ public class LevelDB {
         for (String elem : list)
             System.out.println(elem);
     }
-
+    */
     public void addAdmin() {
+        HashMap<String, String> map = new HashMap<>();
         User user = new User("Capo", "Capo", "admin", "admin", true);
-        UserService myUserService = new UserService(this);
-        myUserService.register(user);
+        String prefixKey = "User:" + 1 + ":";
+        map.put(prefixKey + "username", user.getUsername());
+        map.put(prefixKey + "firstName", user.getFirstName());
+        map.put(prefixKey + "lastName", user.getLastName());
+        map.put(prefixKey + "password", user.getPassword());
+        if(user.getAdmin() == true)
+            map.put(prefixKey + "admin", String.valueOf(user.getAdmin()));
+        putBatchValues(map);
     }
 
     public void printContent() {

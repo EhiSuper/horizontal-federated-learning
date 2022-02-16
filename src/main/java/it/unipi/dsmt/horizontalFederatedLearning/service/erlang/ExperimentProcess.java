@@ -2,7 +2,7 @@ package it.unipi.dsmt.horizontalFederatedLearning.service.erlang;
 
 import com.ericsson.otp.erlang.*;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorException;
+import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.CommunicationException;
 import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
 
 import java.io.BufferedReader;
@@ -11,10 +11,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Communication {
-    private OtpErlangPid destination;//concurrency problems
+public class ExperimentProcess {
+    private OtpErlangPid destination;
     private OtpMbox erlangProcess;
-    private OtpConnection caller;//concurrency problems
+    private OtpConnection caller;
     private Experiment currentExperiment;
     private long elapsedTime;
     private long start;
@@ -95,7 +95,7 @@ public class Communication {
                     System.out.println("Experiment completed! Received all rounds!");
                     break;
                 }
-            } catch (ErlangErrorException ex) {
+            } catch (CommunicationException ex) {
                 System.out.println("Error during erlang computations: " + ex.getMessage());
                 continue;
             }
@@ -109,7 +109,7 @@ public class Communication {
         tuple = (OtpErlangTuple) erlangProcess.receive();
         OtpErlangPid sender = (OtpErlangPid) tuple.elementAt(0);
         if (!sender.node().equals("erl@127.0.0.1"))
-            throw new ErlangErrorException();
+            throw new CommunicationException();
         if (destination == null) {
             destination = sender;
             erlangProcess.link(destination);
@@ -126,7 +126,7 @@ public class Communication {
             }
             OtpErlangAtom msgType = (OtpErlangAtom) result.elementAt(1);
             if (msgType.toString().equals("error")) {
-                throw new ErlangErrorException(result.elementAt(2).toString());
+                throw new CommunicationException(result.elementAt(2).toString());
             } else if (msgType.toString().equals("completed")) {
                 System.out.println( "completed");
                 elapsedTime = (System.nanoTime() - start) / 1000000;

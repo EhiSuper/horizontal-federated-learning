@@ -7,15 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 
 public class UserService {
-    private LevelDB db;
+    private static LevelDB db;
     private static int counterID;
 
-    public UserService(LevelDB db) {
-        this.db = db;
+    static {
+        db = LevelDB.getInstance();
         setCounterID();
     }
 
-    private void setCounterID() {
+    private static void setCounterID() {
         List<String> keys = db.findKeysByPrefix("User:");
         if (keys != null)
             for (String key : keys) {
@@ -25,7 +25,7 @@ public class UserService {
             }
     }
 
-    public void register(User user) throws RegistrationException {
+    public static void register(User user) throws RegistrationException {
         HashMap<String, String> map = new HashMap<>();
         if (findUserByUsername(user.getUsername()) != null)
             throw new RegistrationException("Username already taken");
@@ -39,7 +39,7 @@ public class UserService {
         db.putBatchValues(map);
     }
 
-    public User login(String username, String password) throws LoginException {
+    public static User login(String username, String password) throws LoginException {
         List<String> keys = db.findKeysByPrefix("User:");
         for (String key : keys) {
             if (key.endsWith("username") && db.getValue(key).equals(username)) {
@@ -53,7 +53,7 @@ public class UserService {
         throw new LoginException("Username not valid!");
     }
 
-    public User findUserByUsername(String username) {
+    public static User findUserByUsername(String username) {
         List<String> keys = db.findKeysByPrefix("User:");
         for (String key : keys) {
             if (key.endsWith("username") && db.getValue(key).equals(username)) {
@@ -70,8 +70,8 @@ public class UserService {
         return null;
     }
 
-    public User findUserById(int id) {
-        List<String> keys = db.findKeysByPrefix("User:" + id);
+    public static User findUserById(int id) {
+        List<String> keys = db.findKeysByPrefix("User:" + id+":");
         if (keys.size() == 0)
             return null;
         String username = db.getValue("User:" + id + ":username");
@@ -84,7 +84,7 @@ public class UserService {
         return new User(id, firstName, lastName, username, password, admin);
     }
 
-    public void updateUser(User user) {
+    public static void updateUser(User user) {
         db.deleteValue("User:" + user.getId() + ":username");
         db.putValue("User:" + user.getId() + ":username", user.getUsername());
         db.deleteValue("User:" + user.getId() + ":password");

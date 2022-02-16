@@ -12,9 +12,6 @@ import java.util.*;
 
 @WebFilter("/AdminPage")
 public class ValidationFilter implements Filter {
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final ConfigurationService myConfigurationService = new ConfigurationService(myLevelDb);
-
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -35,7 +32,7 @@ public class ValidationFilter implements Filter {
         request.setAttribute("valuesGeneral", valuesGeneral);
         HashMap<String, String> valuesKMeans = new HashMap<>();
         request.setAttribute("valuesKMeans", valuesKMeans);
-        valuesGeneral = myConfigurationService.retrieveGeneral();
+        valuesGeneral = ConfigurationService.retrieveGeneral();
         if (valuesGeneral != null && !valuesGeneral.isEmpty()) {
             String[] clients = valuesGeneral.remove("ClientsHostnames").split(",");
             List<String> clientsHostnames = Arrays.asList(clients);
@@ -45,7 +42,7 @@ public class ValidationFilter implements Filter {
             request.setAttribute("valuesGeneral", new HashMap<>());
             request.setAttribute("hostnames", new ArrayList<>());
         }
-        valuesKMeans = myConfigurationService.retrieveSpecific("kmeans");
+        valuesKMeans = ConfigurationService.retrieveSpecific("kmeans");
         if (valuesKMeans != null && !valuesKMeans.isEmpty()) {
             request.setAttribute("valuesKMeans", valuesKMeans);
         } else {

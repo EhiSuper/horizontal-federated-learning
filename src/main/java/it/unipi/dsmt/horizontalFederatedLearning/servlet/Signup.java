@@ -13,9 +13,6 @@ import java.io.IOException;
 @WebServlet(name = "Signup", value = "/Signup")
 public class Signup extends HttpServlet {
 
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final UserService myUserService = new UserService(myLevelDb);
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/signup.jsp";
@@ -40,7 +37,7 @@ public class Signup extends HttpServlet {
 
         try {
             User user = new User(firstName, lastName, username, password);
-            myUserService.register(user);
+            UserService.register(user);
             HttpSession session = request.getSession();
             session.setAttribute("user", user.getId());
             response.sendRedirect(request.getContextPath() + "/Home");

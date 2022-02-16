@@ -12,9 +12,6 @@ import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.LoginExcepti
 @WebServlet(name = "Login", value = "/Login")
 public class Login extends HttpServlet {
 
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final UserService myUserService = new UserService(myLevelDb);
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/login.jsp";
@@ -28,8 +25,8 @@ public class Login extends HttpServlet {
         String password = request.getParameter("password");
         request.setAttribute("error", " ");
         try {
-            myUserService.login(username, password);
-            User myUser = myUserService.findUserByUsername(username);
+            UserService.login(username, password);
+            User myUser = UserService.findUserByUsername(username);
             if(myUser.getAdmin() == true) {
                 System.out.println("Admin logged in!");
                 HttpSession session = request.getSession();

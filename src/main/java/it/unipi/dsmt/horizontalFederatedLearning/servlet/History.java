@@ -19,14 +19,10 @@ import java.util.List;
 @WebServlet(name = "History", value = "/History")
 public class History extends HttpServlet {
 
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final ExperimentService myExperimentService = new ExperimentService(myLevelDb);
-    private final UserService myUserService = new UserService(myLevelDb);
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/history.jsp";
-        List<Experiment> listExperiment = myExperimentService.readAllExperiments();
+        List<Experiment> listExperiment = ExperimentService.readAllExperiments();
         request.setAttribute("listExperiment", listExperiment);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
@@ -41,11 +37,11 @@ public class History extends HttpServlet {
         // agisci su user
         HttpSession session = request.getSession();
         int id = (int) session.getAttribute("user");
-        User myUser = myUserService.findUserById(id);
+        User myUser = UserService.findUserById(id);
         if (!user.equals("all"))
             user = String.valueOf(myUser.getId());
         System.out.println(user);
-        List<Experiment> listExperiments = myExperimentService.findExperimentsByFilter(user, filter, value);
+        List<Experiment> listExperiments = ExperimentService.findExperimentsByFilter(user, filter, value);
         request.setAttribute("listExperiment", listExperiments);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);

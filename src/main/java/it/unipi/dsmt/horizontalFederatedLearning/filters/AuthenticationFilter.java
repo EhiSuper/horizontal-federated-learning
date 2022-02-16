@@ -12,7 +12,7 @@ import java.util.Set;
 @WebFilter("/*")
 public class AuthenticationFilter implements Filter {
     private static final Set<String> ALLOWED_PATHS = Collections.unmodifiableSet(new HashSet<>(
-            Arrays.asList("", "/Login", "/Logout", "/Register")));
+            Arrays.asList("", "/Login", "/Logout", "/Signup")));
     private static final Set<String> ADMIN_PATHS = Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList("/AdminPage")));
 

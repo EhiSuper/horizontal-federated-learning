@@ -16,10 +16,6 @@ public class Log {
         logFile = "experimentsLog.txt";
     }
 
-    public Log(){
-    }
-
-
     public static synchronized void logExperiment(List<String> lines, Experiment experiment){
         try {
             FileWriter fw = new FileWriter(logFile, true);

@@ -22,8 +22,10 @@
     <button><a href="<%=request.getContextPath()%>/Logout">Logout</a></button>
 </div>
 <div id="options">
+    <form action="<%=request.getContextPath()%>/History">
+        <button type="submit" name="action" value="back">Back</button>
+    </form>
     <form action="<%=request.getContextPath()%>/ExperimentInfo" method="post">
-        <button type="submit" name="action" value="back">Back</button><br>
         <input type="hidden" id="id" name="id" value="<%=experiment.getId()%>">
         <label for="name">Name: </label><input id="name" name="name" value="<%=experiment.getName()%>"><br>
         <label for="dataset">Dataset: </label><input id="dataset" name="dataset" type="text" value="<%=experiment.getDataset()%>"><br>
@@ -86,9 +88,10 @@
             <label for="centers">Cluster Centers: </label><br><textarea id="centers" name="centers" rows="9" cols="50" readonly><%=algorithm.toStringCenters()%></textarea><br>
         <% } %>
         <br>
-        <button type="submit" name="action" value="update">Edit Experiment</button>
-        <button type="submit" name="action" value="delete">Delete Experiment</button>
-        <br>
+        <% if(experiment.getUser().getId() == (int)session.getAttribute("user")){ %>
+            <button type="submit" name="action" value="update">Edit Experiment</button>
+            <button type="submit" name="action" value="delete">Delete Experiment</button>
+        <% } %>
     </form>
 </div>
 </body>

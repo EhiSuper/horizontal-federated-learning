@@ -11,14 +11,11 @@ import java.util.*;
 
 @WebServlet(name = "AdminPage", value = "/AdminPage")
 public class AdminPage extends HttpServlet {
-    private final LevelDB myLevelDb = LevelDB.getInstance();
-    private final ConfigurationService myConfigurationService = new ConfigurationService(myLevelDb);
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Map<String, String> messages = new HashMap<>();
         request.setAttribute("messages", messages);
-        Map<String, String> valuesGeneral = myConfigurationService.retrieveGeneral();
+        Map<String, String> valuesGeneral = ConfigurationService.retrieveGeneral();
         if (valuesGeneral != null && !valuesGeneral.isEmpty()) {
             String[] clients = valuesGeneral.remove("ClientsHostnames").split(",");
             List<String> clientsHostnames = Arrays.asList(clients);
@@ -28,7 +25,7 @@ public class AdminPage extends HttpServlet {
             request.setAttribute("valuesGeneral", new HashMap<>());
             request.setAttribute("hostnames", new ArrayList<>());
         }
-        Map<String, String> valuesKMeans = myConfigurationService.retrieveSpecific("kmeans");
+        Map<String, String> valuesKMeans = ConfigurationService.retrieveSpecific("kmeans");
         if (valuesKMeans != null && !valuesKMeans.isEmpty()) {
             request.setAttribute("valuesKMeans", valuesKMeans);
         } else {
@@ -83,8 +80,8 @@ public class AdminPage extends HttpServlet {
         String mode = request.getParameter("Mode");
         valuesGeneral.put("Mode", mode);
 
-        myConfigurationService.insertGeneral(valuesGeneral);
-        myConfigurationService.insertSpecific(valuesKMeans, "kmeans");
+        ConfigurationService.insertGeneral(valuesGeneral);
+        ConfigurationService.insertSpecific(valuesKMeans, "kmeans");
 
         String targetJSP = "/pages/jsp/adminPage.jsp";
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);

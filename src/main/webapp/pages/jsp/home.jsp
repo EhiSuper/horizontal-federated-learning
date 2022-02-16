@@ -1,11 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.*" %>
-<%@ page import="com.google.gson.Gson" %>
-<%@ page import="com.google.gson.JsonObject" %>
-<%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.ExperimentRound" %>
-<%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm" %>
-<%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithmRound" %>
-<%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.Client" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <%
     int numClients = (int)request.getAttribute("numClients");

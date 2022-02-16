@@ -1,29 +1,18 @@
 package it.unipi.dsmt.horizontalFederatedLearning;
 
-import com.ericsson.otp.erlang.*;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ExperimentService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Communication;
-import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.Node;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.ErlangErrorException;
-import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
+import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.ExperimentProcess;
+import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.CommunicationException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Test {
 
     public static void main(String[] args){
-        LevelDB db = LevelDB.getInstance();
-        UserService myUserService = new UserService(db);
-        ExperimentService myExperimentService = new ExperimentService(db);
         /*List<String> list = db.iterateDB();
         for(String elem: list)
                 System.out.println(elem);*/
@@ -31,7 +20,7 @@ public class Test {
         User user = new User(1, "Franco", "Terranova", "franchinino", "terranova");
         UserService.register(user);
         UserService.login("franchino", "terranova");*/
-        User user = myUserService.findUserByUsername("franchino");
+        User user = UserService.findUserByUsername("franchino");
         Experiment experiment = new Experiment();
         experiment.setId(2);
         experiment.setName("Experiment5");
@@ -65,7 +54,7 @@ public class Test {
         algorithm.setNumClusters(4);
         algorithm.setSeedCenters(100);
         experiment.setAlgorithm(algorithm);
-        Communication communication = new Communication();
+        ExperimentProcess communication = new ExperimentProcess();
         communication.startExperiment(experiment);
         ExperimentRound round = null;
         List<ExperimentRound> rounds = new ArrayList<>();
@@ -74,7 +63,7 @@ public class Test {
                 round = communication.receiveRound();
                 if(round != null)
                     rounds.add(round);
-            } catch(ErlangErrorException ex){
+            } catch(CommunicationException ex){
                 System.out.println("Error during erlang computations: " + ex.getMessage());
                 continue;
             }
@@ -93,11 +82,8 @@ public class Test {
         algorithm.setCenters(lastRound.getCenters());
         algorithm.setfNorm(lastRound.getfNorm());
         // altri settaggi
-        myExperimentService.insert(experiment);
-        List<String> list = db.iterateDB();
-        for(String elem: list)
-            System.out.println(elem);
-        Experiment foundExperiment = myExperimentService.findExperimentById(experiment.getId());
+        ExperimentService.insert(experiment);
+        Experiment foundExperiment = ExperimentService.findExperimentById(experiment.getId());
         KMeansAlgorithm km = (KMeansAlgorithm) foundExperiment.getAlgorithm();
         /*System.out.println(km.getfNorm());
         List<List<Double>> centers = km.getCenters();

@@ -5,11 +5,11 @@ import java.util.HashMap;
 public class ConfigurationService {
     private static LevelDB db;
 
-    public ConfigurationService(LevelDB db) {
-        this.db = db;
+    static {
+        db = LevelDB.getInstance();
     }
 
-    public void insertGeneral(HashMap<String, String> values){
+    public static void insertGeneral(HashMap<String, String> values){
         HashMap<String, String> map = new HashMap<>();
         String prefixKey = "Conf:general:";
         for(String key: values.keySet()){
@@ -19,7 +19,7 @@ public class ConfigurationService {
         db.putBatchValues(map);
     }
 
-    public void insertSpecific(HashMap<String, String> values, String algorithm){
+    public static void insertSpecific(HashMap<String, String> values, String algorithm){
         HashMap<String, String> map = new HashMap<>();
         String prefixKey = "Conf:" + algorithm + ":";
         for(String key: values.keySet()){
@@ -29,7 +29,7 @@ public class ConfigurationService {
         db.putBatchValues(map);
     }
 
-    public HashMap<String, String> retrieveGeneral(){
+    public static HashMap<String, String> retrieveGeneral(){
         HashMap<String, String> map = db.findByPrefix("Conf:general:");
         HashMap<String, String> attributeValues = new HashMap<>();
         for(String key: map.keySet()){
@@ -40,7 +40,7 @@ public class ConfigurationService {
         return attributeValues;
     }
 
-    public HashMap<String, String> retrieveSpecific(String algorithm){
+    public static HashMap<String, String> retrieveSpecific(String algorithm){
         HashMap<String, String> map = db.findByPrefix("Conf:" + algorithm + ":");
         HashMap<String, String> attributeValues = new HashMap<>();
         for(String key: map.keySet()){

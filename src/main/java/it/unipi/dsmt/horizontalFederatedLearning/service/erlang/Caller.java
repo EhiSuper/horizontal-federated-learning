@@ -37,20 +37,8 @@ public class Caller {
         return callerNode;
     }
 
-    public void setCallerNode(OtpSelf callerNode) {
-        this.callerNode = callerNode;
-    }
-
     public OtpPeer getSupervisorNode() {
         return supervisorNode;
-    }
-
-    public void setSupervisorNode(OtpPeer supervisorNode) {
-        this.supervisorNode = supervisorNode;
-    }
-
-    public void setCallerConnection(OtpConnection callerConnection) {
-        this.callerConnection = callerConnection;
     }
 
     public OtpConnection getCallerConnection() {
