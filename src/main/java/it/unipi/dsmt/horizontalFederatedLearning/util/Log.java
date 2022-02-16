@@ -18,11 +18,9 @@ public class Log {
 
     public Log(){
     }
-    public Log(String fileName){
-        logFile = fileName;
-    }
 
-    public static void startLogExperiment(Experiment experiment){
+
+    public static synchronized void logExperiment(List<String> lines, Experiment experiment){
         try {
             FileWriter fw = new FileWriter(logFile, true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -30,26 +28,18 @@ public class Log {
             LocalDateTime now = LocalDateTime.now();
             bw.write("---- Log experiment " + experiment.getId() + " " + dtf.format(now) + " ----");
             bw.newLine();
+            for(String line: lines) {
+                line = line.replace("'", "");
+                bw.write(line);
+                bw.newLine();
+            }
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void logExperimentLine(String line){
-        try {
-            FileWriter fw = new FileWriter(logFile, true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            line = line.replace("'", "");
-            bw.write(line);
-            bw.newLine();
-            bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static List<String> getLogExperimentText(Experiment experiment) {
+    public static List<String> getLogExperiment(Experiment experiment) {
         int id = experiment.getId();
         boolean exp = false;
         List<String> result = new ArrayList<>();
@@ -63,7 +53,6 @@ public class Log {
                     int expId = Integer.parseInt(line.split("---- Log experiment ")[1].split(" ")[0]);
                     if(id == expId){
                         result.clear();
-                        //result.add(line);
                         exp = true;
                     }
                     else{
@@ -72,10 +61,6 @@ public class Log {
                 }
                 if(exp) {
                     result.add(line);
-                    /*String[] parsedLine = line.split("#");
-                    if(parsedLine.length > 1 && parsedLine[0].equals(experiment.getId() + " ")){
-                        result.add(parsedLine[1]);
-                    }*/
                 }
             }
         } catch (FileNotFoundException e) {

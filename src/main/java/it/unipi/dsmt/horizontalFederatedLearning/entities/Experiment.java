@@ -308,6 +308,28 @@ public class Experiment {
         OtpErlangObject[] array2 = new OtpErlangObject[objects.size()];
         OtpErlangObject[] array = objects.toArray(array2);
         OtpErlangTuple tuple = new OtpErlangTuple(array);
+        System.out.println(tuple);
         return tuple;
+    }
+
+    public void setPostAlgorithmParameters(List<ExperimentRound> rounds){
+        Algorithm algorithm = null;
+        ExperimentRound lastRound = rounds.get(rounds.size()-1);
+        int numOverallCrashes = rounds.get(rounds.size()-2).getNumCrashes();
+        long time = lastRound.getTime();
+        setTime(time);
+        switch (getAlgorithm().getName()) {
+            case "KMeans":
+                KMeansAlgorithmRound kmround = (KMeansAlgorithmRound)rounds.get(rounds.size()-2).getAlgorithmRound();
+                KMeansAlgorithm kMeansAlgorithm = (KMeansAlgorithm)getAlgorithm();
+                kMeansAlgorithm.setfNorm(kmround.getfNorm());
+                kMeansAlgorithm.setCenters(kmround.getCenters());
+                algorithm = kMeansAlgorithm;
+                break;
+        }
+        setRoundsInfo(rounds);
+        setNumCrashes(numOverallCrashes);
+        setNumRounds(rounds.size()-1);
+        setAlgorithm(algorithm);
     }
 }

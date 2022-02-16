@@ -17,10 +17,6 @@ public class Settings extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getSession().getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/");
-            return;
-        }
         int id = (int) request.getSession().getAttribute("user");
         User myUser = myUserService.findUserById(id);
         request.setAttribute("username", myUser.getUsername());

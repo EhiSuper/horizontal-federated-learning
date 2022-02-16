@@ -1,92 +1,21 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.*" %>
-<%@ page import="com.google.gson.Gson" %>
-<%@ page import="com.google.gson.JsonObject" %>
-<%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.ExperimentRound" %>
-<%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm" %>
-<%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithmRound" %>
-<%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.Client" %>
 
 <%
-    ArrayList<String> dataPoints = new ArrayList<>();
-    ArrayList<String> normPoints = new ArrayList<>();
-    ArrayList<Integer> crashes = new ArrayList<>();
-    ArrayList<String> availableClients = new ArrayList<>();
-    ArrayList<String> involvedClients = new ArrayList<>();
-    int numMinClients = 0;
-    int numOverallCrashes = 0;
-    int numRounds = 0;
-    int experimentId = 0;
-    int numFeatures = 0;
-    long time = 0;
-    int firstFeature = 0;
-    int secondFeature = 1;
-    String reason = "";
-    List<String> logExecution = new ArrayList<>();
-    if (request.getAttribute("rounds") != null) {
-        firstFeature = (int)request.getAttribute("firstFeature");
-        secondFeature = (int)request.getAttribute("secondFeature");
-        Gson gsonObj = new Gson();
-        Map<Object, Object> map = null;
-        List<ExperimentRound> roundList = (List<ExperimentRound>) request.getAttribute("rounds");
-        List<Map<Object, Object>> normList = new ArrayList<Map<Object, Object>>();
-        for(int i=0; i<(roundList.size() - 1); i++){
-            List<Map<Object, Object>> pointList = new ArrayList<Map<Object, Object>>();
-            if(!roundList.get(i).getLast()){
-                KMeansAlgorithmRound kmRound = (KMeansAlgorithmRound) roundList.get(i).getAlgorithmRound();
-                List<List<Double>> centers = kmRound.getCenters();
-                List<Client> availableClientsRound = roundList.get(i).getClientsState();
-                List<Client> involvedClientsRound = roundList.get(i).getInvolvedClients();
-                for(Client involvedClient: involvedClientsRound)
-                    involvedClients.add(involvedClient.getHostname() + " ");
-                int numcrashesRound = roundList.get(i).getNumCrashes();
-                for (Client client : involvedClientsRound) {
-                    List<List<Double>> chunk = client.getChunk();
-                    for(List<Double> point: chunk){
-                        map = new HashMap<Object, Object>();
-                        map.put("x", point.get(firstFeature));
-                        map.put("y", point.get(secondFeature));
-                        map.put("color", "grey");
-                        map.put("markerSize", 3);
-                        map.put("fillOpacity", ".3");
-                        pointList.add(map);
-                    }
-                }
-                for (List<Double> center : centers) {
-                    map = new HashMap<Object, Object>();
-                    map.put("x", center.get(firstFeature));
-                    map.put("y", center.get(secondFeature));
-                    map.put("color", "black");
-                    map.put("markerSize", 20);
-                    map.put("markerBorderColor", "red");
-                    pointList.add(map);
-                }
-                String selectedAlgorithm = (String) request.getAttribute("algorithm");
-                switch(selectedAlgorithm){
-                    case "KMeans":
-                        KMeansAlgorithmRound round = (KMeansAlgorithmRound) roundList.get(i).getAlgorithmRound();
-                        double norm = round.getfNorm();
-                        map = new HashMap<Object, Object>();
-                        map.put("x", i + 1);
-                        map.put("y", norm);
-                        normList.add(map);
-                }
-                dataPoints.add(gsonObj.toJson(pointList));
-                normPoints.add(gsonObj.toJson(normList));
-                //availableClients.add(gsonObj.toJson(availableClientsRound));
-                crashes.add(Integer.valueOf(gsonObj.toJson(numcrashesRound)));
-            } else {
-                reason = roundList.get(i).getReason();
-            }
-        }
-        numOverallCrashes = crashes.get(crashes.size()-1);
-        experimentId = (int)request.getAttribute("experimentId");
-        logExecution = (List<String>) request.getAttribute("logExecution");
-        numMinClients = (int)request.getAttribute("numMinClients");
-        numFeatures = (int)request.getAttribute("numFeatures");
-        time = (long)request.getAttribute("time");
-        numRounds = roundList.size() - 2;
-    }
+    ArrayList<String> dataPoints = (ArrayList<String>) request.getAttribute("dataPoints");
+    ArrayList<String> normPoints = (ArrayList<String>) request.getAttribute("normPoints");
+    ArrayList<Integer> crashes = (ArrayList<Integer>) request.getAttribute("crashes");
+    ArrayList<String> involvedClients = (ArrayList<String>) request.getAttribute("involvedClients");
+    int numFeatures = (int)request.getAttribute("numFeatures");
+    int numMinClients = (int)request.getAttribute("numMinClients");
+    int numRounds = (int)request.getAttribute("numRounds");
+    int numOverallCrashes = (int)request.getAttribute("numOverallCrashes");
+    String reason = (String)request.getAttribute("reason");
+    long time = (long)request.getAttribute("time");
+    List<String> logExecution = (List<String>) request.getAttribute("logExecution");
+    int firstFeature = (int)request.getAttribute("firstFeature");
+    int secondFeature = (int)request.getAttribute("secondFeature");
+    int experimentId = (int)request.getAttribute("experimentId");
 %>
 
 <!DOCTYPE HTML>
@@ -96,27 +25,19 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script type="text/javascript">
         let time = null;
-        datapointsJS = <%=dataPoints%>;
-        normpointsJS = <%=normPoints%>;
-        availableClientsJS = <%=availableClients%>;
-        involvedClientsJS = <%=involvedClients%>;
+        datapoints = <%=dataPoints%>;
+        normpoints = <%=normPoints%>;
+        involvedClients = <%=involvedClients%>;
         crashes = <%=crashes%>;
         overallCrashes = <%=numOverallCrashes%>;
         totalRounds = <%=numRounds%>;
         numMinClients = <%=numMinClients%>;
         terminationReason = '<%=reason%>';
         timeNeeded = <%=time%>;
-        console.log(availableClientsJS);
-        console.log(involvedClientsJS);
-        console.log(crashes);
-        console.log(overallCrashes);
         rounds = 0;
         logExecution = <%=logExecution%>;
         window.onload = function () {
-            <% if(request.getAttribute("rounds")!=null){
-            %>
             time = setInterval(delayRounds ,4000);
-            <%}%>
         }
 
         function delayRounds() {
@@ -154,7 +75,7 @@
                 document.getElementById("reason").textContent = terminationReason;
                 document.getElementById("time").textContent = timeNeeded + " ms";
                 document.getElementById("logExecution").value = logExecution.join("\r\n");
-                uniq = [...new Set(involvedClientsJS)];
+                uniq = [...new Set(involvedClients)];
                 document.getElementById("clientsInvolved").textContent = uniq.join(", ");
                 clearInterval(time);
             } else {
@@ -168,8 +89,8 @@
             console.log(rounds)
             console.log(totalRounds)
             document.getElementById("results").style.display = "block";
-            console.log(involvedClientsJS.slice(numMinClients * rounds, numMinClients * rounds + numMinClients).join("\r\n"));
-            document.getElementById("clientsInvolved").textContent = involvedClientsJS.slice(numMinClients * (rounds-1), numMinClients * (rounds-1) + numMinClients).join(", ");
+            console.log(involvedClients.slice(numMinClients * rounds, numMinClients * rounds + numMinClients).join("\r\n"));
+            document.getElementById("clientsInvolved").textContent = involvedClients.slice(numMinClients * (rounds-1), numMinClients * (rounds-1) + numMinClients).join(", ");
             printCenters();
             <% if(request.getAttribute("algorithm") != null && request.getAttribute("algorithm").equals("KMeans")){
             %>
@@ -199,7 +120,7 @@
                     xValueFormatString: "#,##0.000",
                     yValueFormatString: "#,##0.000",
                     toolTipContent: "<b>First Feature:</b> {x} <br><b>Second feature:</b> {y}",
-                    dataPoints: datapointsJS[rounds-1]
+                    dataPoints: datapoints[rounds-1]
                 }]
             });
             chart.render();
@@ -227,7 +148,7 @@
                     xValueFormatString: "#,##0.000",
                     yValueFormatString: "#,##0.000",
                     toolTipContent: "<b>Round:</b> {x} <br><b>FNorm:</b> {y}",
-                    dataPoints: normpointsJS[rounds-1]
+                    dataPoints: normpoints[rounds-1]
                 }]
             });
             chart.render();
@@ -242,13 +163,13 @@
     <button><a href="<%=request.getContextPath()%>/Logout">Logout</a></button>
 </div>
 <div id="experimentResult" style="width:1400px">
-    <form action="<%=request.getContextPath()%>/Home" method="post">
+    <form action="<%=request.getContextPath()%>/Home">
         <button type="submit" name="back">Back</button>
     </form>
     <br>
     <div id="features" style=" display: none;">
-        <form action="<%=request.getContextPath()%>/Home" method="post">
-            <input type="hidden" id="experimentId" name="experimentId" value="<%=experimentId%>">
+        <form action="<%=request.getContextPath()%>/Run" method="post">
+            <input type="hidden" id="ExperimentId" name="ExperimentId" value="<%=experimentId%>">
             <label for="firstFeature">First Feature:</label>
             <select name="firstFeature" id="firstFeature">
             </select>
@@ -290,7 +211,7 @@
         <label for="logExecution">Logs of the Execution:</label><br>
         <textarea id="logExecution" name="Logs of the execution" rows="30" cols="100">
         </textarea>
-        <form action="<%=request.getContextPath()%>/Home" method="post">
+        <form action="<%=request.getContextPath()%>/Run" method="post">
             <input type="hidden" id="id" name="id" value="<%=experimentId%>">
             <button type="submit" name="export">Export as txt File</button>
         </form>

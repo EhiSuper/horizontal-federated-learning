@@ -31,7 +31,7 @@ public class Communication {
         return arguments;
     }
 
-    public void startExperiment(Experiment experiment) {
+    public List<ExperimentRound> startExperiment(Experiment experiment) {
         System.out.println("Working Directory = " + System.getProperty("user.dir"));
         destination = null;
         currentExperiment = experiment;
@@ -39,12 +39,15 @@ public class Communication {
         erlangProcess = node.getOtpNode().createMbox();
         OtpErlangPid javaPid = erlangProcess.self();
         OtpErlangList arguments = prepareArguments(experiment, javaPid);
+        System.out.println(arguments);
+        List<ExperimentRound> rounds = null;
         try {
             start = System.nanoTime();
             String[] cmd = {"bash", "-c", "erl -name erl@127.0.0.1 -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
             final Process p = Runtime.getRuntime().exec(cmd);
             //final Process p = Runtime.getRuntime().exec("erl -name erl@127.0.0.1 -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
+                List<String> logs = new ArrayList<>();
                 public void run() {
                     BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
                     String line;
@@ -55,8 +58,12 @@ public class Communication {
                                 editedLine = line.split("1> ")[1];
                             else editedLine = line;
                             System.out.println(editedLine);
-                            Log.logExperimentLine(editedLine);
+                            logs.add(editedLine);
+                            if(editedLine.contains("completed")){
+                                break;
+                            }
                         }
+                        Log.logExperiment(logs, experiment);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (ArrayIndexOutOfBoundsException ie) {
@@ -65,14 +72,35 @@ public class Communication {
                 }
             }).start();
             Thread.sleep(1000);
-            Log.startLogExperiment(experiment);
             caller = Caller.getCaller().getCallerConnection();
             caller.sendRPC("supervisorNode", "start", arguments);
+            rounds = waitForRounds();
         } catch (IOException e) {
             startExperiment(experiment);
         } catch (Exception ee){
             ee.printStackTrace();
         }
+        return rounds;
+    }
+
+    private List<ExperimentRound> waitForRounds(){
+        List<ExperimentRound> rounds = new ArrayList<>();
+        ExperimentRound round;
+        while (true) {
+            try {
+                round = receiveRound();
+                if(round != null)
+                    rounds.add(round);
+                else{
+                    System.out.println("Experiment completed! Received all rounds!");
+                    break;
+                }
+            } catch (ErlangErrorException ex) {
+                System.out.println("Error during erlang computations: " + ex.getMessage());
+                continue;
+            }
+        }
+        return rounds;
     }
 
     // accertarsi ricezione da chi vogliamo noi
@@ -98,7 +126,6 @@ public class Communication {
             }
             OtpErlangAtom msgType = (OtpErlangAtom) result.elementAt(1);
             if (msgType.toString().equals("error")) {
-                System.out.println( "Error");
                 throw new ErlangErrorException(result.elementAt(2).toString());
             } else if (msgType.toString().equals("completed")) {
                 System.out.println( "completed");

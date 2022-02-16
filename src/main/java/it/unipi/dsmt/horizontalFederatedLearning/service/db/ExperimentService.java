@@ -52,6 +52,7 @@ public class ExperimentService {
         map.put(prefixKey + "numRounds", Integer.toString(experiment.getNumRounds()));
         map.put(prefixKey + "maxNumRounds", Integer.toString(experiment.getMaxNumRounds()));
         map.put(prefixKey + "numClients", Integer.toString(experiment.getNumClients()));
+        System.out.println(experiment.getNumClients());
         map.put(prefixKey + "numMinClients", Integer.toString(experiment.getNumMinClients()));
         map.put(prefixKey + "clientsHostnames", String.join(",", experiment.getClientsHostnames()));
         map.put(prefixKey + "randomClients", Boolean.toString(experiment.getRandomClients()));
@@ -144,7 +145,7 @@ public class ExperimentService {
         Experiment experiment = new Experiment();
         if(db.findKeysByPrefix("Experiment:" + id+":").size()==0)
             return null;
-        HashMap<String, String> map = db.findByPrefix("Experiment:"+id);
+        HashMap<String, String> map = db.findByPrefix("Experiment:"+id+":");
         experiment.setId(id);
         for(String key: map.keySet()){
             switch(key.split(":")[3]){
@@ -170,6 +171,7 @@ public class ExperimentService {
                     experiment.setMaxNumRounds(Integer.parseInt(map.get(key)));
                     break;
                 case "numClients":
+                    System.out.println(map.get(key));
                     experiment.setNumClients(Integer.parseInt(map.get(key)));
                     break;
                 case "numMinClients":
@@ -191,13 +193,13 @@ public class ExperimentService {
                     experiment.setTimeout((int)Double.parseDouble(map.get(key)));
                     break;
                 case "maxAttemptsClientCrash":
-                    experiment.setNumClients(Integer.parseInt(map.get(key)));
+                    experiment.setMaxAttemptsClientCrash(Integer.parseInt(map.get(key)));
                     break;
                 case "maxAttemptsServerCrash":
-                    experiment.setNumClients(Integer.parseInt(map.get(key)));
+                    experiment.setMaxAttemptsServerCrash(Integer.parseInt(map.get(key)));
                     break;
                 case "maxAttemptsOverallCrash":
-                    experiment.setNumClients(Integer.parseInt(map.get(key)));
+                    experiment.setMaxAttemptsOverallCrash(Integer.parseInt(map.get(key)));
                     break;
                 default:
                     break;

@@ -21,6 +21,7 @@
 -export([start/3]).
 
 start({NClients,NMinClients, Dataset, NumFeatures, ClientsHostnames, RandomClients, RandomClientsSeed, MaxNumberRounds, RandomClientsSeed, RandomClients, Timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, Mode}, AlgParams, Supervisor) ->
+  io:format("NClients ~p~n", [NClients]),
   io:format("Server - Launching python server...~n"),
   createPythonServer(),
   io:format("Server - Generating chunks...~n"),
@@ -33,6 +34,8 @@ start({NClients,NMinClients, Dataset, NumFeatures, ClientsHostnames, RandomClien
      0, FirstIterationParameters, 0, AlgParams, Supervisor).
 
 spawnClients(0, _, _, ListClients, _) -> ListClients;
+spawnClients(_, [], _, ListClients, _) -> ListClients;
+spawnClients(_, _, [], ListClients, _) -> ListClients;
 spawnClients(NClients, [ChunkHead | ChunkTail], [HostnameHead | HostnameTail], ListClients, Timeout) ->
   ServerPID = self(),
   {Client, _} = spawn_monitor(list_to_atom(HostnameHead), 'client', start, [ChunkHead, ServerPID, Timeout]),

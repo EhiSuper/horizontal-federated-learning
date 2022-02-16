@@ -25,12 +25,7 @@ public class History extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getSession().getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/");
-            return;
-        }
         String targetJSP = "/pages/jsp/history.jsp";
-        myLevelDb.printContent();
         List<Experiment> listExperiment = myExperimentService.readAllExperiments();
         request.setAttribute("listExperiment", listExperiment);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);

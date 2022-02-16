@@ -32,10 +32,6 @@ public class Home extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getSession().getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/");
-            return;
-        }
         String targetJSP = "/pages/jsp/home.jsp";
         Map<String, String> defaultValues = myConfigurationService.retrieveGeneral();
         request.setAttribute("numClients", Integer.parseInt(defaultValues.get("NumberOfClients")));
@@ -45,9 +41,9 @@ public class Home extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        int userId = (int)request.getSession().getAttribute("user");
+        int userId = (int) request.getSession().getAttribute("user");
         User myUser = myUserService.findUserById(userId);
+        
 
         if (request.getParameter("run") != null) {
             String name = request.getParameter("name");
@@ -56,8 +52,8 @@ public class Home extends HttpServlet {
             int numMinClients = Integer.parseInt(request.getParameter("numMinClients"));
             boolean randomClients = Boolean.parseBoolean(request.getParameter("randomClients"));
             int timeout = Integer.parseInt(request.getParameter("timeout"));
-            int firstFeature = 0;
-            int secondFeature = 1;
+            request.setAttribute("firstFeature", 0);
+            request.setAttribute("secondFeature", 1);
             String selectedAlgorithm = request.getParameter("algorithm");
             Algorithm algorithm = null;
             switch (selectedAlgorithm) {
@@ -67,7 +63,6 @@ public class Home extends HttpServlet {
                     double epsilon = Double.parseDouble(request.getParameter("epsilon"));
                     String normFn = request.getParameter("normFn");
                     int seedCenters = Integer.parseInt(request.getParameter("seedCenters"));
-                    //Map<String, String> kmeansDefaultValues = myConfigurationService.retrieveSpecific("kmeans");
                     KMeansAlgorithm kMeansAlgorithm = new KMeansAlgorithm();
                     kMeansAlgorithm.setDistance(distance);
                     kMeansAlgorithm.setEpsilon(epsilon);
@@ -79,7 +74,6 @@ public class Home extends HttpServlet {
             }
             Experiment experiment = new Experiment();
             experiment.setAlgorithm(algorithm);
-
             experiment.setUser(myUser);
             experiment.setName(name);
             experiment.setDataset(dataset);
@@ -89,158 +83,32 @@ public class Home extends HttpServlet {
             experiment.setNumMinClients(numMinClients);
             experiment.setRandomClients(randomClients);
             experiment.setTimeout(timeout);
-
             Map<String, String> defaultValues = myConfigurationService.retrieveGeneral();
             experiment.setMode(Integer.parseInt(defaultValues.get("Mode")));
             experiment.setMaxNumRounds(Integer.parseInt(defaultValues.get("MaxNumberRound")));
             experiment.setNumClients(Integer.parseInt(defaultValues.get("NumberOfClients")));
+            System.out.println("NUMClients" + experiment.getNumClients());
+            System.out.println("NumMinClients" + experiment.getNumMinClients());
             experiment.setRandomClientsSeed(Integer.parseInt(defaultValues.get("RandomClientsSeed")));
             experiment.setMaxAttemptsClientCrash(Integer.parseInt(defaultValues.get("MaxAttemptsClientCrash")));
             experiment.setMaxAttemptsOverallCrash(Integer.parseInt(defaultValues.get("MaxAttemptsOverallCrash")));
             experiment.setMaxAttemptsServerCrash(Integer.parseInt(defaultValues.get("MaxAttemptsServerCrash")));
-
             String[] clients = defaultValues.remove("ClientsHostnames").split(",");
             List<String> clientsHostnames = Arrays.asList(clients);
+            for(String x : clientsHostnames)
+                System.out.println(x);
             experiment.setClientsHostnames(clientsHostnames);
             try {
                 myExperimentService.insert(experiment); //da vedere
             } catch (RegistrationException e) {
                 request.setAttribute("error", e.getMessage());
                 String targetJSP = "/pages/jsp/home.jsp";
-                request.setAttribute("numClients", experiment.getNumClients());
                 RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
                 requestDispatcher.forward(request, response);
                 return;
             }
-            Communication communication = new Communication();
-            communication.startExperiment(experiment);
-            List<ExperimentRound> rounds = new ArrayList<>();
-            ExperimentRound round = null;
-            while (true) {
-                try {
-                    round = communication.receiveRound();
-                    rounds.add(round);
-                } catch (ErlangErrorException ex) {
-                    System.out.println("Error during erlang computations: " + ex.getMessage());
-                    continue;
-                }
-                if (round == null) {
-                    System.out.println("finished experiment");
-                    break;
-                }
-            }
-            // save in the db
-            int numCrashes = 0;
-            for (int i = 0; i < rounds.size(); ++i) {
-                ExperimentRound singleRound = rounds.get(i);
-                if(singleRound != null && singleRound.getLast()){
-                    numCrashes = rounds.get(i-1).getNumCrashes();
-                    System.out.println(numCrashes);
-                    experiment.setTime(rounds.get(i).getTime());
-                    switch (experiment.getAlgorithm().getName()) {
-                        case "KMeans":
-                            KMeansAlgorithmRound kmround = (KMeansAlgorithmRound)rounds.get(i-1).getAlgorithmRound();
-                            KMeansAlgorithm kMeansAlgorithm = (KMeansAlgorithm) experiment.getAlgorithm();
-                            kMeansAlgorithm.setfNorm(kmround.getfNorm());
-                            kMeansAlgorithm.setCenters(kmround.getCenters());
-                            algorithm = kMeansAlgorithm;
-                            break;
-                    }
-                }
-            }
-            experiment.setRoundsInfo(rounds);
-            experiment.setNumCrashes(numCrashes);
-            experiment.setNumRounds(rounds.size()-2);
-            experiment.setAlgorithm(algorithm);
-            myExperimentService.editExperiment(experiment);
-            List<String> logExecution = Log.getLogExperimentText(experiment);
-            for(int i = 0; i < logExecution.size(); ++i)
-                logExecution.set(i, "'"+logExecution.get(i)+"'");
-            request.setAttribute("rounds", rounds);
-            request.setAttribute("algorithm", selectedAlgorithm);
-            request.setAttribute("logExecution", logExecution);
-            request.setAttribute("firstFeature", firstFeature);
-            request.setAttribute("secondFeature", secondFeature);
-            request.setAttribute("numClients", experiment.getNumClients());
-            request.setAttribute("experimentId", experiment.getId());
-            request.setAttribute("numMinClients", experiment.getNumMinClients());
-            request.setAttribute("time", experiment.getTime());
-            request.setAttribute("numFeatures", experiment.getNumFeatures());
-            String targetJSP = "/pages/jsp/run.jsp";
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
-            requestDispatcher.forward(request, response);
-        } else if(request.getParameter("export") != null) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            List<String> logs = Log.getLogExperimentText(myExperimentService.findExperimentById(id));
-            String result = String.join( "\n", logs);
-            response.setContentType("plain/text");
-            response.addHeader("Content-Disposition", "attachment; filename=\"log.txt\"");
-            PrintWriter writer = response.getWriter();
-            writer.write(result);
-            writer.close();
-        } else if(request.getParameter("back") != null) {
-            response.sendRedirect(request.getContextPath() + "/Home");
-        }else if(request.getParameter("change") != null) {
-            int id = Integer.parseInt(request.getParameter("experimentId"));
-            int firstFeature = Integer.parseInt(request.getParameter("firstFeature"));
-            int secondFeature = Integer.parseInt(request.getParameter("secondFeature"));
-            Experiment experiment = myExperimentService.findExperimentById(id);
-            Communication communication = new Communication();
-            communication.startExperiment(experiment);
-            List<ExperimentRound> rounds = new ArrayList<>();
-            ExperimentRound round = null;
-            while (true) {
-                try {
-                    round = communication.receiveRound();
-                    rounds.add(round);
-                } catch (ErlangErrorException ex) {
-                    System.out.println("Error during erlang computations: " + ex.getMessage());
-                    continue;
-                }
-                if (round == null) {
-                    System.out.println("finished experiment");
-                    break;
-                }
-            }
-            int numCrashes = 0;
-            Algorithm algorithm = null;
-            for (int i = 0; i < rounds.size(); ++i) {
-                ExperimentRound singleRound = rounds.get(i);
-                if (singleRound != null && !singleRound.getLast())
-                    numCrashes += singleRound.getNumCrashes();
-                else if(singleRound != null && singleRound.getLast()){
-                    experiment.setTime(rounds.get(i).getTime());
-                    switch (experiment.getAlgorithm().getName()) {
-                        case "KMeans":
-                            KMeansAlgorithmRound kmround = (KMeansAlgorithmRound)rounds.get(i-1).getAlgorithmRound();
-                            KMeansAlgorithm kMeansAlgorithm = (KMeansAlgorithm) experiment.getAlgorithm();
-                            kMeansAlgorithm.setfNorm(kmround.getfNorm());
-                            kMeansAlgorithm.setCenters(kmround.getCenters());
-                            algorithm = kMeansAlgorithm;
-                            break;
-                    }
-                }
-            }
-            experiment.setRoundsInfo(rounds);
-            experiment.setNumCrashes(numCrashes);
-            experiment.setNumRounds(rounds.size()-2);
-            experiment.setAlgorithm(algorithm);
-            myExperimentService.editExperiment(experiment);
-            List<String> logExecution = Log.getLogExperimentText(experiment);
-            for(int i = 0; i < logExecution.size(); ++i)
-                logExecution.set(i, "'"+logExecution.get(i)+"'");
-            request.setAttribute("rounds", experiment.getRoundsInfo());
-            request.setAttribute("algorithm", experiment.getAlgorithm().getName());
-            request.setAttribute("logExecution", logExecution);
-            request.setAttribute("firstFeature", firstFeature);
-            request.setAttribute("secondFeature", secondFeature);
-            request.setAttribute("numClients", experiment.getNumClients());
-            request.setAttribute("experimentId", experiment.getId());
-            request.setAttribute("numMinClients", experiment.getNumMinClients());
-            request.setAttribute("time", experiment.getTime());
-            request.setAttribute("numFeatures", experiment.getNumFeatures());
-            String targetJSP = "/pages/jsp/run.jsp";
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
+            request.setAttribute("ExperimentId", experiment.getId());
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher("Run");
             requestDispatcher.forward(request, response);
         }
     }

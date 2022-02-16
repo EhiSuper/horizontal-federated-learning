@@ -29,10 +29,6 @@ public class ExperimentInfo extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getSession().getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/");
-            return;
-        }
         String targetJSP = "/pages/jsp/experimentInfo.jsp";
         String id = request.getParameter("id");
         System.out.println(id);
@@ -131,7 +127,7 @@ public class ExperimentInfo extends HttpServlet {
                 experiment.setAlgorithm(algorithm);
                 myExperimentService.editExperiment(experiment);
                 myLevelDb.printContent();
-                List<String> logExecution = Log.getLogExperimentText(experiment);
+                List<String> logExecution = Log.getLogExperiment(experiment);
                 for (int i = 0; i < logExecution.size(); ++i)
                     logExecution.set(i, "'" + logExecution.get(i) + "'");
                 request.setAttribute("rounds", rounds);

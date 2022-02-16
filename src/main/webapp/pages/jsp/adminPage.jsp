@@ -149,7 +149,7 @@
         <span class="error"><%=modeError%></span>
     </p>
     <p>
-        <input type="submit">
+        <input type="submit" name="update" value="Send">
         <span class="success"><%=successError%></span>
     </p>
 </form>
