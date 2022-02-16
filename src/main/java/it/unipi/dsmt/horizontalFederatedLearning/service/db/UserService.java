@@ -84,7 +84,7 @@ public class UserService {
         return new User(id, firstName, lastName, username, password, admin);
     }
 
-    public static void updateUser(User user) {
+    public static void updateUser(User user){
         db.deleteValue("User:" + user.getId() + ":username");
         db.putValue("User:" + user.getId() + ":username", user.getUsername());
         db.deleteValue("User:" + user.getId() + ":password");

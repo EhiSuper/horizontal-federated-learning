@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
+import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.RegistrationException;
 import org.iq80.leveldb.*;
 
 import java.io.*;
@@ -20,7 +21,6 @@ public class LevelDB {
     private LevelDB(String pathDatabase) {
         this.pathDatabase = pathDatabase;
         openDB();
-        //addAdmin();
     }
 
     //Singleton Pattern
@@ -68,7 +68,7 @@ public class LevelDB {
         db.delete(bytes(key));
     }
 
-    public synchronized void putBatchValues(HashMap<String, String> entries) {
+    public void putBatchValues(HashMap<String, String> entries) {
         try (WriteBatch batch = db.createWriteBatch()) {
             for (int i = 0; i < entries.size(); ++i) {
                 batch.put(bytes((String) entries.keySet().toArray()[i]), bytes(entries.get(entries.keySet().toArray()[i])));
@@ -79,25 +79,22 @@ public class LevelDB {
         }
     }
 
-
+    /*
     public List<String> iterateDB() {
         List<String> results = new ArrayList<>();
         try (DBIterator iterator = db.iterator()) {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 String key = asString(iterator.peekNext().getKey());
                 String value = asString(iterator.peekNext().getValue());
-                deleteValue(key);
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
         return results;
     }
-    /*
+
+
    public void addExperiment() {
-        UserService myUserService = new UserService(this);
-        new ExperimentService(this);
-        User user = myUserService.findUserByUsername("antonio");
         Experiment experiment = new Experiment();
         experiment.setName("Experiment3");
         experiment.setDataset("https://raw.githubusercontent.com/deric/clustering-benchmark/master/src/main/resources/datasets/artificial/xclara.arff");
@@ -105,7 +102,7 @@ public class LevelDB {
         experiment.setCreationDate(LocalDate.now());
         experiment.setNumFeatures(2);
         experiment.setMode(1);
-        experiment.setUser(user);
+        experiment.setUser(new User(1, "admin", "admin", "admin", "password"));
         experiment.setNumRounds(4);
         experiment.setMaxNumRounds(10);
         experiment.setNumCrashes(5);
@@ -130,13 +127,36 @@ public class LevelDB {
         algorithm.setNumClusters(3);
         algorithm.setSeedCenters(100);
         experiment.setAlgorithm(algorithm);
-        ExperimentService myExperimentService = new ExperimentService(this);
-        myExperimentService.insert(experiment);
+       HashMap<String, String> map = new HashMap<>();
+       experiment.setId(1);
+       String prefixKey = "Experiment:" + experiment.getId() + ":" + experiment.getUser().getId() + ":";
+       map.put(prefixKey + "name", experiment.getName());
+       map.put(prefixKey + "dataset", experiment.getDataset());
+       map.put(prefixKey + "numFeatures", Integer.toString(experiment.getNumFeatures()));
+       map.put(prefixKey + "mode", Integer.toString(experiment.getMode()));
+       map.put(prefixKey + "creationDate", experiment.getCreationDate().toString());
+       map.put(prefixKey + "lastUpdateDate", experiment.getLastUpdateDate().toString());
+       map.put(prefixKey + "numRounds", Integer.toString(experiment.getNumRounds()));
+       map.put(prefixKey + "maxNumRounds", Integer.toString(experiment.getMaxNumRounds()));
+       map.put(prefixKey + "numClients", Integer.toString(experiment.getNumClients()));
+       System.out.println(experiment.getNumClients());
+       map.put(prefixKey + "numMinClients", Integer.toString(experiment.getNumMinClients()));
+       map.put(prefixKey + "clientsHostnames", String.join(",", experiment.getClientsHostnames()));
+       map.put(prefixKey + "randomClients", Boolean.toString(experiment.getRandomClients()));
+       map.put(prefixKey + "randomClientsSeed", Double.toString(experiment.getRandomClientsSeed()));
+       map.put(prefixKey + "timeout", Double.toString(experiment.getTimeout()));
+       map.put(prefixKey + "time", Double.toString(experiment.getTime()));
+       map.put(prefixKey + "numCrashes", Integer.toString(experiment.getNumCrashes()));
+       map.put(prefixKey + "maxAttemptsClientCrash", Integer.toString(experiment.getMaxAttemptsClientCrash()));
+       map.put(prefixKey + "maxAttemptsServerCrash", Integer.toString(experiment.getMaxAttemptsServerCrash()));
+       map.put(prefixKey + "maxAttemptsOverallCrash", Integer.toString(experiment.getMaxAttemptsOverallCrash()));
+       putBatchValues(map);
         List<String> list = this.iterateDB();
         for (String elem : list)
             System.out.println(elem);
     }
-    */
+
+
     public void addAdmin() {
         HashMap<String, String> map = new HashMap<>();
         User user = new User("Capo", "Capo", "admin", "admin", true);
@@ -155,6 +175,7 @@ public class LevelDB {
         for (String elem : results)
             System.out.println(elem);
     }
+     */
 
     public List<String> findKeysByPrefix(String prefix) throws RuntimeException {
         try (DBIterator iterator = db.iterator()) {
