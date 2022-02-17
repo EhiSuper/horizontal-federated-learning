@@ -3,6 +3,7 @@ package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.RegistrationException;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
@@ -25,7 +26,7 @@ public class Signup extends HttpServlet {
         String lastName = request.getParameter("lastName");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
-        if(!password.equals(confirmPassword)){
+        if (!password.equals(confirmPassword)) {
             request.setAttribute("error", "The two passwords are not equal");
             String targetJSP = "/pages/jsp/signup.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
@@ -36,9 +37,8 @@ public class Signup extends HttpServlet {
             UserService.register(user);
             HttpSession session = request.getSession();
             session.setAttribute("user", user.getId());
-            response.sendRedirect(request.getContextPath() + "/Home");
-        }
-        catch(RegistrationException e){
+            response.sendRedirect(request.getContextPath() + "/Login");
+        } catch (RegistrationException e) {
             request.setAttribute("error", e.getMessage());
             String targetJSP = "/pages/jsp/signup.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);

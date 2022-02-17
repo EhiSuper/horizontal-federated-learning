@@ -1,0 +1,65 @@
+body {
+    text-align: center;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+button {
+    margin: 20px;
+    background-color: white;
+    border: 2px solid black;
+    padding: 6px;
+}
+
+h2 {
+    border-bottom: 2px solid lightgrey;
+}
+
+button:hover {
+    background-color: lightgrey;
+    cursor: pointer;
+}
+
+a, a:hover, a:focus, a:active {
+    text-decoration: underline;
+    color: inherit;
+    margin: 10px;
+}
+
+label {
+    margin: 10px;
+    display: inline-block;
+    width: 250px;
+    border-bottom: 1px solid lightgrey;
+}
+
+li {
+    list-style: none;
+}
+
+li a {
+    border: 2px solid black;
+    display: inline-block;
+    width: 1000%;
+    max-width: 400px;
+    padding: .5rem;
+    text-decoration: none;
+}
+
+li a:hover {
+    text-decoration: none;
+    background-color: lightgrey;
+}
+
+.details {
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+    font-size: 1.3rem;
+}
+
+input {
+    padding: 6px;
+}
