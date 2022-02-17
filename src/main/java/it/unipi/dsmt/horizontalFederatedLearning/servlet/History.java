@@ -3,9 +3,7 @@ package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ExperimentService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -34,13 +32,11 @@ public class History extends HttpServlet {
         String filter = request.getParameter("filter");
         String value = request.getParameter("value");
         String user = request.getParameter("user");
-        // agisci su user
         HttpSession session = request.getSession();
         int id = (int) session.getAttribute("user");
         User myUser = UserService.findUserById(id);
-        if (!user.equals("all"))
+        if (!user.equals("all") && myUser != null)
             user = String.valueOf(myUser.getId());
-        System.out.println(user);
         List<Experiment> listExperiments = ExperimentService.findExperimentsByFilter(user, filter, value);
         request.setAttribute("listExperiment", listExperiments);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);

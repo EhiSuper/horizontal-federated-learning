@@ -17,7 +17,7 @@ public class AuthenticationFilter implements Filter {
             Arrays.asList("/AdminPage")));
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override
@@ -29,7 +29,6 @@ public class AuthenticationFilter implements Filter {
         boolean loggedIn = (session != null && session.getAttribute("user") != null);
         boolean adminLoggedIn = (session != null && session.getAttribute("user") != null && session.getAttribute("isAdmin") != null);
         boolean allowedPath = ALLOWED_PATHS.contains(path);
-
         if(ADMIN_PATHS.contains(path)) {
             if (adminLoggedIn) {
                 chain.doFilter(req, res);

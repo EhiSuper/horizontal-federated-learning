@@ -1,8 +1,5 @@
 package it.unipi.dsmt.horizontalFederatedLearning.service.erlang;
-
 import com.ericsson.otp.erlang.*;
-
-import java.io.IOException;
 
 public class Caller {
     private static volatile Caller instance;
@@ -10,7 +7,6 @@ public class Caller {
     private OtpPeer supervisorNode;
     private OtpConnection callerConnection;
 
-    //Private Constructor
     private Caller(){
         try{
             callerNode = new OtpSelf("caller", "COOKIE");

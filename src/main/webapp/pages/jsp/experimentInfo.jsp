@@ -1,13 +1,6 @@
 <%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment" %>
 <%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm" %>
-<%--
-  Created by IntelliJ IDEA.
-  User: antonio
-  Date: 07/02/22
-  Time: 21:18
-  To change this template use File | Settings | File Templates.
---%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <% Experiment experiment = (Experiment) request.getAttribute("experiment"); %>
 <!DOCTYPE html>
 <html>
@@ -30,12 +23,12 @@
         <label for="name">Name: </label><input id="name" name="name" value="<%=experiment.getName()%>"><br>
         <label for="dataset">Dataset: </label><input id="dataset" name="dataset" type="text" value="<%=experiment.getDataset()%>"><br>
         <label for="numFeatures">Number of Features: </label><input id="numFeatures" name="numFeatures" type="number" value="<%=experiment.getNumFeatures()%>"><br>
-        <label for="mode">Mode: </label><input id="mode" name="mode"value="<%=experiment.getMode()%>" readonly><br>
+        <label for="mode">Mode: </label><input id="mode" name="mode" value="<%=experiment.getMode()%>" readonly><br>
         <label for="creationDate">Creation Date: </label><input id="creationDate" name="creationDate" type="text" value="<%=experiment.getCreationDate()%>" readonly><br>
         <label for="lastUpdateDate">Last Update Date: </label><input id="lastUpdateDate" name="lastUpdateDate" type="text" value="<%=experiment.getLastUpdateDate()%>" readonly><br>
         <label for="user">User: </label><input id="user" name="username" value="<%=experiment.getUser().getUsername()%>" readonly><br>
         <label for="numRounds">Number of rounds: </label><input id="numRounds" name="numRounds"  value="<%=experiment.getNumRounds()%>" readonly><br>
-        <label for="maxNumRounds">Maximum number of rounds: </label><input id="maxNumRounds" name="maxNumRounds" type="number"value="<%=experiment.getMaxNumRounds()%>" ><br>
+        <label for="maxNumRounds">Maximum number of rounds: </label><input id="maxNumRounds" name="maxNumRounds" type="number" value="<%=experiment.getMaxNumRounds()%>" ><br>
         <label for="numCrashes">Number of crashes: </label><input id="numCrashes" name="numCrashes" value="<%=experiment.getNumCrashes()%>" readonly><br>
         <label for="numClients">Number of clients: </label><input id="numClients" name="numClients" value="<%=experiment.getNumClients()%>" readonly><br>
         <label for="numMinClients">Minimum number of clients: </label><input id="numMinClients" name="numMinClients"  type="number" min="0" max="<%=experiment.getNumClients()%>" value="<%=experiment.getNumClients()%>" required> / <%=experiment.getNumClients()%><br>
@@ -43,12 +36,12 @@
         <label for="randomClients">Different clients at each round: </label>
         <select name="randomClients" id="randomClients" required>
             <option value="false"
-                <%if (experiment.getRandomClients() == false){%>
+                <%if (experiment.getRandomClients()){%>
                     selected
                 <%}%>
             >false</option>
             <option value="true"
-                    <%if (experiment.getRandomClients() == true){%>
+                    <%if (experiment.getRandomClients()){%>
                     selected
                     <%}%>
             >true</option>
@@ -60,7 +53,7 @@
         <label for="maxAttemptsServerCrash">Max Attempt Server Crash: </label><input id="maxAttemptsServerCrash" name="maxAttemptsServerCrash" value="<%=experiment.getMaxAttemptsServerCrash()%>" readonly><br>
         <label for="maxAttemptsOverallCrash">Max Attempt Overall Crash: </label><input id="maxAttemptsOverallCrash" name="maxAttemptsOverallCrash" value="<%=experiment.getMaxAttemptsOverallCrash()%>" readonly><br>
         <label for="algorithmName">Algorithm: </label>
-        <select name="algorithmName" id="algorithmName" readonly required>
+        <select name="algorithmName" id="algorithmName" required>
             <option value="KMeans"
                     <%if (experiment.getAlgorithm().getName().equals("KMeans")){%>
                     selected

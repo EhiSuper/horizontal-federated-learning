@@ -152,7 +152,6 @@ public class KMeansAlgorithm extends Algorithm{
         objects.add((new OtpErlangString(normFn)));
         OtpErlangObject[] array2 = new OtpErlangObject[objects.size()];
         OtpErlangObject[] array = objects.toArray(array2);
-        OtpErlangTuple tuple = new OtpErlangTuple(array);
-        return tuple;
+        return new OtpErlangTuple(array);
     }
 }

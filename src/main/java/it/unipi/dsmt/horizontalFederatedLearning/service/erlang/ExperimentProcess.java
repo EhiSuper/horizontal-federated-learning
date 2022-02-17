@@ -14,9 +14,7 @@ import java.util.List;
 public class ExperimentProcess {
     private OtpErlangPid destination;
     private OtpMbox erlangProcess;
-    private OtpConnection caller;
     private Experiment currentExperiment;
-    private long elapsedTime;
     private long start;
 
     private OtpErlangList prepareArguments(Experiment experiment, OtpErlangPid javaPid) {
@@ -27,26 +25,21 @@ public class ExperimentProcess {
         listParams[1] = algParams;
         listParams[2] = new OtpErlangInt(experiment.getMaxAttemptsServerCrash());
         listParams[3] = javaPid;
-        OtpErlangList arguments = new OtpErlangList(listParams);
-        return arguments;
+        return new OtpErlangList(listParams);
     }
 
     public List<ExperimentRound> startExperiment(Experiment experiment) {
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
         destination = null;
         currentExperiment = experiment;
         Node node = Node.getNode();
-        //ciao
         erlangProcess = node.getOtpNode().createMbox();
         OtpErlangPid javaPid = erlangProcess.self();
         OtpErlangList arguments = prepareArguments(experiment, javaPid);
-        System.out.println(arguments);
         List<ExperimentRound> rounds = null;
         try {
             start = System.nanoTime();
             String[] cmd = {"bash", "-c", "erl -name erl@127.0.0.1 -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
             final Process p = Runtime.getRuntime().exec(cmd);
-            //final Process p = Runtime.getRuntime().exec("erl -name erl@127.0.0.1 -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
                 List<String> logs = new ArrayList<>();
                 public void run() {
@@ -67,13 +60,11 @@ public class ExperimentProcess {
                         Log.logExperiment(logs, experiment);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (ArrayIndexOutOfBoundsException ie) {
-
                     }
                 }
             }).start();
             Thread.sleep(1000);
-            caller = Caller.getCaller().getCallerConnection();
+            OtpConnection caller = Caller.getCaller().getCallerConnection();
             caller.sendRPC("supervisorNode", "start", arguments);
             rounds = waitForRounds();
         } catch (IOException e) {
@@ -98,16 +89,13 @@ public class ExperimentProcess {
                 }
             } catch (CommunicationException ex) {
                 System.out.println("Error during erlang computations: " + ex.getMessage());
-                continue;
             }
         }
         return rounds;
     }
 
-    // accertarsi ricezione da chi vogliamo noi
     private OtpErlangTuple receive() throws OtpErlangDecodeException, OtpErlangExit {
-        OtpErlangTuple tuple = null;
-        tuple = (OtpErlangTuple) erlangProcess.receive();
+        OtpErlangTuple tuple = (OtpErlangTuple) erlangProcess.receive();
         OtpErlangPid sender = (OtpErlangPid) tuple.elementAt(0);
         if (!sender.node().equals("erl@127.0.0.1"))
             throw new CommunicationException();
@@ -129,13 +117,10 @@ public class ExperimentProcess {
             if (msgType.toString().equals("error")) {
                 throw new CommunicationException(result.elementAt(2).toString());
             } else if (msgType.toString().equals("completed")) {
-                System.out.println( "completed");
-                elapsedTime = (System.nanoTime() - start) / 1000000;
+                long elapsedTime = (System.nanoTime() - start) / 1000000;
                 return new ExperimentRound(true, result.elementAt(2).toString(), elapsedTime);
-            } else { //round
-                //System.out.println(result.elementAt(2).toString());
+            } else {
                 ExperimentRound round = composeRound(result);
-                System.out.println(round);
                 return round;
             }
         } catch (OtpErlangExit e) {
@@ -151,14 +136,11 @@ public class ExperimentProcess {
     private ExperimentRound composeRound(OtpErlangTuple result) {
         OtpErlangTuple content = (OtpErlangTuple) result.elementAt(2);
         OtpErlangTuple algorithmContent = (OtpErlangTuple) content.elementAt(0);
-        // deve diventare chiamata generica
         AlgorithmRound algRound = currentExperiment.getAlgorithm().getIterationInfo(algorithmContent);
-        //AlgorithmRound algRound = getKMeansIterationInfo(algorithmContent);
         List<Client> clients = new ArrayList<>();
         OtpErlangList clientsContent = (OtpErlangList) content.elementAt(2);
         for (OtpErlangObject element : clientsContent) {
             OtpErlangTuple tupleElement = (OtpErlangTuple) element;
-            //System.out.println(tupleElement.toString());
             OtpErlangList chunkList = (OtpErlangList) tupleElement.elementAt(2);
             List<List<Double>> points = new ArrayList<>();
             List<Double> point;
@@ -192,27 +174,6 @@ public class ExperimentProcess {
         }
         return new ExperimentRound(Integer.parseInt(content.elementAt(4).toString()), Integer.parseInt(content.elementAt(1).toString()), algRound, clients, stateClients);
     }
-
-    // mettere in un luogo independent da logica generale
-    private AlgorithmRound getKMeansIterationInfo(OtpErlangTuple algorithmContent) {
-        OtpErlangList centersContent = (OtpErlangList) algorithmContent.elementAt(0);
-        //System.out.println("centersContent: " + centersContent);
-        List<List<Double>> centers = new ArrayList<>();
-        List<Double> center = new ArrayList<>();
-        for (OtpErlangObject element : centersContent) {
-            OtpErlangList centerList = (OtpErlangList) element;
-            for (OtpErlangObject coordinate : centerList)
-                center.add(Double.parseDouble(coordinate.toString()));
-            centers.add(center);
-        }
-        return new KMeansAlgorithmRound(centers, Double.parseDouble(algorithmContent.elementAt(1).toString()));
-    }
-
-    /*private static void send(Node node, String content){
-        OtpErlangString msg = new OtpErlangString(content);
-        OtpErlangTuple responseTuple = new OtpErlangTuple(new OtpErlangObject[]{node.getOtpMbox().self(), msg});
-        node.getOtpMbox().send(destination, responseTuple);
-    }*/
 }
 
 

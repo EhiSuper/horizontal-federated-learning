@@ -7,28 +7,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Experiment {
-    private int id; //auto
-    private String name; //user
-    private Algorithm algorithm; //user
-    private String dataset; //user
-    private int numFeatures; //user
-    private int mode; //admin
-    private LocalDate creationDate; //auto
-    private LocalDate lastUpdateDate; //auto
-    private User user; //auto
-    private int numRounds; //auto
-    private int maxNumRounds; //admin
-    private int numCrashes; //auto
-    private int numClients; //admin
-    private int numMinClients; //user
+    private int id;
+    private String name;
+    private Algorithm algorithm;
+    private String dataset;
+    private int numFeatures;
+    private int mode;
+    private LocalDate creationDate;
+    private LocalDate lastUpdateDate;
+    private User user;
+    private int numRounds;
+    private int maxNumRounds;
+    private int numCrashes;
+    private int numClients;
+    private int numMinClients;
     private long time;
-    private List<String> clientsHostnames; //admin
-    private boolean randomClients; //user
-    private double randomClientsSeed; //admin
-    private int timeout; //auto
-    private int maxAttemptsClientCrash; //admin
-    private int maxAttemptsServerCrash; //admin
-    private int maxAttemptsOverallCrash; //admin
+    private List<String> clientsHostnames;
+    private boolean randomClients;
+    private double randomClientsSeed;
+    private int timeout;
+    private int maxAttemptsClientCrash;
+    private int maxAttemptsServerCrash;
+    private int maxAttemptsOverallCrash;
     private List<ExperimentRound> roundsInfo;
 
     public Experiment(){}
@@ -64,7 +64,6 @@ public class Experiment {
                       LocalDate lastUpdateDate, int numRounds, int maxNumRounds, int numCrashes, int numClients, int numMinClients,
                       List<String> clientsHostnames, boolean randomClients, double randomClientsSeed, int timeout, int maxAttemptsClientCrash,
                       int maxAttemptsServerCrash, int maxAttemptsOverallCrash) {
-        this.id = id;
         this.name = name;
         this.algorithm = algorithm;
         this.dataset = dataset;
@@ -308,7 +307,6 @@ public class Experiment {
         OtpErlangObject[] array2 = new OtpErlangObject[objects.size()];
         OtpErlangObject[] array = objects.toArray(array2);
         OtpErlangTuple tuple = new OtpErlangTuple(array);
-        System.out.println(tuple);
         return tuple;
     }
 

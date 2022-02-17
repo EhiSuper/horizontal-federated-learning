@@ -1,8 +1,6 @@
 package it.unipi.dsmt.horizontalFederatedLearning.filters;
 
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ConfigurationService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
-
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
@@ -14,8 +12,7 @@ import java.util.*;
 public class ValidationFilter implements Filter {
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override
@@ -33,7 +30,7 @@ public class ValidationFilter implements Filter {
         HashMap<String, String> valuesKMeans = new HashMap<>();
         request.setAttribute("valuesKMeans", valuesKMeans);
         valuesGeneral = ConfigurationService.retrieveGeneral();
-        if (valuesGeneral != null && !valuesGeneral.isEmpty()) {
+        if (!valuesGeneral.isEmpty()) {
             String[] clients = valuesGeneral.remove("ClientsHostnames").split(",");
             List<String> clientsHostnames = Arrays.asList(clients);
             request.setAttribute("valuesGeneral", valuesGeneral);
@@ -43,18 +40,12 @@ public class ValidationFilter implements Filter {
             request.setAttribute("hostnames", new ArrayList<>());
         }
         valuesKMeans = ConfigurationService.retrieveSpecific("kmeans");
-        if (valuesKMeans != null && !valuesKMeans.isEmpty()) {
+        if (!valuesKMeans.isEmpty()) {
             request.setAttribute("valuesKMeans", valuesKMeans);
         } else {
             request.setAttribute("valuesKMeans", new HashMap<>());
         }
         String numberOfClients = request.getParameter("NumberOfClients");
-        if (numberOfClients == null || numberOfClients.trim().isEmpty()) {
-            messages.put("NumberOfClients", "Please enter NumberOfClients");
-        } else if (!numberOfClients.matches("\\d+")) {
-            messages.put("NumberOfClients", "Please enter digits only");
-        }
-
         if (request.getParameterValues("ClientsHostnames") != null) {
             List<String> clientsHostnames = Arrays.asList(request.getParameterValues("ClientsHostnames"));
             List<String> actualClientsHostnames = new ArrayList<>();
@@ -71,48 +62,12 @@ public class ValidationFilter implements Filter {
             if (actualClientsHostnames.isEmpty()) {
                 messages.put("ClientsHostnames", "Please enter at least one client");
             } else {
-                if (numberOfClients.matches("\\d+") && actualClientsHostnames.size() < Integer.parseInt(numberOfClients)) {
+                if (numberOfClients != null && numberOfClients.matches("\\d+") && actualClientsHostnames.size() < Integer.parseInt(numberOfClients)) {
                     messages.put("ClientsHostnames", "Please enter at least as many hostnames as the number of clients");
                 }
             }
         } else {
             messages.put("ClientsHostnames", "Please enter at least one client");
-        }
-        String randomClientsSeed = request.getParameter("RandomClientsSeed");
-        if (randomClientsSeed == null || randomClientsSeed.trim().isEmpty()) {
-            messages.put("RandomClientsSeed", "Please enter RandomClientsSeed");
-        } else if (!randomClientsSeed.matches("\\d+")) {
-            messages.put("RandomClientsSeed", "Please enter digits only");
-        }
-        String maxNumberRound = request.getParameter("MaxNumberRound");
-        if (maxNumberRound == null || maxNumberRound.trim().isEmpty()) {
-            messages.put("MaxNumberRound", "Please enter MaxNumberRound");
-        } else if (!maxNumberRound.matches("\\d+")) {
-            messages.put("MaxNumberRound", "Please enter digits only");
-        }
-        String maxAttemptsClientCrash = request.getParameter("MaxAttemptsClientCrash");
-        if (maxAttemptsClientCrash == null || maxAttemptsClientCrash.trim().isEmpty()) {
-            messages.put("MaxAttemptsClientCrash", "Please enter MaxAttemptsClientCrash");
-        } else if (!maxAttemptsClientCrash.matches("\\d+")) {
-            messages.put("MaxAttemptsClientCrash", "Please enter digits only");
-        }
-        String maxAttemptsServerCrash = request.getParameter("MaxAttemptsServerCrash");
-        if (maxAttemptsServerCrash == null || maxAttemptsServerCrash.trim().isEmpty()) {
-            messages.put("MaxAttemptsServerCrash", "Please enter MaxAttemptsServerCrash");
-        } else if (!maxAttemptsServerCrash.matches("\\d+")) {
-            messages.put("MaxAttemptsServerCrash", "Please enter digits only");
-        }
-        String maxAttemptsOverallCrash = request.getParameter("MaxAttemptsOverallCrash");
-        if (maxAttemptsOverallCrash == null || maxAttemptsOverallCrash.trim().isEmpty()) {
-            messages.put("MaxAttemptsOverallCrash", "Please enter MaxAttemptsOverallCrash");
-        } else if (!maxAttemptsOverallCrash.matches("\\d+")) {
-            messages.put("MaxAttemptsOverallCrash", "Please enter digits only");
-        }
-        String mode = request.getParameter("Mode");
-        if (mode == null || mode.trim().isEmpty()) {
-            messages.put("Mode", "Please enter Mode");
-        } else if (!mode.matches("\\d+")) {
-            messages.put("Mode", "Please enter digits only");
         }
         if(messages.size() != 0){
             String targetJSP = "/pages/jsp/adminPage.jsp";

@@ -32,7 +32,6 @@ public class ExperimentRound {
     public ExperimentRound(boolean last, String reason) {
         this.last = last;
         this.reason = reason;
-        this.time = time;
     }
 
     public void setNumCrashes(int numCrashes) {

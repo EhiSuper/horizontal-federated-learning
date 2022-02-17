@@ -3,12 +3,13 @@ package it.unipi.dsmt.horizontalFederatedLearning.service.db;
 import java.util.HashMap;
 
 public class ConfigurationService {
-    private static LevelDB db;
+    private final static LevelDB db;
 
     static {
         db = LevelDB.getInstance();
     }
 
+    // for general configuration parameters
     public static void insertGeneral(HashMap<String, String> values){
         HashMap<String, String> map = new HashMap<>();
         String prefixKey = "Conf:general:";
@@ -19,6 +20,7 @@ public class ConfigurationService {
         db.putBatchValues(map);
     }
 
+    // for algorithms' specific configuration parameters
     public static void insertSpecific(HashMap<String, String> values, String algorithm){
         HashMap<String, String> map = new HashMap<>();
         String prefixKey = "Conf:" + algorithm + ":";
@@ -29,6 +31,7 @@ public class ConfigurationService {
         db.putBatchValues(map);
     }
 
+    // for general configuration parameters
     public static HashMap<String, String> retrieveGeneral(){
         HashMap<String, String> map = db.findByPrefix("Conf:general:");
         HashMap<String, String> attributeValues = new HashMap<>();
@@ -40,6 +43,7 @@ public class ConfigurationService {
         return attributeValues;
     }
 
+    // for algorithms' specific configuration parameters
     public static HashMap<String, String> retrieveSpecific(String algorithm){
         HashMap<String, String> map = db.findByPrefix("Conf:" + algorithm + ":");
         HashMap<String, String> attributeValues = new HashMap<>();

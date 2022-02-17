@@ -16,7 +16,6 @@
     int firstFeature = (int)request.getAttribute("firstFeature");
     int secondFeature = (int)request.getAttribute("secondFeature");
     int experimentId = (int)request.getAttribute("experimentId");
-
 %>
 
 <!DOCTYPE HTML>
@@ -40,7 +39,6 @@
         window.onload = function () {
             time = setInterval(delayRounds ,4000);
         }
-
         function delayRounds() {
             if (rounds == 0) {
                 numFeatures = <%= numFeatures %>;
@@ -56,8 +54,8 @@
                     selectList.appendChild(option);
 
                 }
-                for (var i = 0; i < numFeatures; i++) {
-                    var option = document.createElement("option");
+                for (i = 0; i < numFeatures; i++) {
+                    option = document.createElement("option");
                     option.value = i;
                     option.text = "Feature "+ i;
                     if(i ==  <%= secondFeature %>)
@@ -83,7 +81,6 @@
                 showRound();
             }
         }
-
         function showRound(){
             document.getElementById("numrounds").textContent = rounds;
             document.getElementById("crashes").textContent = crashes.slice(rounds-1,rounds);
@@ -93,12 +90,10 @@
             console.log(involvedClients.slice(numMinClients * rounds, numMinClients * rounds + numMinClients).join("\r\n"));
             document.getElementById("clientsInvolved").textContent = involvedClients.slice(numMinClients * (rounds-1), numMinClients * (rounds-1) + numMinClients).join(", ");
             printCenters();
-            <% if(request.getAttribute("algorithm") != null && request.getAttribute("algorithm").equals("KMeans")){
-            %>
+            <% if(request.getAttribute("algorithm") != null && request.getAttribute("algorithm").equals("KMeans")){ %>
             printNorms();
             <%}%>
         }
-
         function printCenters(){
             var chart = new CanvasJS.Chart("chartContainerCenters", {
                 animationEnabled: false,
@@ -126,7 +121,6 @@
             });
             chart.render();
         }
-
         function printNorms(){
             var chart = new CanvasJS.Chart("chartContainerNorms", {
                 animationEnabled: false,
@@ -210,7 +204,7 @@
         <label id="time"></label>
         <br>
         <label for="logExecution">Logs of the Execution:</label><br>
-        <textarea id="logExecution" name="Logs of the execution" rows="30" cols="100">
+        <textarea id="logExecution" name="Logs of the execution" rows="30" cols="100" readonly>
         </textarea>
         <form action="<%=request.getContextPath()%>/Run" method="post">
             <input type="hidden" id="id" name="id" value="<%=experimentId%>">

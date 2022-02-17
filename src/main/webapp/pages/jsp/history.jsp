@@ -1,10 +1,6 @@
 <%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment" %>
-<%@ page import="java.util.List" %><%--
-  Created by IntelliJ IDEA.
-  User: franco
-  To change this template use File | Settings | File Templates.
---%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
+<%@ page contentType="text/html;charset=UTF-8"%>
 <% List<Experiment> listExperiment = (List<Experiment>) request.getAttribute("listExperiment"); %>
 <!DOCTYPE html>
 <html>

@@ -3,14 +3,13 @@ package it.unipi.dsmt.horizontalFederatedLearning.util;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
 
 import java.io.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Log {
-    private static String logFile;
+    private final static String logFile;
 
     static {
         logFile = "experimentsLog.txt";
@@ -47,21 +46,15 @@ public class Log {
             while ((line = br.readLine()) != null) {
                 if(line.startsWith("----")){
                     int expId = Integer.parseInt(line.split("---- Log experiment ")[1].split(" ")[0]);
-                    if(id == expId){
+                    if(id == expId) {
                         result.clear();
                         exp = true;
-                    }
-                    else{
-                        exp = false;
-                    }
+                    } else exp = false;
                 }
-                if(exp) {
+                if(exp)
                     result.add(line);
-                }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;

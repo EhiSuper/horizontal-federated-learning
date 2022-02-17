@@ -1,11 +1,8 @@
 package it.unipi.dsmt.horizontalFederatedLearning.service.db;
-
 import it.unipi.dsmt.horizontalFederatedLearning.entities.Algorithm;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.RegistrationException;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +11,7 @@ import java.util.List;
 
 public class ExperimentService {
     private static int counterID;
-    private static LevelDB db;
+    private final static LevelDB db;
 
     static {
         db = LevelDB.getInstance();
@@ -50,7 +47,6 @@ public class ExperimentService {
         map.put(prefixKey + "numRounds", Integer.toString(experiment.getNumRounds()));
         map.put(prefixKey + "maxNumRounds", Integer.toString(experiment.getMaxNumRounds()));
         map.put(prefixKey + "numClients", Integer.toString(experiment.getNumClients()));
-        System.out.println(experiment.getNumClients());
         map.put(prefixKey + "numMinClients", Integer.toString(experiment.getNumMinClients()));
         map.put(prefixKey + "clientsHostnames", String.join(",", experiment.getClientsHostnames()));
         map.put(prefixKey + "randomClients", Boolean.toString(experiment.getRandomClients()));
@@ -68,7 +64,6 @@ public class ExperimentService {
     public static void insertAlgorithm(Experiment experiment, HashMap<String, String> map) {
         String prefixKey = "Experiment:" + experiment.getId() + ":" + experiment.getUser().getId() + ":Algorithm:";
         map.put(prefixKey + "name", experiment.getAlgorithm().getName());
-        // logica dipendente
         if(experiment.getAlgorithm().getName().equals("KMeans")){
             KMeansAlgorithm kMeansAlgorithm = (KMeansAlgorithm) experiment.getAlgorithm();
             map.put(prefixKey + "numClusters", Integer.toString(kMeansAlgorithm.getNumClusters()));
@@ -107,23 +102,6 @@ public class ExperimentService {
                 experiments.add(experiment);
         }
         return experiments;
-    }
-
-    public static double getAverageTimeout(String algorithmName) {
-        List<Experiment> list = readAllExperiments();
-        double avgTime = 0;
-        int counter = 0;
-        for(Experiment exp: list){
-            if(exp.getAlgorithm().getName().equals(algorithmName)){
-                if(exp.getTime() != 0){
-                    avgTime += (exp.getTime() / exp.getNumRounds());
-                    counter++;
-                }
-            }
-        }
-        if(counter != 0)
-            return 2*(avgTime/counter);
-        else return -1;
     }
 
     public static void deleteExperimentById(int id) {
@@ -168,7 +146,6 @@ public class ExperimentService {
                     experiment.setMaxNumRounds(Integer.parseInt(map.get(key)));
                     break;
                 case "numClients":
-                    System.out.println(map.get(key));
                     experiment.setNumClients(Integer.parseInt(map.get(key)));
                     break;
                 case "numMinClients":
@@ -239,12 +216,9 @@ public class ExperimentService {
         return list;
     }
 
-    //aggiustare poi
     public static KMeansAlgorithm readAlgorithm(int id, int userId){
         HashMap<String, String> map = db.findByPrefix("Experiment:"+id+":"+userId+":Algorithm");
-        System.out.println("Experiment:"+id+":"+userId+":Algorithm:name");
         String name = db.findValuesByPrefix("Experiment:"+id+":"+userId+":Algorithm:name").get(0);
-        // codice dipendente
         if(name.equals("KMeans")) {
             KMeansAlgorithm algorithm = new KMeansAlgorithm();
             for (String key : map.keySet()) {

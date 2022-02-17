@@ -3,10 +3,6 @@ package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ExperimentService;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.UserService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.erlang.ExperimentProcess;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.CommunicationException;
-import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,9 +21,7 @@ public class ExperimentInfo extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/experimentInfo.jsp";
         String id = request.getParameter("id");
-        System.out.println(id);
         Experiment experiment = ExperimentService.findExperimentById(Integer.parseInt(id));
-        System.out.println(experiment);
         request.setAttribute("experiment", experiment);
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
@@ -72,12 +65,13 @@ public class ExperimentInfo extends HttpServlet {
                 String normFn = request.getParameter("normFn");
                 algorithm = new KMeansAlgorithm(numClusters, epsilon, distance,  seedCenters, normFn);
             }
-            algorithm.setName(algorithmName);
+            if(algorithm != null)
+                algorithm.setName(algorithmName);
             Experiment experiment = new Experiment(experimentId, name, algorithm, dataset, numFeatures, mode, user, creationDate, lastUpdateDate,numRounds,maxNumRounds,numCrashes,numClients, numMinClients,
                     clientsHostnames,  randomClients, randomClientsSeed, (int) timeout,maxAttemptsClientCrash, maxAttemptsServerCrash, maxAttemptsOverallCrash);
             Experiment oldExperiment = ExperimentService.findExperimentById(experimentId);
             ExperimentService.editExperiment(experiment);
-            if(experiment.different(oldExperiment)) {
+            if(oldExperiment!= null && experiment.different(oldExperiment)) {
                 request.setAttribute("ExperimentId", experiment.getId());
                 request.setAttribute("firstFeature", 0);
                 request.setAttribute("secondFeature", 1);
@@ -86,7 +80,6 @@ public class ExperimentInfo extends HttpServlet {
                 requestDispatcher.forward(request, response);
             } else {
                 String targetJSP = "/pages/jsp/experimentInfo.jsp";
-                System.out.println(experiment.getId());
                 request.setAttribute("experiment", experiment);
                 RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
                 requestDispatcher.forward(request, response);

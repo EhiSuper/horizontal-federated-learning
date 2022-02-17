@@ -6,7 +6,7 @@ public class Client {
     private String hostname;
     private String pid;
     private List<List<Double>> chunk;
-    private int numCrashes; //or numSpawns
+    private int numCrashes;
 
     public Client(String hostname, String pid, List<List<Double>> chunk, int numCrashes) {
         this.hostname = hostname;

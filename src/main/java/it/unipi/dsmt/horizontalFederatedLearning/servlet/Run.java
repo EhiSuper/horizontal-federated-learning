@@ -31,20 +31,17 @@ public class Run extends HttpServlet {
             Experiment experiment = null;
             int firstFeature = 0;
             int secondFeature = 1;
-            System.out.println("1st branch");
             if(request.getAttribute("ExperimentId") != null) {
-                System.out.println("1st inner branch");
                 experiment = ExperimentService.findExperimentById((Integer)request.getAttribute("ExperimentId"));
                 firstFeature = (Integer)request.getAttribute("firstFeature");
                 secondFeature = (Integer)request.getAttribute("secondFeature");
             } else if (request.getParameter("ExperimentId") != null){
-                System.out.println("2nd inner branch");
                 experiment = ExperimentService.findExperimentById(Integer.parseInt(request.getParameter("ExperimentId")));
                 firstFeature = Integer.parseInt(request.getParameter("firstFeature"));
                 secondFeature = Integer.parseInt(request.getParameter("secondFeature"));
             }
-            ExperimentProcess communication = new ExperimentProcess();
-            List<ExperimentRound> rounds = communication.startExperiment(experiment);
+            ExperimentProcess process = new ExperimentProcess();
+            List<ExperimentRound> rounds = process.startExperiment(experiment);
             experiment.setPostAlgorithmParameters(rounds);
             ExperimentService.editExperiment(experiment);
             List<String> logExecution = Log.getLogExperiment(experiment);
@@ -128,7 +125,10 @@ public class Run extends HttpServlet {
             requestDispatcher.forward(request, response);
         } else if(request.getParameter("export") != null) {
             int id = Integer.parseInt(request.getParameter("id"));
-            List<String> logs = Log.getLogExperiment(ExperimentService.findExperimentById(id));
+            Experiment experiment = ExperimentService.findExperimentById(id);
+            List<String> logs = new ArrayList<>();
+            if(experiment != null)
+                logs = Log.getLogExperiment(experiment);
             String result = String.join( "\n", logs);
             response.setContentType("plain/text");
             response.addHeader("Content-Disposition", "attachment; filename=\"log.txt\"");

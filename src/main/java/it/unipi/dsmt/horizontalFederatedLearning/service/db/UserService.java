@@ -2,12 +2,11 @@ package it.unipi.dsmt.horizontalFederatedLearning.service.db;
 
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.*;
-
 import java.util.HashMap;
 import java.util.List;
 
 public class UserService {
-    private static LevelDB db;
+    private final static LevelDB db;
     private static int counterID;
 
     static {
@@ -40,7 +39,7 @@ public class UserService {
         map.put(prefixKey + "firstName", user.getFirstName());
         map.put(prefixKey + "lastName", user.getLastName());
         map.put(prefixKey + "password", user.getPassword());
-        if(user.getAdmin() == true)
+        if(user.getAdmin())
             map.put(prefixKey + "admin", String.valueOf(user.getAdmin()));
         db.putBatchValues(map);
     }
@@ -106,7 +105,7 @@ public class UserService {
         map.put(prefixKey + "firstName", user.getFirstName());
         map.put(prefixKey + "lastName", user.getLastName());
         map.put(prefixKey + "password", user.getPassword());
-        if(user.getAdmin() == true)
+        if(user.getAdmin())
             map.put(prefixKey + "admin", String.valueOf(user.getAdmin()));
         db.putBatchValues(map);
     }

@@ -1,8 +1,6 @@
 package it.unipi.dsmt.horizontalFederatedLearning.servlet;
 
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.ConfigurationService;
-import it.unipi.dsmt.horizontalFederatedLearning.service.db.LevelDB;
-
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
@@ -16,7 +14,7 @@ public class AdminPage extends HttpServlet {
         Map<String, String> messages = new HashMap<>();
         request.setAttribute("messages", messages);
         Map<String, String> valuesGeneral = ConfigurationService.retrieveGeneral();
-        if (valuesGeneral != null && !valuesGeneral.isEmpty()) {
+        if (!valuesGeneral.isEmpty()) {
             String[] clients = valuesGeneral.remove("ClientsHostnames").split(",");
             List<String> clientsHostnames = Arrays.asList(clients);
             request.setAttribute("valuesGeneral", valuesGeneral);
@@ -26,12 +24,11 @@ public class AdminPage extends HttpServlet {
             request.setAttribute("hostnames", new ArrayList<>());
         }
         Map<String, String> valuesKMeans = ConfigurationService.retrieveSpecific("kmeans");
-        if (valuesKMeans != null && !valuesKMeans.isEmpty()) {
+        if (!valuesKMeans.isEmpty()) {
             request.setAttribute("valuesKMeans", valuesKMeans);
         } else {
             request.setAttribute("valuesKMeans", new HashMap<>());
         }
-
         String targetJSP = "/pages/jsp/adminPage.jsp";
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
@@ -43,10 +40,8 @@ public class AdminPage extends HttpServlet {
         request.setAttribute("valuesGeneral", valuesGeneral);
         HashMap<String, String> valuesKMeans = new HashMap<>();
         request.setAttribute("valuesKMeans", valuesKMeans);
-
         String numberOfClients = request.getParameter("NumberOfClients");
         valuesGeneral.put("NumberOfClients", numberOfClients);
-
         if (request.getParameterValues("ClientsHostnames") != null) {
             List<String> clientsHostnames = Arrays.asList(request.getParameterValues("ClientsHostnames"));
             List<String> actualClientsHostnames = new ArrayList<>();
@@ -60,29 +55,20 @@ public class AdminPage extends HttpServlet {
             request.setAttribute("hostnames", actualClientsHostnames);
             valuesGeneral.put("ClientsHostnames", hostnameValue);
         }
-
         String randomClientsSeed = request.getParameter("RandomClientsSeed");
         valuesGeneral.put("RandomClientsSeed", randomClientsSeed);
-
         String maxNumberRound = request.getParameter("MaxNumberRound");
         valuesGeneral.put("MaxNumberRound", maxNumberRound);
-
         String maxAttemptsClientCrash = request.getParameter("MaxAttemptsClientCrash");
         valuesGeneral.put("MaxAttemptsClientCrash", maxAttemptsClientCrash);
-
-
         String maxAttemptsServerCrash = request.getParameter("MaxAttemptsServerCrash");
         valuesGeneral.put("MaxAttemptsServerCrash", maxAttemptsServerCrash);
-
         String maxAttemptsOverallCrash = request.getParameter("MaxAttemptsOverallCrash");
         valuesGeneral.put("MaxAttemptsOverallCrash", maxAttemptsOverallCrash);
-
         String mode = request.getParameter("Mode");
         valuesGeneral.put("Mode", mode);
-
         ConfigurationService.insertGeneral(valuesGeneral);
         ConfigurationService.insertSpecific(valuesKMeans, "kmeans");
-
         String targetJSP = "/pages/jsp/adminPage.jsp";
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);

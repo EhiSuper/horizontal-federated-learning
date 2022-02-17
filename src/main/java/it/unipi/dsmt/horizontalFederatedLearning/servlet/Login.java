@@ -4,7 +4,6 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
-
 import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
 import it.unipi.dsmt.horizontalFederatedLearning.service.db.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.LoginException;
@@ -23,12 +22,10 @@ public class Login extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        request.setAttribute("error", " ");
         try {
             UserService.login(username, password);
             User myUser = UserService.findUserByUsername(username);
-            if(myUser.getAdmin() == true) {
-                System.out.println("Admin logged in!");
+            if(myUser != null && myUser.getAdmin()) {
                 HttpSession session = request.getSession();
                 session.setAttribute("isAdmin", true);
                 session.setAttribute("user", myUser.getId());
