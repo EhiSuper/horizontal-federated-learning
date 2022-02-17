@@ -42,6 +42,7 @@ public class ExperimentProcess {
             start = System.nanoTime();
             String[] cmd = {"bash", "-c", "erl -name erl" + experiment.getId() + "@127.0.0.1 -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
             p = Runtime.getRuntime().exec(cmd);
+            //p = Runtime.getRuntime().exec("erl -name erl" + experiment.getId() + "@127.0.0.1 -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
                 List<String> logs = new ArrayList<>();
                 public void run() {
@@ -50,8 +51,13 @@ public class ExperimentProcess {
                     String editedLine;
                     try {
                         while ((line = input.readLine()) != null) {
-                            if (line.contains("1> "))
-                                editedLine = line.split("1> ")[1];
+                            if (line.contains("1> ")){
+                                if(line.split("1> ").length > 1)
+                                    editedLine = line.split("1> ")[1];
+                                else{
+                                    editedLine = "";
+                                }
+                            }
                             else editedLine = line;
                             if(line.contains("WARNING") || line.contains("global:") || line.replaceAll(" ","").equals("\n"))
                                 continue;
@@ -97,8 +103,12 @@ public class ExperimentProcess {
         while (true) {
             try {
                 round = receiveRound();
-                if(round != null)
+                if(round != null && round.getReason() != null && (round.getReason().equals("server restart"))){
+                    rounds = new ArrayList<>();
+                }
+                else if (round != null){
                     rounds.add(round);
+                }
                 else{
                     System.out.println("Experiment completed! Received all rounds!");
                     break;
@@ -141,10 +151,18 @@ public class ExperimentProcess {
                 return round;
             }
         } catch (OtpErlangExit e) {
-            if (!e.reason().toString().equals("normal")) {
+            if (!e.reason().toString().equals("normal") && !e.reason().toString().equals("noproc")) {
                 return new ExperimentRound(true, e.toString());
             }
-        } catch (Exception e) {
+        } catch (CommunicationException e) {
+            if (e.getMessage().split(",")[0].equals("{server_restart")){
+                return new ExperimentRound(false, "server restart");
+            }
+            else{
+                return new ExperimentRound(true, e.toString());
+            }
+        }
+        catch (Exception e) {
             return new ExperimentRound(true, e.toString());
         }
         return null;
