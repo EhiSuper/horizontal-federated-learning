@@ -13,8 +13,8 @@
     String reason = (String) session.getAttribute("reason");
     long time = (long) session.getAttribute("time");
     List<String> logExecution = (List<String>) session.getAttribute("logExecution");
-    int firstFeature = (int)session.getAttribute("firstFeature");
-    int secondFeature = (int)session.getAttribute("secondFeature");
+    int firstFeature = (int) session.getAttribute("firstFeature");
+    int secondFeature = (int) session.getAttribute("secondFeature");
     int experimentId = (int) session.getAttribute("experimentId");
 
 %>
@@ -24,6 +24,9 @@
 <head>
     <title>Home Page</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        <%@include file="../../style/css/style.css" %>
+    </style>
     <script type="text/javascript">
         let time = null;
         datapoints = <%=dataPoints%>;
@@ -164,9 +167,6 @@
     <button><a href="<%=request.getContextPath()%>/Logout">Logout</a></button>
 </div>
 <div id="experimentResult" style="width:1400px">
-    <form action="<%=request.getContextPath()%>/Home">
-        <button type="submit" name="back">Back</button>
-    </form>
     <br>
     <div id="features" style=" display: none;">
         <form action="<%=request.getContextPath()%>/Home/Features" method="post">

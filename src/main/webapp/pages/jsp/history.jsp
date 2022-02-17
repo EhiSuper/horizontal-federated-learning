@@ -1,11 +1,14 @@
 <%@ page import="it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment" %>
 <%@ page import="java.util.List" %>
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <% List<Experiment> listExperiment = (List<Experiment>) request.getAttribute("listExperiment"); %>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Search Page</title>
+    <style>
+        <%@include file="../../style/css/style.css" %>
+    </style>
 </head>
 <body>
 <div id="menu">
@@ -49,20 +52,30 @@
             <td>User</td>
             <td></td>
         </tr>
-        <% for(Experiment experiment: listExperiment){ %>
-            <tr>
-                <td><%= experiment.getName()%></td>
-                <td><%= experiment.getAlgorithm().getName()%></td>
-                <td><%= experiment.getDataset()%></td>
-                <td><%= experiment.getNumFeatures()%></td>
-                <td><%= experiment.getMode()%></td>
-                <td><%= experiment.getCreationDate().toString()%></td>
-                <td><%= experiment.getLastUpdateDate().toString()%></td>
-                <% if(experiment.getUser() != null) { %>
-                    <td><%= experiment.getUser().getUsername()%></td>
-                <% } %>
-                <td><a href="<%= request.getContextPath()%>/ExperimentInfo?id=<%=experiment.getId()%>"><button>Show Experiment</button></a></td>
-            </tr>
+        <% for (Experiment experiment : listExperiment) { %>
+        <tr>
+            <td><%= experiment.getName()%>
+            </td>
+            <td><%= experiment.getAlgorithm().getName()%>
+            </td>
+            <td><%= experiment.getDataset()%>
+            </td>
+            <td><%= experiment.getNumFeatures()%>
+            </td>
+            <td><%= experiment.getMode()%>
+            </td>
+            <td><%= experiment.getCreationDate().toString()%>
+            </td>
+            <td><%= experiment.getLastUpdateDate().toString()%>
+            </td>
+            <% if (experiment.getUser() != null) { %>
+            <td><%= experiment.getUser().getUsername()%>
+            </td>
+            <% } %>
+            <td><a href="<%= request.getContextPath()%>/ExperimentInfo?id=<%=experiment.getId()%>">
+                <button>Show Experiment</button>
+            </a></td>
+        </tr>
         <% } %>
     </table>
 </div>

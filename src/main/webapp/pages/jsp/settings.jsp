@@ -3,10 +3,14 @@
 <html>
 <head>
     <title>Settings</title>
+    <style>
+        <%@include file="../../style/css/style.css" %>
+    </style>
 </head>
 <body>
 <% if (request.getAttribute("error") != null) { %>
-<p><%=request.getAttribute("error")%></p>
+<p><%=request.getAttribute("error")%>
+</p>
 <% } %>
 <div id="menu">
     <button><a href="<%=request.getContextPath()%>/Home">Home</a></button>
@@ -18,7 +22,8 @@
     <form action="<%=request.getContextPath()%>/Settings" method="post">
         <div><label for="username">Username: </label> <input type="text" name="username" id="username"
                                                              placeholder="username" required
-                                                             value="<%=request.getAttribute("username")%>" readonly></div>
+                                                             value="<%=request.getAttribute("username")%>" readonly>
+        </div>
         <div><label for="firstName">First Name: </label> <input type="text" name="firstName" id="firstName"
                                                                 placeholder="First Name" required
                                                                 value="<%=request.getAttribute("firstName")%>"></div>

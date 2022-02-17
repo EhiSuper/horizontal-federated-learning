@@ -3,11 +3,15 @@
 <html>
 <head>
     <title>Sign up</title>
+    <style>
+        <%@include file="../../style/css/style.css" %>
+    </style>
 </head>
 <body>
 <h1>Sign up</h1>
 <% if (request.getAttribute("error") != null) { %>
-    <p><%=request.getAttribute("error")%> </p>
+<p><%=request.getAttribute("error")%>
+</p>
 <% } %>
 <form action="<%=request.getContextPath()%>/Signup" method="post">
     <div><label for="username">Username: </label> <input type="text" name="username" id="username"
