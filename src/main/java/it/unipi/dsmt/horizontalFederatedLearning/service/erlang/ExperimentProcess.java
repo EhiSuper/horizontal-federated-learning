@@ -16,7 +16,6 @@ public class ExperimentProcess {
     private OtpMbox erlangProcess;
     private Process p;
     private Experiment currentExperiment;
-    private long elapsedTime;
     private long start;
 
     private OtpErlangList prepareArguments(Experiment experiment, OtpErlangPid javaPid) {
@@ -27,12 +26,10 @@ public class ExperimentProcess {
         listParams[1] = algParams;
         listParams[2] = new OtpErlangInt(experiment.getMaxAttemptsServerCrash());
         listParams[3] = javaPid;
-        OtpErlangList arguments = new OtpErlangList(listParams);
-        return arguments;
+        return new OtpErlangList(listParams);
     }
 
     public List<ExperimentRound> startExperiment(Experiment experiment) {
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
         destination = null;
         currentExperiment = experiment;
         Node node = Node.getNode();
@@ -46,7 +43,6 @@ public class ExperimentProcess {
             start = System.nanoTime();
             String[] cmd = {"bash", "-c", "erl -name erl" + experiment.getId() + "@127.0.0.1 -setcookie COOKIE -pa './erlangFiles'"}; // type last element your command
             p = Runtime.getRuntime().exec(cmd);
-            //p = Runtime.getRuntime().exec("erl -name erl" + experiment.getId() + "@127.0.0.1 -setcookie COOKIE -pa \"./erlangFiles\"");
             new Thread(new Runnable() {
                 List<String> logs = new ArrayList<>();
                 public void run() {
@@ -69,8 +65,6 @@ public class ExperimentProcess {
                         Log.logExperiment(logs, experiment);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (ArrayIndexOutOfBoundsException ie) {
-                        ie.printStackTrace();
                     }
                 }
             }).start();
@@ -110,7 +104,6 @@ public class ExperimentProcess {
                 }
             } catch (CommunicationException ex) {
                 System.out.println("Error during erlang computations: " + ex.getMessage());
-                continue;
             }
         }
         return rounds;
@@ -139,7 +132,7 @@ public class ExperimentProcess {
             if (msgType.toString().equals("error")) {
                 throw new CommunicationException(result.elementAt(2).toString());
             } else if (msgType.toString().equals("completed")) {
-                elapsedTime = (System.nanoTime() - start) / 1000000;
+                long elapsedTime = (System.nanoTime() - start) / 1000000;
                 return new ExperimentRound(true, result.elementAt(2).toString(), elapsedTime);
             } else { //round
                 ExperimentRound round = composeRound(result);
@@ -160,13 +153,10 @@ public class ExperimentProcess {
         OtpErlangTuple content = (OtpErlangTuple) result.elementAt(2);
         OtpErlangTuple algorithmContent = (OtpErlangTuple) content.elementAt(0);
         AlgorithmRound algRound = currentExperiment.getAlgorithm().getIterationInfo(algorithmContent);
-
         OtpErlangList clientsContent = (OtpErlangList) content.elementAt(2);
         List<Client> clients = convertClientsList(clientsContent);
-
         OtpErlangList stateClientsContent = (OtpErlangList) content.elementAt(3);
         List<Client> stateClients = convertClientsList(stateClientsContent);
-
         return new ExperimentRound(Integer.parseInt(content.elementAt(4).toString()), Integer.parseInt(content.elementAt(1).toString()), algRound, clients, stateClients);
     }
 
