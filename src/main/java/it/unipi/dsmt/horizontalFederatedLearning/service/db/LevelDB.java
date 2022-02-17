@@ -93,6 +93,7 @@ public class LevelDB {
             System.out.println(elem);
     }
 
+
     public List<String> findKeysByPrefix(String prefix) throws RuntimeException {
         try (DBIterator iterator = db.iterator()) {
             List<String> keys = Lists.newArrayList();
@@ -108,6 +109,7 @@ public class LevelDB {
         }
         return null;
     }
+
 
     public List<String> findValuesByPrefix(String prefix) throws RuntimeException {
         try (DBIterator iterator = db.iterator()) {

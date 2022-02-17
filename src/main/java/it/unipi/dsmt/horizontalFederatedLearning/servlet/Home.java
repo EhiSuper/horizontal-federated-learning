@@ -20,7 +20,6 @@ public class Home extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String targetJSP = "/pages/jsp/home.jsp";
         Map<String, String> defaultValues = ConfigurationService.retrieveGeneral();
-        System.out.println(Integer.parseInt(defaultValues.get("NumberOfClients")));
         request.setAttribute("numClients", Integer.parseInt(defaultValues.get("NumberOfClients")));
         RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
         requestDispatcher.forward(request, response);
