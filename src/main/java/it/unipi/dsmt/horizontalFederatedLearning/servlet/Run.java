@@ -68,7 +68,7 @@ public class Run extends HttpServlet {
                     for(Client involvedClient: involvedClientsRound)
                         involvedClients.add(involvedClient.getHostname() + " ");
                     int numcrashesRound = rounds.get(i).getNumCrashes();
-                    for (Client client : involvedClientsRound) {
+                    for (Client client : rounds.get(i).getClientsState()) {
                         List<List<Double>> chunk = client.getChunk();
                         for(List<Double> point: chunk){
                             map = new HashMap<>();

@@ -28,7 +28,7 @@
     <form action="<%=request.getContextPath()%>/Settings" method="post">
         <div><label for="username">Username: </label> <input type="text" name="username" id="username"
                                                              placeholder="username" required
-                                                             value="<%=request.getAttribute("username")%>"></div>
+                                                             value="<%=request.getAttribute("username")%>" readonly></div>
 
         <div><label for="firstName">First Name: </label> <input type="text" name="firstName" id="firstName"
                                                                 placeholder="First Name" required

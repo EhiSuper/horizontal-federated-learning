@@ -78,62 +78,10 @@ public class ExperimentInfo extends HttpServlet {
             Experiment oldExperiment = ExperimentService.findExperimentById(experimentId);
             ExperimentService.editExperiment(experiment);
             if(experiment.different(oldExperiment)) {
-                ExperimentProcess communication = new ExperimentProcess();
-                communication.startExperiment(experiment);
-                List<ExperimentRound> rounds = new ArrayList<>();
-                ExperimentRound round = null;
-                while (true) {
-                    try {
-                        round = communication.receiveRound();
-                        rounds.add(round);
-                    } catch (CommunicationException ex) {
-                        System.out.println("Error during erlang computations: " + ex.getMessage());
-                        continue;
-                    }
-                    if (round == null) {
-                        System.out.println("finished experiment");
-                        break;
-                    }
-                }
-                numCrashes = 0;
-                for (int i = 0; i < rounds.size(); ++i) {
-                    ExperimentRound singleRound = rounds.get(i);
-                    if (singleRound != null && !singleRound.getLast())
-                        numCrashes += singleRound.getNumCrashes();
-                    else if (singleRound != null && singleRound.getLast()) {
-                        System.out.println(rounds.get(i).getTime());
-                        experiment.setTime(rounds.get(i).getTime());
-                        switch (experiment.getAlgorithm().getName()) {
-                            case "KMeans":
-                                KMeansAlgorithmRound kmround = (KMeansAlgorithmRound) rounds.get(i - 1).getAlgorithmRound();
-                                KMeansAlgorithm kMeansAlgorithm = (KMeansAlgorithm) experiment.getAlgorithm();
-                                kMeansAlgorithm.setfNorm(kmround.getfNorm());
-                                kMeansAlgorithm.setCenters(kmround.getCenters());
-                                algorithm = kMeansAlgorithm;
-                                break;
-                        }
-                    }
-                }
-                experiment.setRoundsInfo(rounds);
-                experiment.setNumCrashes(numCrashes);
-                experiment.setNumRounds(rounds.size() - 2);
-                experiment.setAlgorithm(algorithm);
-                ExperimentService.editExperiment(experiment);
-                List<String> logExecution = Log.getLogExperiment(experiment);
-                for (int i = 0; i < logExecution.size(); ++i)
-                    logExecution.set(i, "'" + logExecution.get(i) + "'");
-                request.setAttribute("rounds", rounds);
-                request.setAttribute("algorithm", experiment.getAlgorithm().getName());
-                request.setAttribute("logExecution", logExecution);
+                request.setAttribute("ExperimentId", experiment.getId());
                 request.setAttribute("firstFeature", 0);
                 request.setAttribute("secondFeature", 1);
-                request.setAttribute("numClients", experiment.getNumClients());
-                request.setAttribute("experimentId", experiment.getId());
-                request.setAttribute("numMinClients", experiment.getNumMinClients());
-                request.setAttribute("time", experiment.getTime());
-                request.setAttribute("numFeatures", experiment.getNumFeatures());
-                System.out.println(experiment.getTime());
-                String targetJSP = "/pages/jsp/run.jsp";
+                String targetJSP = "/Run";
                 RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
                 requestDispatcher.forward(request, response);
             } else {

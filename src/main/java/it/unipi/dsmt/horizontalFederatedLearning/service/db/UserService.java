@@ -15,7 +15,7 @@ public class UserService {
         setCounterID();
     }
 
-    private static void setCounterID() {
+    private synchronized static void setCounterID() {
         List<String> keys = db.findKeysByPrefix("User:");
         if (keys != null)
             for (String key : keys) {
@@ -29,7 +29,13 @@ public class UserService {
         HashMap<String, String> map = new HashMap<>();
         if (findUserByUsername(user.getUsername()) != null)
             throw new RegistrationException("Username already taken");
-        String prefixKey = "User:" + ++counterID + ":";
+        if(user.getId() == 0) {
+            synchronized(ExperimentService.class) {
+                if(user.getId() == 0)
+                    user.setId(++counterID);
+            }
+        }
+        String prefixKey = "User:" + user.getId() + ":";
         map.put(prefixKey + "username", user.getUsername());
         map.put(prefixKey + "firstName", user.getFirstName());
         map.put(prefixKey + "lastName", user.getLastName());
@@ -71,7 +77,7 @@ public class UserService {
     }
 
     public static User findUserById(int id) {
-        List<String> keys = db.findKeysByPrefix("User:" + id+":");
+        List<String> keys = db.findKeysByPrefix("User:" + id +":");
         if (keys.size() == 0)
             return null;
         String username = db.getValue("User:" + id + ":username");
@@ -84,14 +90,24 @@ public class UserService {
         return new User(id, firstName, lastName, username, password, admin);
     }
 
+
+    public static void deleteUserById(int id) {
+        List<String> keys = db.findKeysByPrefix("User:"+id+":");
+        for(String key: keys) {
+            db.deleteValue(key);
+        }
+    }
+
     public static void updateUser(User user){
-        db.deleteValue("User:" + user.getId() + ":username");
-        db.putValue("User:" + user.getId() + ":username", user.getUsername());
-        db.deleteValue("User:" + user.getId() + ":password");
-        db.putValue("User:" + user.getId() + ":password", user.getPassword());
-        db.deleteValue("User:" + user.getId() + ":firstName");
-        db.putValue("User:" + user.getId() + ":firstName", user.getFirstName());
-        db.deleteValue("User:" + user.getId() + ":lastName");
-        db.putValue("User:" + user.getId() + ":lastName", user.getLastName());
+        HashMap<String, String> map = new HashMap<>();
+        deleteUserById(user.getId());
+        String prefixKey = "User:" + user.getId() + ":";
+        map.put(prefixKey + "username", user.getUsername());
+        map.put(prefixKey + "firstName", user.getFirstName());
+        map.put(prefixKey + "lastName", user.getLastName());
+        map.put(prefixKey + "password", user.getPassword());
+        if(user.getAdmin() == true)
+            map.put(prefixKey + "admin", String.valueOf(user.getAdmin()));
+        db.putBatchValues(map);
     }
 }

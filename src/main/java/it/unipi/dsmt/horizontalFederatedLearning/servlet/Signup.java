@@ -34,11 +34,11 @@ public class Signup extends HttpServlet {
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);
         }
-
         try {
             User user = new User(firstName, lastName, username, password);
             UserService.register(user);
             HttpSession session = request.getSession();
+            System.out.println(user.getId());
             session.setAttribute("user", user.getId());
             response.sendRedirect(request.getContextPath() + "/Home");
         }

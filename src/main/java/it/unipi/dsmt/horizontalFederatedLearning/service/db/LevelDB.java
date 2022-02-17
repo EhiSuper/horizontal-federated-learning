@@ -1,14 +1,8 @@
 package it.unipi.dsmt.horizontalFederatedLearning.service.db;
 
 import com.google.common.collect.Lists;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.Experiment;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.KMeansAlgorithm;
-import it.unipi.dsmt.horizontalFederatedLearning.entities.User;
-import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.RegistrationException;
 import org.iq80.leveldb.*;
-
 import java.io.*;
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.*;
@@ -68,7 +62,7 @@ public class LevelDB {
         db.delete(bytes(key));
     }
 
-    public void putBatchValues(HashMap<String, String> entries) {
+    public synchronized void putBatchValues(HashMap<String, String> entries) {
         try (WriteBatch batch = db.createWriteBatch()) {
             for (int i = 0; i < entries.size(); ++i) {
                 batch.put(bytes((String) entries.keySet().toArray()[i]), bytes(entries.get(entries.keySet().toArray()[i])));

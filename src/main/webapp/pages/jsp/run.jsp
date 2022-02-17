@@ -16,6 +16,7 @@
     int firstFeature = (int)request.getAttribute("firstFeature");
     int secondFeature = (int)request.getAttribute("secondFeature");
     int experimentId = (int)request.getAttribute("experimentId");
+
 %>
 
 <!DOCTYPE HTML>

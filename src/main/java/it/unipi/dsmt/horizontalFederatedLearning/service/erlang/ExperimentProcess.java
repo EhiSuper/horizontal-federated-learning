@@ -36,6 +36,7 @@ public class ExperimentProcess {
         destination = null;
         currentExperiment = experiment;
         Node node = Node.getNode();
+        //ciao
         erlangProcess = node.getOtpNode().createMbox();
         OtpErlangPid javaPid = erlangProcess.self();
         OtpErlangList arguments = prepareArguments(experiment, javaPid);

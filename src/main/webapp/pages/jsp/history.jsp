@@ -62,7 +62,9 @@
                 <td><%= experiment.getMode()%></td>
                 <td><%= experiment.getCreationDate().toString()%></td>
                 <td><%= experiment.getLastUpdateDate().toString()%></td>
-                <td><%= experiment.getUser().getUsername()%></td>
+                <% if(experiment.getUser() != null) { %>
+                    <td><%= experiment.getUser().getUsername()%></td>
+                <% } %>
                 <td><a href="<%= request.getContextPath()%>/ExperimentInfo?id=<%=experiment.getId()%>"><button>Show Experiment</button></a></td>
             </tr>
         <% } %>

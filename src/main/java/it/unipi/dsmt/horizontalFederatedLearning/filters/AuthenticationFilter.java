@@ -12,7 +12,7 @@ import java.util.Set;
 @WebFilter("/*")
 public class AuthenticationFilter implements Filter {
     private static final Set<String> ALLOWED_PATHS = Collections.unmodifiableSet(new HashSet<>(
-            Arrays.asList("", "/Login", "/Logout", "/Signup")));
+            Arrays.asList("", "/Login", "/Signup")));
     private static final Set<String> ADMIN_PATHS = Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList("/AdminPage")));
 
@@ -22,7 +22,6 @@ public class AuthenticationFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws ServletException, IOException {
-        System.out.println("Auth filter");
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
         HttpSession session = request.getSession(false);
@@ -49,5 +48,4 @@ public class AuthenticationFilter implements Filter {
 
     }
 
-    // ...
 }
