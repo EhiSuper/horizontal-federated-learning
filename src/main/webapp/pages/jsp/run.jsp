@@ -2,20 +2,21 @@
 <%@ page import="java.util.*" %>
 
 <%
-    ArrayList<String> dataPoints = (ArrayList<String>) request.getAttribute("dataPoints");
-    ArrayList<String> normPoints = (ArrayList<String>) request.getAttribute("normPoints");
-    ArrayList<Integer> crashes = (ArrayList<Integer>) request.getAttribute("crashes");
-    ArrayList<String> involvedClients = (ArrayList<String>) request.getAttribute("involvedClients");
-    int numFeatures = (int)request.getAttribute("numFeatures");
-    int numMinClients = (int)request.getAttribute("numMinClients");
-    int numRounds = (int)request.getAttribute("numRounds");
-    int numOverallCrashes = (int)request.getAttribute("numOverallCrashes");
-    String reason = (String)request.getAttribute("reason");
-    long time = (long)request.getAttribute("time");
-    List<String> logExecution = (List<String>) request.getAttribute("logExecution");
-    int firstFeature = (int)request.getAttribute("firstFeature");
-    int secondFeature = (int)request.getAttribute("secondFeature");
-    int experimentId = (int)request.getAttribute("experimentId");
+    ArrayList<String> dataPoints = (ArrayList<String>) session.getAttribute("dataPoints");
+    ArrayList<String> normPoints = (ArrayList<String>) session.getAttribute("normPoints");
+    ArrayList<Integer> crashes = (ArrayList<Integer>) session.getAttribute("crashes");
+    ArrayList<String> involvedClients = (ArrayList<String>) session.getAttribute("involvedClients");
+    int numFeatures = (int) session.getAttribute("numFeatures");
+    int numMinClients = (int) session.getAttribute("numMinClients");
+    int numRounds = (int) session.getAttribute("numRounds");
+    int numOverallCrashes = (int) session.getAttribute("numOverallCrashes");
+    String reason = (String) session.getAttribute("reason");
+    long time = (long) session.getAttribute("time");
+    List<String> logExecution = (List<String>) session.getAttribute("logExecution");
+    int firstFeature = Integer.parseInt((String) session.getAttribute("firstFeature"));
+    int secondFeature = Integer.parseInt((String) session.getAttribute("secondFeature"));
+    int experimentId = (int) session.getAttribute("experimentId");
+
 %>
 
 <!DOCTYPE HTML>
@@ -37,8 +38,9 @@
         rounds = 0;
         logExecution = <%=logExecution%>;
         window.onload = function () {
-            time = setInterval(delayRounds ,4000);
+            time = setInterval(delayRounds, 4000);
         }
+
         function delayRounds() {
             if (rounds == 0) {
                 numFeatures = <%= numFeatures %>;
@@ -48,8 +50,8 @@
                 for (var i = 0; i < numFeatures; i++) {
                     var option = document.createElement("option");
                     option.value = i;
-                    option.text = "Feature "+ i;
-                    if(i == <%= firstFeature %>)
+                    option.text = "Feature " + i;
+                    if (i == <%= firstFeature %>)
                         option.selected = true
                     selectList.appendChild(option);
 
@@ -57,14 +59,14 @@
                 for (i = 0; i < numFeatures; i++) {
                     option = document.createElement("option");
                     option.value = i;
-                    option.text = "Feature "+ i;
-                    if(i ==  <%= secondFeature %>)
+                    option.text = "Feature " + i;
+                    if (i ==  <%= secondFeature %>)
                         option.selected = true
                     selectList2.appendChild(option);
                 }
             }
             rounds++;
-            if(rounds==totalRounds+1){
+            if (rounds == totalRounds + 1) {
                 document.getElementById("changeButton").disabled = false;
                 document.getElementById("numroundsText").textContent = "Total number of rounds:";
                 document.getElementById("clientsInvolvedText").textContent = "Overall clients involved:";
@@ -81,20 +83,23 @@
                 showRound();
             }
         }
-        function showRound(){
+
+        function showRound() {
             document.getElementById("numrounds").textContent = rounds;
-            document.getElementById("crashes").textContent = crashes.slice(rounds-1,rounds);
+            document.getElementById("crashes").textContent = crashes.slice(rounds - 1, rounds);
             console.log(rounds)
             console.log(totalRounds)
             document.getElementById("results").style.display = "block";
             console.log(involvedClients.slice(numMinClients * rounds, numMinClients * rounds + numMinClients).join("\r\n"));
-            document.getElementById("clientsInvolved").textContent = involvedClients.slice(numMinClients * (rounds-1), numMinClients * (rounds-1) + numMinClients).join(", ");
+            document.getElementById("clientsInvolved").textContent = involvedClients.slice(numMinClients * (rounds - 1), numMinClients * (rounds - 1) + numMinClients).join(", ");
             printCenters();
-            <% if(request.getAttribute("algorithm") != null && request.getAttribute("algorithm").equals("KMeans")){ %>
+            <% if(session.getAttribute("algorithm") != null && session.getAttribute("algorithm").equals("KMeans")){
+            %>
             printNorms();
             <%}%>
         }
-        function printCenters(){
+
+        function printCenters() {
             var chart = new CanvasJS.Chart("chartContainerCenters", {
                 animationEnabled: false,
                 theme: "light2",
@@ -116,12 +121,13 @@
                     xValueFormatString: "#,##0.000",
                     yValueFormatString: "#,##0.000",
                     toolTipContent: "<b>First Feature:</b> {x} <br><b>Second feature:</b> {y}",
-                    dataPoints: datapoints[rounds-1]
+                    dataPoints: datapoints[rounds - 1]
                 }]
             });
             chart.render();
         }
-        function printNorms(){
+
+        function printNorms() {
             var chart = new CanvasJS.Chart("chartContainerNorms", {
                 animationEnabled: false,
                 theme: "light2",
@@ -143,7 +149,7 @@
                     xValueFormatString: "#,##0.000",
                     yValueFormatString: "#,##0.000",
                     toolTipContent: "<b>Round:</b> {x} <br><b>FNorm:</b> {y}",
-                    dataPoints: normpoints[rounds-1]
+                    dataPoints: normpoints[rounds - 1]
                 }]
             });
             chart.render();
@@ -163,7 +169,7 @@
     </form>
     <br>
     <div id="features" style=" display: none;">
-        <form action="<%=request.getContextPath()%>/Run" method="post">
+        <form action="<%=request.getContextPath()%>/Home/Features" method="post">
             <input type="hidden" id="ExperimentId" name="ExperimentId" value="<%=experimentId%>">
             <label for="firstFeature">First Feature:</label>
             <select name="firstFeature" id="firstFeature">
