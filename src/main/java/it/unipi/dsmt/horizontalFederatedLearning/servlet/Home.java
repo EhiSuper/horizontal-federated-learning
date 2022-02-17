@@ -82,6 +82,7 @@ public class Home extends HttpServlet {
             ExperimentService.insert(experiment);
         } catch (RegistrationException e) {
             request.setAttribute("error", e.getMessage());
+            request.setAttribute("numClients", Integer.parseInt(defaultValues.get("NumberOfClients")));
             String targetJSP = "/pages/jsp/home.jsp";
             RequestDispatcher requestDispatcher = request.getRequestDispatcher(targetJSP);
             requestDispatcher.forward(request, response);

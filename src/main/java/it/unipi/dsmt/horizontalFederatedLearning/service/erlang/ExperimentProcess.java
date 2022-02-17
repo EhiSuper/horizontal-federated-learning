@@ -4,7 +4,6 @@ import com.ericsson.otp.erlang.*;
 import it.unipi.dsmt.horizontalFederatedLearning.entities.*;
 import it.unipi.dsmt.horizontalFederatedLearning.service.exceptions.CommunicationException;
 import it.unipi.dsmt.horizontalFederatedLearning.util.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -68,7 +67,7 @@ public class ExperimentProcess {
                     }
                 }
             }).start();
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             OtpSelf callerNode = node.getCaller();
             OtpPeer supervisorNode = new OtpPeer("erl" + experiment.getId() + "@127.0.0.1");
             synchronized (Node.class) {
@@ -134,7 +133,7 @@ public class ExperimentProcess {
             } else if (msgType.toString().equals("completed")) {
                 long elapsedTime = (System.nanoTime() - start) / 1000000;
                 return new ExperimentRound(true, result.elementAt(2).toString(), elapsedTime);
-            } else { //round
+            } else {
                 ExperimentRound round = composeRound(result);
                 System.out.println(round);
                 return round;
