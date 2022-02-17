@@ -6,10 +6,12 @@ import java.io.IOException;
 public class Node {
     private static volatile Node instance;
     private OtpNode otpNode;
+    private OtpSelf caller;
 
     private Node(){
         try{
             otpNode = new OtpNode("server@127.0.0.1", "COOKIE");
+            caller = new OtpSelf("caller", "COOKIE");
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -29,6 +31,10 @@ public class Node {
 
     public OtpNode getOtpNode() {
         return otpNode;
+    }
+
+    public OtpSelf getCaller(){
+        return caller;
     }
 
 }
