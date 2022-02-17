@@ -53,6 +53,8 @@ public class ExperimentProcess {
                             if (line.contains("1> "))
                                 editedLine = line.split("1> ")[1];
                             else editedLine = line;
+                            if(line.contains("WARNING") || line.contains("global:") || line.replaceAll(" ","").equals("\n"))
+                                continue;
                             System.out.println(editedLine);
                             logs.add(editedLine);
                             if(editedLine.contains("Received completed message") ||

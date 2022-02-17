@@ -19,12 +19,11 @@ start(Chunk, Server, Timeout) ->
   createPythonClient(),
   loop(Chunk, Server, Timeout).
 
-
+% restarts the pyrlang node if dead
 createPythonClient() ->
     [_|[IPList]] = string:split(atom_to_list(node()),"@"),
-    Node = "py@" ++ IPList,
-    IP = list_to_atom(Node),
-    try throw(rpc:call(IP, 'client', 'is_alive', []))
+    Node = list_to_atom("py@" ++ IPList),
+    try throw(rpc:call(Node, 'client', 'is_alive', []))
     catch
         {badrpc,nodedown} ->
             io:format("Client ~w - Pyrlang node dead, re-starting the pyrlang node...~n", [self()]),

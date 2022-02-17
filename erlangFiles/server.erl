@@ -21,7 +21,6 @@
 -export([start/3]).
 
 start({NClients,NMinClients, Dataset, NumFeatures, ClientsHostnames, RandomClients, RandomClientsSeed, MaxNumberRounds, RandomClientsSeed, RandomClients, Timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, Mode}, AlgParams, Supervisor) ->
-  io:format("NClients ~p~n", [NClients]),
   io:format("Server - Launching python server...~n"),
   createPythonServer(),
   io:format("Server - Generating chunks...~n"),
@@ -47,13 +46,13 @@ spawnClients(NClients, [ChunkHead | ChunkTail], [HostnameHead | HostnameTail], L
 loop(NClients, NMinClients, ListClients, DatasetChunks, NumFeatures, RandomClientsSeed, RandomClients,
     ClientsHostnames, MaxNumberRounds, RandomClientsSeed, Timeout, MaxAttemptsClientCrash, MaxAttemptsOverallCrash,
     NumCrashes, IterationElements, ExecutedRounds, AlgParams, Supervisor) ->
-  case ExecutedRounds >= MaxNumberRounds of %% MaxNumberRounds reached
-    true ->
+  case ExecutedRounds >= MaxNumberRounds of
+    true -> % maximum number of rounds reached
       Supervisor ! {self(), reached_max_rounds},
-      io:format("Server - Shutting down all nodes~n"),
       io:format("Server - Max number rounds reached~n"),
+      io:format("Server - Shutting down all nodes~n"),
       shutdownClients(ListClients);
-    false ->
+    false -> % new iteration
       io:format("Server - Getting into the ~p-th iteration of the loop~n", [ExecutedRounds + 1]),
       InvolvedClients = getInvolvedClients(NClients, NMinClients, ListClients, RandomClientsSeed, RandomClients),
       RoundParameters = performRound(IterationElements, InvolvedClients),
@@ -61,7 +60,7 @@ loop(NClients, NMinClients, ListClients, DatasetChunks, NumFeatures, RandomClien
       io:format("Server - Received all results, joining them...~n"),
       {NewIterationElements, Finished} = getResults(AlgParams, MaxNumberRounds, NumFeatures, Client_responses, ExecutedRounds, IterationElements),
       sendResults(Supervisor, NewIterationElements, NewNumCrashes, InvolvedClients, UpdatedClients, ExecutedRounds),
-      case Finished == 0 of %% Norm Under Epsilon Reached for KMeans
+      case Finished == 0 of % reason of termination of the specific algorithm reached
         true ->
           Supervisor ! {self(), completed, getFinishedReason()},
           io:format("Server - Shutting down all nodes~n"),
@@ -82,14 +81,14 @@ performRound(IterationElements, InvolvedClients) ->
 getInvolvedClients(NClients, NMinClients, ListClients, RandomClientSeed, RandomClients) ->
   io:format("Server - Selecting nodes to be involved..~n"),
   [_|[IPList]] = string:split(atom_to_list(node()),"@"),
-  IP = list_to_atom("py@" ++ IPList),
+  Node = list_to_atom("py@" ++ IPList),
   InvolvedClients = case NClients == NMinClients of
-    false when RandomClients == true ->
-      InvolvedClientsIndexes = rpc:call(IP, 'server', 'erlang_request_get_involved_clients', [{NClients, NMinClients, RandomClientSeed}]),
+    false when RandomClients == true -> % extract some clients for this iteration
+      InvolvedClientsIndexes = rpc:call(Node, 'server', 'erlang_request_get_involved_clients', [{NClients, NMinClients, RandomClientSeed}]),
       selectClients(ListClients, InvolvedClientsIndexes);
-    false when RandomClients == false ->
+    false when RandomClients == false -> % extract a fixed list of clients
       lists:sublist(ListClients, NMinClients);
-    true ->
+    true -> % use all clients if requested, RandomClients is meaningless
       ListClients
   end,
   io:format("Server - Selected nodes:~n"),
@@ -116,7 +115,7 @@ waitResponses(_, _, _, _, NumCrashes, ClientsHostnames, UpdatedClients, [], Resu
   {ResultsList, UpdatedClients, ClientsHostnames, NumCrashes};
 waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NumCrashes, ClientsHostnames, ListClients, PidList, ResultsList) ->
   receive
-    {From, results, Results} ->
+    {From, results, Results} -> % client provided results
       case lists:keymember(From, 2, PidList) of
         true ->
           NewPidList = lists:keydelete(From, 2, PidList),
@@ -125,7 +124,7 @@ waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOvera
         false ->
           waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NumCrashes, ClientsHostnames, ListClients, PidList, ResultsList)
       end;
-    {'DOWN', _, _, Pid, Reason} ->
+    {'DOWN', _, _, Pid, Reason} -> % client crashed
       io:format("Server - Client ~w has crashed for reason: ~w ~n", [Pid, Reason]),
       {NewNumCrashes, UpdatedListClients, UpdatedPidList} = handleClientFault(Pid, Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NumCrashes, ClientsHostnames, ListClients, PidList),
       waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NewNumCrashes, ClientsHostnames, UpdatedListClients, UpdatedPidList, ResultsList);
@@ -136,13 +135,13 @@ waitResponses(Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOvera
 handleClientFault(Pid, Timeout, RoundParameters, MaxAttemptsClientCrash, MaxAttemptsOverallCrash, NumCrashes, ClientsHostnames, ListClients, PidList) ->
   NewNumCrashes = checkOverallCrashes(NumCrashes, MaxAttemptsOverallCrash),
   {Hostname, Pid, Chunk, Attempts} = lists:keyfind(Pid, 2, ListClients),
-  NewPidList = lists:keydelete(Pid, 2, PidList), %%delete member from list of nodes that have to answer this round
-  UpdatedClients = lists:keydelete(Pid, 2, ListClients), %%delete member from list of nodes in general
+  NewPidList = lists:keydelete(Pid, 2, PidList), % delete member from list of pids that have to answer this round
+  UpdatedClients = lists:keydelete(Pid, 2, ListClients), % delete member from list of all pids
   case Attempts >= MaxAttemptsClientCrash of
-     true ->
+     true -> % reached max attempts
        io:format("Server - Reached max attempts for node ~w at location ~p ~n", [Pid, Hostname]),
        AvailableHostnames = lists:delete(Hostname, ClientsHostnames),
-       NextHostname = selectNextLocation(ListClients, AvailableHostnames),
+       NextHostname = selectNextLocation(ListClients, AvailableHostnames), % select another location
        ClientInfo = spawnClientAtHostname(NextHostname, Chunk, Timeout, 0, RoundParameters),
        UpdatedPidList = NewPidList ++ [ClientInfo],
        UpdatedListClients = UpdatedClients ++ [ClientInfo],
@@ -165,24 +164,25 @@ checkOverallCrashes(NumCrashes, MaxAttemptsOverallCrash) ->
       NewNumCrashes
   end.
 
+% restarts the pyrlang node if dead
 createPythonServer() ->
     [_|[IPList]] = string:split(atom_to_list(node()),"@"),
-    Node = "py@" ++ IPList,
-    IP = list_to_atom(Node),
-    try throw(rpc:call(IP, 'server', 'is_alive', []))
+    NodeString = "py@" ++ IPList,
+    Node = list_to_atom(NodeString),
+    try throw(rpc:call(Node, 'server', 'is_alive', []))
     catch
         {badrpc,nodedown} ->
             io:format("Server - Pyrlang node dead, re-starting the pyrlang node...~n"),
-            spawn(fun() -> os:cmd("python3 \"erlangFiles/server.py\" " ++ Node) end),
-            timer:sleep(8000),
+            spawn(fun() -> os:cmd("python3 \"erlangFiles/server.py\" " ++ NodeString) end),
+            timer:sleep(6000),
             createPythonServer();
          _ -> io:format("Server - Pyrlang node up...~n")
     end.
 
 generateChunks(NClients, Dataset, Mode, NumFeatures) ->
     [_|[IPList]] = string:split(atom_to_list(node()),"@"),
-    IP = list_to_atom("py@" ++ IPList),
-    rpc:call(IP, 'server', 'generate_chunks', [NClients, Dataset, Mode, NumFeatures]).
+    Node = list_to_atom("py@" ++ IPList),
+    rpc:call(Node, 'server', 'generate_chunks', [NClients, Dataset, Mode, NumFeatures]).
 
 sendResults(Supervisor, NewIterationElements, NewNumCrashes, InvolvedClients, UpdatedClients, ExecutedRounds) ->
     Supervisor ! {self(), round, {getOutputIterationResults(NewIterationElements), NewNumCrashes, InvolvedClients, UpdatedClients, ExecutedRounds + 1}}.

@@ -13,10 +13,11 @@
 %% API
 -export([computeRound/2]).
 
+%% Algorithm's specific operations for the node to perform at each round
 computeRound(Chunk, Centers) ->
   [_|[IPList]] = string:split(atom_to_list(node()),"@"),
-  IP = list_to_atom("py@" ++ IPList),
-  Result = rpc:call(IP, 'client', 'run_round', [{Chunk, Centers}]),
+  Node = list_to_atom("py@" ++ IPList),
+  Result = rpc:call(Node, 'client', 'run_round', [{Chunk, Centers}]),
   case is_tuple(Result) of
     true->
       exit(failed_PYRLANG_NODE_CRASHED);

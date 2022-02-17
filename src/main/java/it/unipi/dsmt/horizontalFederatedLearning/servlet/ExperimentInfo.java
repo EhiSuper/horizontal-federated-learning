@@ -63,13 +63,20 @@ public class ExperimentInfo extends HttpServlet {
                 String distance = request.getParameter("distance");
                 double seedCenters = Double.parseDouble(request.getParameter("seedCenters"));
                 String normFn = request.getParameter("normFn");
-                algorithm = new KMeansAlgorithm(numClusters, epsilon, distance,  seedCenters, normFn);
+                algorithm = new KMeansAlgorithm(numClusters, epsilon, distance,  seedCenters, normFn );
             }
             if(algorithm != null)
                 algorithm.setName(algorithmName);
             Experiment experiment = new Experiment(experimentId, name, algorithm, dataset, numFeatures, mode, user, creationDate, lastUpdateDate,numRounds,maxNumRounds,numCrashes,numClients, numMinClients,
                     clientsHostnames,  randomClients, randomClientsSeed, (int) timeout,maxAttemptsClientCrash, maxAttemptsServerCrash, maxAttemptsOverallCrash);
             Experiment oldExperiment = ExperimentService.findExperimentById(experimentId);
+            if(algorithmName.equals("KMeans")){
+                KMeansAlgorithm kmalg = (KMeansAlgorithm) oldExperiment.getAlgorithm();
+                KMeansAlgorithm kmalg2 = (KMeansAlgorithm) experiment.getAlgorithm();
+                kmalg2.setCenters(kmalg.getCenters());
+                kmalg2.setfNorm(kmalg.getfNorm());
+                experiment.setAlgorithm(kmalg2);
+            }
             ExperimentService.editExperiment(experiment);
             if(oldExperiment!= null && experiment.different(oldExperiment)) {
                 request.setAttribute("ExperimentId", experiment.getId());

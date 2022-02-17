@@ -222,7 +222,7 @@ class CMeansFederatedServer:
 class MyProcess(Process):
     def __init__(self) -> None:
         Process.__init__(self)
-        self.get_node().register_name(self, Atom('my_process'))  # optional
+        self.get_node().register_name(self, Atom('my_process'))
         LOG.info("Registering process - 'my_process'")
 
     def handle_one_inbox_message(self, msg):

@@ -9,7 +9,6 @@ import numpy as np
 LOG = logging.getLogger("LOGGER client.py")
 logging.getLogger("").setLevel(logging.DEBUG)
 
-
 def numba_norm(u: np.ndarray, v: np.ndarray):
     return np.linalg.norm(u - v)
 

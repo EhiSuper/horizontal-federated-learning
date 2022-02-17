@@ -285,7 +285,6 @@ public class Experiment {
 
     public OtpErlangTuple prepareTuple(){
         ArrayList<OtpErlangObject> objects = new ArrayList<>();
-        //start( {NumClusters, Distance, Mode, Epsilon, SeedCenters, NormFn}, MaxAttemptsServerCrash).
         objects.add((new OtpErlangInt(numClients)));
         objects.add((new OtpErlangInt(numMinClients)));
         objects.add((new OtpErlangString(dataset)));
