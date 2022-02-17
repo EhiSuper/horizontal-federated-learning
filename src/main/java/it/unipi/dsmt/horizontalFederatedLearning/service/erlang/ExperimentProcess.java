@@ -159,7 +159,8 @@ public class ExperimentProcess {
                 return new ExperimentRound(false, "server restart");
             }
             else{
-                return new ExperimentRound(true, e.toString());
+                int attempts = Integer.parseInt(e.getMessage().split(",")[1].split("}")[0]);
+                return new ExperimentRound(true, "failed experiment, tried restarting " + attempts + " times the server, none successful");
             }
         }
         catch (Exception e) {

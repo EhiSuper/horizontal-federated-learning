@@ -20,9 +20,11 @@ public class ErrorHandler extends HttpServlet {
         Exception ex = (Exception) request.getAttribute("javax.servlet.error.exception");
         String servletName = (String) request.getAttribute("javax.servlet.error.servlet_name");
         if (servletName == null) {
-            servletName = "Unknown";
+            request.setAttribute("error", "The page you're searching for is wrong");
         }
-        request.setAttribute("error", "Servlet " + servletName + " has thrown an exception " + ex.getClass().getName() +  " : " + ex.getMessage());
+        else{
+            request.setAttribute("error", "Servlet " + servletName + " has thrown an exception " + ex.getClass().getName() +  " : " + ex.getMessage());
+        }
         try {
             request.getRequestDispatcher("/pages/jsp/errorPage.jsp").forward(request, response);
         } catch (ServletException e) {

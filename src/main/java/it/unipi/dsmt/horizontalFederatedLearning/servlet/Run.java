@@ -43,8 +43,10 @@ public class Run extends HttpServlet {
             }
             ExperimentProcess process = new ExperimentProcess();
             List<ExperimentRound> rounds = process.startExperiment(experiment);
-            experiment.setPostAlgorithmParameters(rounds);
-            ExperimentService.editExperiment(experiment);
+            if(rounds.size() > 1){
+                experiment.setPostAlgorithmParameters(rounds);
+                ExperimentService.editExperiment(experiment);
+            }
             List<String> logExecution = Log.getLogExperiment(experiment);
             for (int i = 0; i < logExecution.size(); ++i)
                 logExecution.set(i, "'" + logExecution.get(i) + "'");
@@ -115,7 +117,9 @@ public class Run extends HttpServlet {
             session.setAttribute("algorithm", experiment.getAlgorithm().getName());
             session.setAttribute("numOverallCrashes", experiment.getNumCrashes());
             session.setAttribute("reason", reason);
-            session.setAttribute("time", experiment.getTime());
+            if(experiment.getTime()>0){
+                session.setAttribute("time", experiment.getTime());
+            }
             session.setAttribute("crashes", crashes);
             session.setAttribute("firstFeature", firstFeature);
             session.setAttribute("secondFeature", secondFeature);
