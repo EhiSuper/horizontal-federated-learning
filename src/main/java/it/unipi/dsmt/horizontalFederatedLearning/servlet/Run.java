@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -29,16 +30,16 @@ public class Run extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (request.getAttribute("ExperimentId") != null || request.getParameter("ExperimentId") != null) {
             Experiment experiment = null;
-            String firstFeature = "0";
-            String secondFeature = "1";
+            int firstFeature = 0;
+            int secondFeature = 1;
             if (request.getAttribute("ExperimentId") != null) {
                 experiment = ExperimentService.findExperimentById((Integer) request.getAttribute("ExperimentId"));
-                firstFeature = (String) request.getAttribute("firstFeature");
-                secondFeature = (String) request.getAttribute("secondFeature");
+                firstFeature = (int) request.getAttribute("firstFeature");
+                secondFeature = (int) request.getAttribute("secondFeature");
             } else if (request.getParameter("ExperimentId") != null) {
                 experiment = ExperimentService.findExperimentById(Integer.parseInt(request.getParameter("ExperimentId")));
-                firstFeature = request.getParameter("firstFeature");
-                secondFeature = request.getParameter("secondFeature");
+                firstFeature = Integer.parseInt(request.getParameter("firstFeature"));
+                secondFeature = Integer.parseInt(request.getParameter("secondFeature"));
             }
             ExperimentProcess process = new ExperimentProcess();
             List<ExperimentRound> rounds = process.startExperiment(experiment);
@@ -69,8 +70,8 @@ public class Run extends HttpServlet {
                         List<List<Double>> chunk = client.getChunk();
                         for (List<Double> point : chunk) {
                             map = new HashMap<>();
-                            map.put("x", point.get(Integer.parseInt(firstFeature)));
-                            map.put("y", point.get(Integer.parseInt(secondFeature)));
+                            map.put("x", point.get(firstFeature));
+                            map.put("y", point.get(secondFeature));
                             map.put("color", "grey");
                             map.put("markerSize", 3);
                             map.put("fillOpacity", ".3");
@@ -79,8 +80,8 @@ public class Run extends HttpServlet {
                     }
                     for (List<Double> center : centers) {
                         map = new HashMap<>();
-                        map.put("x", center.get(Integer.parseInt(firstFeature)));
-                        map.put("y", center.get(Integer.parseInt(secondFeature)));
+                        map.put("x", center.get(firstFeature));
+                        map.put("y", center.get(secondFeature));
                         map.put("color", "black");
                         map.put("markerSize", 20);
                         map.put("markerBorderColor", "red");

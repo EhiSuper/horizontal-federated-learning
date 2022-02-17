@@ -23,10 +23,8 @@ public class Features extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String firstFeature = request.getParameter("firstFeature");
-        System.out.println(firstFeature);
-        String secondFeature = request.getParameter("secondFeature");
-        System.out.println(secondFeature);
+        int firstFeature = Integer.parseInt(request.getParameter("firstFeature"));
+        int secondFeature = Integer.parseInt(request.getParameter("secondFeature"));
         HttpSession session = request.getSession();
         session.setAttribute("firstFeature", firstFeature);
         session.setAttribute("secondFeature", secondFeature);
@@ -37,7 +35,7 @@ public class Features extends HttpServlet {
         requestDispatcher.forward(request, response);
     }
 
-    protected ArrayList<String> setDataPoint(HttpServletRequest request, String firstFeature, String secondFeature) {
+    protected ArrayList<String> setDataPoint(HttpServletRequest request, int firstFeature, int secondFeature) {
         HttpSession session = request.getSession();
         String reason = "";
         List<ExperimentRound> rounds = (List<ExperimentRound>) session.getAttribute("rounds");
@@ -50,13 +48,12 @@ public class Features extends HttpServlet {
             if (!rounds.get(i).getLast()) {
                 KMeansAlgorithmRound kmRound = (KMeansAlgorithmRound) rounds.get(i).getAlgorithmRound();
                 List<List<Double>> centers = kmRound.getCenters();
-
                 for (Client client : rounds.get(i).getClientsState()) {
                     List<List<Double>> chunk = client.getChunk();
                     for (List<Double> point : chunk) {
                         map = new HashMap<>();
-                        map.put("x", point.get(Integer.parseInt(firstFeature)));
-                        map.put("y", point.get(Integer.parseInt(secondFeature)));
+                        map.put("x", point.get(firstFeature));
+                        map.put("y", point.get(secondFeature));
                         map.put("color", "grey");
                         map.put("markerSize", 3);
                         map.put("fillOpacity", ".3");
@@ -65,8 +62,8 @@ public class Features extends HttpServlet {
                 }
                 for (List<Double> center : centers) {
                     map = new HashMap<>();
-                    map.put("x", center.get(Integer.parseInt(firstFeature)));
-                    map.put("y", center.get(Integer.parseInt(secondFeature)));
+                    map.put("x", center.get(firstFeature));
+                    map.put("y", center.get(secondFeature));
                     map.put("color", "black");
                     map.put("markerSize", 20);
                     map.put("markerBorderColor", "red");

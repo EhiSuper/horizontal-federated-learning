@@ -1,5 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<% int numClients = (int)request.getAttribute("numClients"); %>
+<% int numClients = 0;
+    if(request.getAttribute("numClients") != null){
+         numClients = (int)request.getAttribute("numClients");
+    }
+%>
 <!DOCTYPE HTML>
 <html>
 <head>

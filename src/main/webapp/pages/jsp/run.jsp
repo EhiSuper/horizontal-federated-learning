@@ -13,8 +13,8 @@
     String reason = (String) session.getAttribute("reason");
     long time = (long) session.getAttribute("time");
     List<String> logExecution = (List<String>) session.getAttribute("logExecution");
-    int firstFeature = Integer.parseInt((String) session.getAttribute("firstFeature"));
-    int secondFeature = Integer.parseInt((String) session.getAttribute("secondFeature"));
+    int firstFeature = (int)session.getAttribute("firstFeature");
+    int secondFeature = (int)session.getAttribute("secondFeature");
     int experimentId = (int) session.getAttribute("experimentId");
 
 %>
