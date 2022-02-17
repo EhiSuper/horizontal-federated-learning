@@ -36,8 +36,8 @@ public class Home extends HttpServlet {
             int numMinClients = Integer.parseInt(request.getParameter("numMinClients"));
             boolean randomClients = Boolean.parseBoolean(request.getParameter("randomClients"));
             int timeout = Integer.parseInt(request.getParameter("timeout"));
-            request.setAttribute("firstFeature", 0);
-            request.setAttribute("secondFeature", 1);
+            request.setAttribute("firstFeature", "0");
+            request.setAttribute("secondFeature", "1");
             String selectedAlgorithm = request.getParameter("algorithm");
             Algorithm algorithm = null;
             switch (selectedAlgorithm) {
@@ -79,7 +79,7 @@ public class Home extends HttpServlet {
             experiment.setMaxAttemptsServerCrash(Integer.parseInt(defaultValues.get("MaxAttemptsServerCrash")));
             String[] clients = defaultValues.remove("ClientsHostnames").split(",");
             List<String> clientsHostnames = Arrays.asList(clients);
-            for(String x : clientsHostnames)
+            for (String x : clientsHostnames)
                 System.out.println(x);
             experiment.setClientsHostnames(clientsHostnames);
             try {
