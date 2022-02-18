@@ -166,9 +166,9 @@
     <button><a href="<%=request.getContextPath()%>/Settings">Settings</a></button>
     <button><a href="<%=request.getContextPath()%>/Logout">Logout</a></button>
 </div>
-<div id="experimentResult" style="width:1400px">
+<div id="experimentResult">
     <br>
-    <div id="features" style=" display: none;">
+    <div id="features" style="display: none;width: 1400px;">
         <form action="<%=request.getContextPath()%>/Home/Features" method="post">
             <input type="hidden" id="ExperimentId" name="ExperimentId" value="<%=experimentId%>">
             <label for="firstFeature">First Feature:</label>
@@ -182,7 +182,7 @@
     </div>
     <br>
     <div id="graphCenters">
-        <div id="chartContainerCenters" style="height: 370px; width: 600px; float:left"></div>
+        <div id="chartContainerCenters" style="height: 370px; width: 600px; margin-left:80px; float:left"></div>
         <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     </div>
     <div id="graphNorms">

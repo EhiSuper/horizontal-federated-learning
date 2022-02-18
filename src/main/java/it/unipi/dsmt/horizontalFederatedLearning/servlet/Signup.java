@@ -37,7 +37,7 @@ public class Signup extends HttpServlet {
             UserService.register(user);
             HttpSession session = request.getSession();
             session.setAttribute("user", user.getId());
-            response.sendRedirect(request.getContextPath() + "/Login");
+            response.sendRedirect(request.getContextPath() + "/Home");
         } catch (RegistrationException e) {
             request.setAttribute("error", e.getMessage());
             String targetJSP = "/pages/jsp/signup.jsp";

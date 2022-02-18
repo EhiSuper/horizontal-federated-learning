@@ -50,7 +50,7 @@
             }
         %>
     </div>
-    <button type="button" onclick="addInput()">add</button>
+    <button type="button" onclick="addInput()">Add Client</button>
     <span class="error"><%=clientHostnamesError%></span>
     <% String randomClientSeed = "";
         if (valuesGeneral.get("RandomClientsSeed") != null) {
@@ -104,7 +104,7 @@
     <label for="Mode">Mode</label>
     <input id="Mode" name="Mode" type="number" min="1" max="3" value=<%=mode%> required>
     <br>
-    <input type="submit" name="update" value="Send">
+    <input type="submit" name="update" value="Update">
     <span class="success"><%=successError%></span>
 </form>
 </body>

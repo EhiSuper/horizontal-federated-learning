@@ -37,12 +37,10 @@ public class Features extends HttpServlet {
 
     protected ArrayList<String> setDataPoint(HttpServletRequest request, int firstFeature, int secondFeature) {
         HttpSession session = request.getSession();
-        String reason = "";
         List<ExperimentRound> rounds = (List<ExperimentRound>) session.getAttribute("rounds");
         ArrayList<String> dataPoints = new ArrayList<>();
         Gson gsonObj = new Gson();
         Map<Object, Object> map;
-        List<Map<Object, Object>> normList = new ArrayList<>();
         for (int i = 0; i < rounds.size(); i++) {
             List<Map<Object, Object>> pointList = new ArrayList<>();
             if (!rounds.get(i).getLast()) {
@@ -70,8 +68,6 @@ public class Features extends HttpServlet {
                     pointList.add(map);
                 }
                 dataPoints.add(gsonObj.toJson(pointList));
-            } else {
-                reason = rounds.get(i).getReason();
             }
         }
         return dataPoints;
