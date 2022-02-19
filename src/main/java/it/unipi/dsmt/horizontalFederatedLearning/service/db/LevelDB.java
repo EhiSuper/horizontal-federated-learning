@@ -62,7 +62,7 @@ public class LevelDB {
         db.delete(bytes(key));
     }
 
-    public synchronized void putBatchValues(HashMap<String, String> entries) {
+    public void putBatchValues(HashMap<String, String> entries) {
         try (WriteBatch batch = db.createWriteBatch()) {
             for (int i = 0; i < entries.size(); ++i) {
                 batch.put(bytes((String) entries.keySet().toArray()[i]), bytes(entries.get(entries.keySet().toArray()[i])));
@@ -73,13 +73,13 @@ public class LevelDB {
         }
     }
 
-    private synchronized List<String> iterateDB() {
+    private List<String> iterateDB() {
         List<String> results = new ArrayList<>();
         try (DBIterator iterator = db.iterator()) {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 String key = asString(iterator.peekNext().getKey());
                 String value = asString(iterator.peekNext().getValue());
-                results.add(key +" " + value);
+                results.add(key + " " + value);
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
