@@ -101,6 +101,7 @@ def generate_chunks(n_splits: int = 10, dataset: str = "https://raw.githubuserco
         if line.startswith(b'@') | line.startswith(b'%') | line.startswith(b'\n'):
             counter += 1
     df = pd.read_csv(dataset,delimiter = ',',error_bad_lines = False, skiprows = counter, header=None)
+    df = df[:int(len(df)/n_splits)*n_splits]
     for i in range(0,numFeatures-1):
         df.iloc[:,i] = [float(x) for x in (df.iloc[:,i])]
     Y = df.iloc[:,numFeatures-1].tolist()
